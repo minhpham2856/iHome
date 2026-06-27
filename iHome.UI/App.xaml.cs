@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace iHome
+namespace iHome.UI
 {
     /// <summary>
     /// Interaction logic for App.xaml

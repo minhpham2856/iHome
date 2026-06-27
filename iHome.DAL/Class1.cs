@@ -1,4 +1,4 @@
-﻿namespace iHome.Core
+﻿namespace iHome.DAL
 {
 	public class Class1
 	{
