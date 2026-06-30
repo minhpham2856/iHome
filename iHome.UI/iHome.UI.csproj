@@ -9,10 +9,22 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="WPF-UI" Version="4.3.0" />
+	  <None Remove="Assets\Images\logo.jpeg" />
+	  <None Remove="Assets\Images\logo.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Assets\Images\logo.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\iHome.BLL\iHome.BLL.csproj" />
+		<ProjectReference Include="..\iHome.DAL\iHome.DAL.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="Assets\Images\logo.jpeg" />
 	</ItemGroup>
 </Project>
