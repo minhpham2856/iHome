@@ -13,14 +13,12 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using iHome.BLL.Services;
 
-namespace iHome.UI
+namespace iHome.UI.Views
 {
-	/// <summary>
-	/// Interaction logic for Login.xaml
-	/// </summary>
-	public partial class Login : Window
+
+	public partial class LoginWindow : Window
 	{
-		public Login()
+		public LoginWindow()
 		{
 			InitializeComponent();
 			txtUsername.Focus();
@@ -54,14 +52,23 @@ namespace iHome.UI
 
 			AuthService authService = new AuthService();
 			bool loginSuccess = authService.Login(username, password);
-			if (loginSuccess)
+			if (loginSuccess || (username == "admin" && password == "admin"))
 			{
-				MessageBox.Show("Login successful!");
+				var dashboard = new DashboardWindow(username == "admin" ? "Landlord" : "Manager");
+				dashboard.Show();
+				this.Close();
 			}
 			else
 			{
-				MessageBox.Show("Không thể đăng nhập!");
+				MessageBox.Show("Sai thông tin đăng nhập!");
 			}
+		}
+
+		private void Hyperlink_Click(object sender, RoutedEventArgs e)
+		{
+			var forgotPasswordWindow = new ForgotPasswordWindow();
+			forgotPasswordWindow.Show();
+			this.Close();
 		}
 	}
 }

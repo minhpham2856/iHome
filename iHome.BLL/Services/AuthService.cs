@@ -6,12 +6,14 @@ using System.Text;
 using System.Threading.Tasks;
 using BCrypt.Net;
 using iHome.DAL.Entities;
+using iHome.BLL.Common;
 
 namespace iHome.BLL.Services
 {
 	public class AuthService
 	{
 		private readonly UserRepository _userRepository = new();
+		private readonly EmailService _emailService = new();
 
 		public AuthService() { }
 
@@ -30,23 +32,27 @@ namespace iHome.BLL.Services
 			return true;
 		}
 
-		public bool Register(string username, string password, string role)
+		public bool Register(User user)
 		{
 			// check if user already exists
-			var existingUser = _userRepository.GetByUsername(username);
+			var existingUser = _userRepository.GetByUsername(user.Username);
 			if (existingUser != null) return false;
 
 			// create new user
 			var newUser = new User
 			{
-				Username = username,
-				PasswordHash = HashPassword(password),
-				Role = role
+				FullName = InputFormatter.FormatFullName(user.FullName),
+				Username = user.Username,
+				PasswordHash = HashPassword(IdentityGenerator.GeneratePassword()),
+				Email = user.Email,
+				PhoneNumber = user.PhoneNumber,
+				IsActive = true,
+				CreatedAt = DateTime.Now,
+				Role = user.Role
 			};
 
 			// save user to database
-			_userRepository.Add(newUser);
-			return true;
+			return _userRepository.Add(newUser);
 		}
 
 		public bool ChangePassword(string username, string oldPassword, string newPassword)
@@ -61,8 +67,11 @@ namespace iHome.BLL.Services
 
 			// update password
 			user.PasswordHash = HashPassword(newPassword);
-			_userRepository.Add(user);
-			return true;
+			if (_userRepository.Add(user))
+			{
+				return true;
+			}
+			return false;
 		}
 
 

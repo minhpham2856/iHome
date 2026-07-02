@@ -17,10 +17,10 @@ namespace iHome.DAL.Repositories
 			_context = new IHomeDbContext();
 		}
 
-		public void Add(User newUser)
+		public bool Add(User newUser)
 		{
 			_context.Users.Add(newUser);
-			_context.SaveChanges();
+			return _context.SaveChanges() > 0;
 		}
 
 		public User GetById(int id) => _context.Users.FirstOrDefault(u => u.Id == id);
