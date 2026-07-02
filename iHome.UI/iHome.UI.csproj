@@ -27,4 +27,8 @@
 	<ItemGroup>
 	  <Resource Include="Assets\Images\logo.jpeg" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Views\Landlord\" />
+	</ItemGroup>
 </Project>
