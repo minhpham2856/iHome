@@ -1,13 +1,73 @@
 <Page x:Class="iHome.UI.Views.Manager.RoomsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
       Title="Quản lý phòng">
 
-    <Grid Background="{StaticResource ColorBackground}">
-        <TextBlock Text="Quản lý phòng" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource ColorTextPrimary}"/>
+    <Grid Background="{StaticResource ColorBackground}" TextElement.FontFamily="Segoe UI">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Margin="4,0,4,16">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="Danh sách phòng" Style="{StaticResource ManagerPageTitleStyle}"/>
+                <TextBlock Text="Theo dõi tình trạng sử dụng, sức chứa và giá thuê của từng phòng."
+                           Style="{StaticResource ManagerPageDescriptionStyle}"/>
+            </StackPanel>
+            <Button x:Name="BtnRefresh" Grid.Column="1" Content="↻  Làm mới"
+                    Style="{StaticResource ManagerRefreshButtonStyle}" Click="BtnRefresh_Click"/>
+        </Grid>
+
+        <UniformGrid Grid.Row="1" Columns="4" Margin="4,0,-6,14">
+            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="TỔNG PHÒNG" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtTotalRooms" Style="{StaticResource ManagerKpiPrimaryValueStyle}"/></StackPanel></Border>
+            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="ĐANG Ở" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtOccupiedRooms" Style="{StaticResource ManagerKpiInfoValueStyle}"/></StackPanel></Border>
+            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="CÒN TRỐNG" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtVacantRooms" Style="{StaticResource ManagerKpiValueStyle}"/></StackPanel></Border>
+            <Border Style="{StaticResource ManagerKpiCardStyle}" Margin="0"><StackPanel><TextBlock Text="BẢO TRÌ" Style="{StaticResource ManagerDangerLabelStyle}"/><TextBlock x:Name="TxtMaintenanceRooms" Style="{StaticResource ManagerKpiDangerValueStyle}"/></StackPanel></Border>
+        </UniformGrid>
+
+        <Border Grid.Row="2" Style="{StaticResource ManagerCardStyle}" Margin="4,0,4,14" Padding="16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,12,0"><TextBlock Text="TÌM KIẾM" Style="{StaticResource ManagerFilterLabelStyle}"/><TextBox x:Name="TxtSearch" Style="{StaticResource ManagerTextBoxStyle}" TextChanged="FilterChanged"/></StackPanel>
+                <StackPanel Grid.Column="1" Margin="0,0,12,0"><TextBlock Text="TÒA NHÀ" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="CboBuilding" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
+                <StackPanel Grid.Column="2" Margin="0,0,12,0"><TextBlock Text="TRẠNG THÁI" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="CboStatus" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
+                <StackPanel Grid.Column="3"><TextBlock Text="TẦNG" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="CboFloor" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="3" Margin="4,0,4,0" Style="{StaticResource ManagerCardStyle}" Padding="0" CornerRadius="14">
+            <Grid>
+                <DataGrid x:Name="RoomsGrid" Style="{StaticResource ManagerDataGridStyle}" HorizontalScrollBarVisibility="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="TÒA NHÀ" Binding="{Binding BuildingName}" Width="1.25*" MinWidth="105" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
+                        <DataGridTextColumn Header="PHÒNG" Binding="{Binding RoomNumber}" Width="0.7*" MinWidth="70" ElementStyle="{StaticResource ManagerDataGridLinkTextStyle}"/>
+                        <DataGridTextColumn Header="LOẠI PHÒNG" Binding="{Binding RoomTypeName}" Width="1.35*" MinWidth="120" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
+                        <DataGridTextColumn Header="TẦNG" Binding="{Binding Floor}" Width="0.5*" MinWidth="55" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
+                        <DataGridTextColumn Header="DIỆN TÍCH" Binding="{Binding Area, StringFormat={}{0:N1} m²}" Width="0.75*" MinWidth="80" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
+                        <DataGridTextColumn Header="GIÁ THUÊ" Binding="{Binding BaseRent, StringFormat={}{0:N0} đ}" Width="1*" MinWidth="105" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
+                        <DataGridTextColumn Header="SỐ NGƯỜI" Binding="{Binding CurrentOccupancy}" Width="0.7*" MinWidth="75" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
+                        <DataGridTemplateColumn Header="TRẠNG THÁI" Width="1*" MinWidth="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource ManagerRoomStatusTagStyle}">
+                                        <TextBlock Text="{Binding StatusDisplay}" Style="{StaticResource ManagerRoomStatusTextStyle}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Border x:Name="StatePanel" Background="{StaticResource ColorOverlay}" Visibility="Collapsed" CornerRadius="14"><TextBlock x:Name="StateText" Style="{StaticResource ManagerStateTextStyle}"/></Border>
+            </Grid>
+        </Border>
+
+        <TextBlock x:Name="TxtResultCount" Grid.Row="4" Margin="10,10,4,0" Foreground="{StaticResource ColorTextSecondary}" FontSize="12"/>
     </Grid>
 </Page>
