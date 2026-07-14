@@ -1,13 +1,306 @@
+using iHome.BLL.DTOs;
+using iHome.BLL.Services.Manager;
+using iHome.DAL.Entities;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace iHome.UI.Views.Manager
 {
-    public partial class GuestsPage : Page
-    {
-        public GuestsPage()
-        {
-            InitializeComponent();
-        }
-    }
+	public partial class GuestsPage : Page
+	{
+		private const string All = "Tất cả";
+		private readonly User _currentUser;
+		private readonly int? _propertyId;
+		private readonly ManagerTenantService _service = new();
+		private readonly ManagerContractService _contractService = new();
+		private List<ManagerTenantDto> _tenants = new();
+		private ICollectionView? _tenantView;
+		private bool _isLoading;
+
+		public GuestsPage(User currentUser, int? propertyId)
+		{
+			InitializeComponent();
+			_currentUser = currentUser;
+			_propertyId = propertyId;
+			Loaded += GuestsPage_Loaded;
+		}
+
+		private async void GuestsPage_Loaded(object sender, RoutedEventArgs e) =>
+			await LoadTenantsAsync();
+
+		private async void BtnRefresh_Click(object sender, RoutedEventArgs e) =>
+			await LoadTenantsAsync();
+
+		private async void AddTenant_Click(object sender, RoutedEventArgs e)
+		{
+			var dialog = new TenantDialog { Owner = Window.GetWindow(this) };
+			if (dialog.ShowDialog() != true || dialog.Result == null)
+			{
+				return;
+			}
+
+			try
+			{
+				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+				int tenantId = await Task.Run(() => _service.CreateTenant(managerId, dialog.Result));
+				await LoadTenantsAsync();
+				if (MessageBox.Show(
+					"Đã thêm khách. Bạn có muốn gán khách vào phòng qua hợp đồng ngay không?",
+					"Thêm khách thành công",
+					MessageBoxButton.YesNo,
+					MessageBoxImage.Question) == MessageBoxResult.Yes)
+				{
+					await ShowAssignDialogAsync(tenantId);
+				}
+			}
+			catch (Exception ex)
+			{
+				ShowOperationError(ex);
+			}
+		}
+
+		private async void EditTenant_Click(object sender, RoutedEventArgs e)
+		{
+			if (GuestsGrid.SelectedItem is not ManagerTenantDto selected)
+			{
+				ShowSelectMessage("Vui lòng chọn khách cần sửa.");
+				return;
+			}
+
+			try
+			{
+				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+				var form = await Task.Run(() => _service.GetTenant(managerId, selected.TenantId));
+				var dialog = new TenantDialog(form) { Owner = Window.GetWindow(this) };
+				if (dialog.ShowDialog() == true && dialog.Result != null)
+				{
+					await Task.Run(() => _service.UpdateTenant(managerId, dialog.Result));
+					await LoadTenantsAsync();
+				}
+			}
+			catch (Exception ex)
+			{
+				ShowOperationError(ex);
+			}
+		}
+
+		private async void DeleteTenant_Click(object sender, RoutedEventArgs e)
+		{
+			if (GuestsGrid.SelectedItem is not ManagerTenantDto selected)
+			{
+				ShowSelectMessage("Vui lòng chọn khách cần xóa.");
+				return;
+			}
+			if (MessageBox.Show(
+				$"Xóa khách {selected.FullName}?",
+				"Xác nhận xóa",
+				MessageBoxButton.YesNo,
+				MessageBoxImage.Warning) != MessageBoxResult.Yes)
+			{
+				return;
+			}
+
+			try
+			{
+				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+				await Task.Run(() => _service.DeleteTenant(managerId, selected.TenantId));
+				await LoadTenantsAsync();
+			}
+			catch (Exception ex)
+			{
+				ShowOperationError(ex);
+			}
+		}
+
+		private async void AssignTenant_Click(object sender, RoutedEventArgs e)
+		{
+			int? tenantId = (GuestsGrid.SelectedItem as ManagerTenantDto)?.TenantId;
+			await ShowAssignDialogAsync(tenantId);
+		}
+
+		private async Task ShowAssignDialogAsync(int? selectedTenantId)
+		{
+			try
+			{
+				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+				var contracts = await Task.Run(() => _contractService.GetContractOptions(managerId, _propertyId));
+				var tenants = await Task.Run(() => _service.GetTenantOptions(managerId));
+				var dialog = new AssignTenantDialog(contracts, tenants, selectedTenantId)
+				{
+					Owner = Window.GetWindow(this)
+				};
+				if (dialog.ShowDialog() == true)
+				{
+					await Task.Run(() => _contractService.AssignTenant(
+						managerId,
+						dialog.ContractId,
+						dialog.TenantId,
+						dialog.IsMainTenant));
+					await LoadTenantsAsync();
+				}
+			}
+			catch (Exception ex)
+			{
+				ShowOperationError(ex);
+			}
+		}
+
+		private async void RemoveTenant_Click(object sender, RoutedEventArgs e)
+		{
+			if (GuestsGrid.SelectedItem is not ManagerTenantDto selected || selected.ContractId <= 0)
+			{
+				ShowSelectMessage("Vui lòng chọn một khách đang thuộc hợp đồng.");
+				return;
+			}
+			if (MessageBox.Show(
+				$"Gỡ {selected.FullName} khỏi hợp đồng #{selected.ContractId}?",
+				"Xác nhận gỡ khách",
+				MessageBoxButton.YesNo,
+				MessageBoxImage.Question) != MessageBoxResult.Yes)
+			{
+				return;
+			}
+
+			try
+			{
+				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+				await Task.Run(() => _contractService.RemoveTenant(managerId, selected.ContractId, selected.TenantId));
+				await LoadTenantsAsync();
+			}
+			catch (Exception ex)
+			{
+				ShowOperationError(ex);
+			}
+		}
+
+		private async Task LoadTenantsAsync()
+		{
+			if (_isLoading)
+			{
+				return;
+			}
+
+			try
+			{
+				_isLoading = true;
+				BtnRefresh.IsEnabled = false;
+				SetState("Đang tải danh sách người thuê...", true);
+				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+				_tenants = await Task.Run(() => _service.GetTenants(managerId, _propertyId));
+
+				_tenantView = CollectionViewSource.GetDefaultView(_tenants);
+				_tenantView.Filter = FilterTenant;
+				GuestsGrid.ItemsSource = _tenantView;
+				PopulateFilters();
+				UpdateSummary();
+				RefreshView();
+			}
+			catch (Exception)
+			{
+				SetState("Không thể tải danh sách người thuê. Vui lòng thử lại.", true);
+			}
+			finally
+			{
+				_isLoading = false;
+				BtnRefresh.IsEnabled = true;
+			}
+		}
+
+		private void PopulateFilters()
+		{
+			CboBuilding.ItemsSource = new[] { All }
+				.Concat(_tenants.Select(t => t.BuildingName).Distinct().OrderBy(name => name));
+			CboContractStatus.ItemsSource = new[] { All }
+				.Concat(_tenants.Select(t => t.ContractStatusDisplay).Distinct().OrderBy(status => status));
+			CboBuilding.SelectedIndex = 0;
+			CboContractStatus.SelectedIndex = 0;
+			PopulateRoomFilter();
+		}
+
+		private void UpdateSummary()
+		{
+			var today = DateOnly.FromDateTime(DateTime.Now);
+			TxtTotalTenants.Text = _tenants.Select(tenant => tenant.TenantId).Distinct().Count().ToString();
+			TxtMainTenants.Text = _tenants.Count(tenant => tenant.IsMainTenant).ToString();
+			TxtRoommates.Text = _tenants.Count(tenant => !tenant.IsMainTenant).ToString();
+			TxtExpiringTenants.Text = _tenants.Count(tenant =>
+				string.Equals(tenant.ContractStatus, "Active", StringComparison.OrdinalIgnoreCase) &&
+				tenant.EndDate >= today &&
+				tenant.EndDate <= today.AddDays(30)).ToString();
+		}
+
+		private void PopulateRoomFilter()
+		{
+			string? building = CboBuilding.SelectedItem as string;
+			var rooms = _tenants
+				.Where(t => building == null || building == All || t.BuildingName == building)
+				.Select(t => t.RoomNumber)
+				.Distinct()
+				.OrderBy(room => room);
+			CboRoom.ItemsSource = new[] { All }.Concat(rooms);
+			CboRoom.SelectedIndex = 0;
+		}
+
+		private bool FilterTenant(object item)
+		{
+			if (item is not ManagerTenantDto tenant)
+			{
+				return false;
+			}
+
+			string keyword = TxtSearch.Text.Trim();
+			bool matchesKeyword = string.IsNullOrEmpty(keyword) ||
+				tenant.FullName.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
+				tenant.IdCardNumber.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
+				tenant.PhoneNumber.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
+				(tenant.Email?.Contains(keyword, StringComparison.OrdinalIgnoreCase) ?? false) ||
+				tenant.BuildingName.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
+				tenant.RoomNumber.Contains(keyword, StringComparison.OrdinalIgnoreCase);
+			bool matchesBuilding = CboBuilding.SelectedItem is not string building ||
+				building == All || tenant.BuildingName == building;
+			bool matchesRoom = CboRoom.SelectedItem is not string room ||
+				room == All || tenant.RoomNumber == room;
+			bool matchesStatus = CboContractStatus.SelectedItem is not string status ||
+				status == All || tenant.ContractStatusDisplay == status;
+
+			return matchesKeyword && matchesBuilding && matchesRoom && matchesStatus;
+		}
+
+		private void BuildingFilterChanged(object sender, RoutedEventArgs e)
+		{
+			if (!_isLoading)
+			{
+				PopulateRoomFilter();
+				RefreshView();
+			}
+		}
+
+		private void FilterChanged(object sender, RoutedEventArgs e) => RefreshView();
+
+		private void RefreshView()
+		{
+			_tenantView?.Refresh();
+			int count = _tenantView?.Cast<object>().Count() ?? 0;
+			TxtResultCount.Text = $"{count} người thuê";
+			SetState(count == 0 ? "Không có người thuê phù hợp." : string.Empty, count == 0);
+		}
+
+		private void SetState(string message, bool isVisible)
+		{
+			StateText.Text = message;
+			StatePanel.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+		}
+
+		private static void ShowSelectMessage(string message) =>
+			MessageBox.Show(message, "Chưa chọn dữ liệu", MessageBoxButton.OK, MessageBoxImage.Information);
+
+		private static void ShowOperationError(Exception exception) =>
+			MessageBox.Show(exception.Message, "Không thể thực hiện", MessageBoxButton.OK, MessageBoxImage.Warning);
+	}
 }

@@ -1,0 +1,23 @@
+<Window x:Class="iHome.UI.Views.Manager.AssignTenantDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Gán khách vào hợp đồng"
+        Width="520" Height="360" WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize" Background="{StaticResource ColorBackground}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <StackPanel>
+            <TextBlock Text="Gán khách vào phòng" Style="{StaticResource ManagerDialogTitleStyle}"/>
+            <TextBlock Text="Khách được gán vào phòng thông qua hợp đồng đang hoạt động." Style="{StaticResource ManagerPageDescriptionStyle}"/>
+            <TextBlock Text="HỢP ĐỒNG / PHÒNG" Style="{StaticResource ManagerDialogLabelStyle}"/>
+            <ComboBox x:Name="CboContract" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"/>
+            <TextBlock Text="KHÁCH THUÊ" Style="{StaticResource ManagerDialogLabelStyle}"/>
+            <ComboBox x:Name="CboTenant" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"/>
+            <CheckBox x:Name="ChkMainTenant" Content="Đặt làm người thuê chính" Margin="0,16,0,0"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Hủy" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="Cancel_Click"/>
+            <Button Content="Gán khách" Style="{StaticResource ManagerToolbarButtonStyle}" Click="Save_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
