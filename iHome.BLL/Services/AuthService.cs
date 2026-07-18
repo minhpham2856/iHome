@@ -1,4 +1,4 @@
-﻿using iHome.DAL.Repositories;
+using iHome.DAL.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,18 +18,18 @@ namespace iHome.BLL.Services
 		public AuthService() { }
 
 		// main methods
-		public bool Login(string username, string password)
+		public User? Login(string username, string password)
 		{
 			var user = _userRepository.GetByUsername(username);
 
 			// check if user exists
-			if (user == null) return false;
+			if (user == null) return null;
 
 			// check if password is correct
 			bool isPasswordValid = VerifyPasswordHash(password, user.PasswordHash);
-			if (!isPasswordValid) return false;
+			if (!isPasswordValid) return null;
 
-			return true;
+			return user;
 		}
 
 		public bool Register(User user)
