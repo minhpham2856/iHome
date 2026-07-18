@@ -19,11 +19,7 @@ public partial class Tenant
 
     public string? PermanentAddress { get; set; }
 
-    public string? IdCardImagePath { get; set; }
-
     public DateTime CreatedAt { get; set; }
 
     public virtual ICollection<ContractTenant> ContractTenants { get; set; } = new List<ContractTenant>();
-
-    public virtual ICollection<NotificationLog> NotificationLogs { get; set; } = new List<NotificationLog>();
 }

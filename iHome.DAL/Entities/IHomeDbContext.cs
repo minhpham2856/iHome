@@ -15,8 +15,6 @@ public partial class IHomeDbContext : DbContext
     {
     }
 
-    public virtual DbSet<AppSetting> AppSettings { get; set; }
-
     public virtual DbSet<AuditLog> AuditLogs { get; set; }
 
     public virtual DbSet<Building> Buildings { get; set; }
@@ -25,15 +23,9 @@ public partial class IHomeDbContext : DbContext
 
     public virtual DbSet<ContractTenant> ContractTenants { get; set; }
 
-    public virtual DbSet<ElectricityTier> ElectricityTiers { get; set; }
-
     public virtual DbSet<Invoice> Invoices { get; set; }
 
     public virtual DbSet<InvoiceItem> InvoiceItems { get; set; }
-
-    public virtual DbSet<NotificationLog> NotificationLogs { get; set; }
-
-    public virtual DbSet<NotificationTemplate> NotificationTemplates { get; set; }
 
     public virtual DbSet<Payment> Payments { get; set; }
 
@@ -55,24 +47,13 @@ public partial class IHomeDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=DESKTOP-2JNFOT5;uid=sa;password=123;database=iHomeDB;Encrypt=True;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=(local);uid=sa;password=123;database=iHomeDB;Encrypt=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AppSetting>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__AppSetti__3214EC077A4F71F5");
-
-            entity.HasIndex(e => e.SettingKey, "UQ__AppSetti__01E719AD02FD6ED7").IsUnique();
-
-            entity.Property(e => e.Description).HasMaxLength(500);
-            entity.Property(e => e.SettingKey).HasMaxLength(100);
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
-        });
-
         modelBuilder.Entity<AuditLog>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__AuditLog__3214EC0754CA7DB0");
+            entity.HasKey(e => e.Id).HasName("PK__AuditLog__3214EC07EA75D0E3");
 
             entity.HasIndex(e => e.Timestamp, "IX_AuditLogs_Timestamp");
 
@@ -91,7 +72,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Building>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Building__3214EC0737B0523A");
+            entity.HasKey(e => e.Id).HasName("PK__Building__3214EC07077E5BEA");
 
             entity.HasIndex(e => e.ManagerId, "IX_Buildings_ManagerId");
 
@@ -113,7 +94,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Contract>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Contract__3214EC07DA29C411");
+            entity.HasKey(e => e.Id).HasName("PK__Contract__3214EC07BDC69C71");
 
             entity.HasIndex(e => e.RoomId, "IX_Contracts_RoomId");
 
@@ -121,18 +102,13 @@ public partial class IHomeDbContext : DbContext
 
             entity.HasIndex(e => e.Status, "IX_Contracts_Status");
 
-            entity.HasIndex(e => e.ContractCode, "UQ__Contract__CBECF8333B8DA1FF").IsUnique();
-
-            entity.Property(e => e.ContractCode)
-                .HasMaxLength(30)
-                .IsUnicode(false);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.DepositAmount).HasColumnType("decimal(15, 2)");
             entity.Property(e => e.MonthlyRent).HasColumnType("decimal(15, 2)");
+            entity.Property(e => e.Notes).HasMaxLength(300);
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .IsUnicode(false);
-            entity.Property(e => e.TerminationReason).HasMaxLength(300);
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Contracts)
                 .HasForeignKey(d => d.CreatedBy)
@@ -162,23 +138,9 @@ public partial class IHomeDbContext : DbContext
                 .HasConstraintName("FK_ContractTenants_Tenants");
         });
 
-        modelBuilder.Entity<ElectricityTier>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__Electric__3214EC07566A1EEC");
-
-            entity.HasIndex(e => e.BuildingId, "IX_ElectricityTiers_BuildingId");
-
-            entity.Property(e => e.PricePerUnit).HasColumnType("decimal(15, 2)");
-
-            entity.HasOne(d => d.Building).WithMany(p => p.ElectricityTiers)
-                .HasForeignKey(d => d.BuildingId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ElectricityTiers_Buildings");
-        });
-
         modelBuilder.Entity<Invoice>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Invoices__3214EC07A235776D");
+            entity.HasKey(e => e.Id).HasName("PK__Invoices__3214EC07A64D3CB4");
 
             entity.HasIndex(e => e.ContractId, "IX_Invoices_ContractId");
 
@@ -186,9 +148,9 @@ public partial class IHomeDbContext : DbContext
 
             entity.HasIndex(e => e.Status, "IX_Invoices_Status");
 
-            entity.HasIndex(e => new { e.ContractId, e.Month, e.Year }, "UQ_Invoices_ContractMonth").IsUnique();
+            entity.HasIndex(e => new { e.ContractId, e.InvoiceDate }, "UQ_Invoices_ContractDate").IsUnique();
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.InvoiceDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .IsUnicode(false);
@@ -202,7 +164,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<InvoiceItem>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__InvoiceI__3214EC07A475803E");
+            entity.HasKey(e => e.Id).HasName("PK__InvoiceI__3214EC0746E50CFC");
 
             entity.Property(e => e.Amount).HasColumnType("decimal(15, 2)");
             entity.Property(e => e.Description).HasMaxLength(200);
@@ -215,51 +177,9 @@ public partial class IHomeDbContext : DbContext
                 .HasConstraintName("FK_InvoiceItems_Invoices");
         });
 
-        modelBuilder.Entity<NotificationLog>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__Notifica__3214EC070594B144");
-
-            entity.HasIndex(e => e.RecipientId, "IX_NotificationLogs_RecipientId");
-
-            entity.HasIndex(e => e.SentAt, "IX_NotificationLogs_SentAt");
-
-            entity.Property(e => e.ErrorMessage).HasMaxLength(500);
-            entity.Property(e => e.RecipientEmail)
-                .HasMaxLength(150)
-                .IsUnicode(false);
-            entity.Property(e => e.RecipientPhone)
-                .HasMaxLength(20)
-                .IsUnicode(false);
-            entity.Property(e => e.SentAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .IsUnicode(false);
-            entity.Property(e => e.Subject).HasMaxLength(200);
-            entity.Property(e => e.Type)
-                .HasMaxLength(10)
-                .IsUnicode(false);
-
-            entity.HasOne(d => d.Recipient).WithMany(p => p.NotificationLogs)
-                .HasForeignKey(d => d.RecipientId)
-                .HasConstraintName("FK_NotificationLogs_Tenants");
-        });
-
-        modelBuilder.Entity<NotificationTemplate>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__Notifica__3214EC07BE9384CD");
-
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Name).HasMaxLength(100);
-            entity.Property(e => e.Placeholders).HasMaxLength(500);
-            entity.Property(e => e.Subject).HasMaxLength(200);
-            entity.Property(e => e.Type)
-                .HasMaxLength(10)
-                .IsUnicode(false);
-        });
-
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Payments__3214EC078F3A37B0");
+            entity.HasKey(e => e.Id).HasName("PK__Payments__3214EC071BFFADFD");
 
             entity.HasIndex(e => e.InvoiceId, "IX_Payments_InvoiceId");
 
@@ -283,7 +203,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Property>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Properti__3214EC07910CE272");
+            entity.HasKey(e => e.Id).HasName("PK__Properti__3214EC07A0632B4C");
 
             entity.HasIndex(e => e.LandlordId, "IX_Properties_LandlordId");
 
@@ -301,7 +221,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Room>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Rooms__3214EC07A7456F68");
+            entity.HasKey(e => e.Id).HasName("PK__Rooms__3214EC07ACEE2830");
 
             entity.HasIndex(e => e.BuildingId, "IX_Rooms_BuildingId");
 
@@ -349,7 +269,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<RoomType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RoomType__3214EC0772FA5606");
+            entity.HasKey(e => e.Id).HasName("PK__RoomType__3214EC07F94F5D00");
 
             entity.HasIndex(e => e.BuildingId, "IX_RoomTypes_BuildingId");
 
@@ -364,7 +284,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Service>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Services__3214EC077A2FAB8D");
+            entity.HasKey(e => e.Id).HasName("PK__Services__3214EC079990BFF3");
 
             entity.HasIndex(e => e.BuildingId, "IX_Services_BuildingId");
 
@@ -384,20 +304,12 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<ServiceReading>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ServiceR__3214EC0708234410");
-
-            entity.HasIndex(e => new { e.Month, e.Year }, "IX_ServiceReadings_MonthYear");
+            entity.HasKey(e => e.Id).HasName("PK__ServiceR__3214EC07537F0AAF");
 
             entity.HasIndex(e => new { e.RoomId, e.ServiceId }, "IX_ServiceReadings_RoomService");
 
-            entity.HasIndex(e => new { e.RoomId, e.ServiceId, e.Month, e.Year }, "UQ_ServiceReadings_RoomServiceMonth").IsUnique();
-
-            entity.Property(e => e.Consumption)
-                .HasComputedColumnSql("([CurrentReading]-[PreviousReading])", false)
-                .HasColumnType("decimal(16, 2)");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.CurrentReading).HasColumnType("decimal(15, 2)");
-            entity.Property(e => e.PreviousReading).HasColumnType("decimal(15, 2)");
+            entity.Property(e => e.ReadingDate).HasDefaultValueSql("(getdate())");
 
             entity.HasOne(d => d.RoomService).WithMany(p => p.ServiceReadings)
                 .HasForeignKey(d => new { d.RoomId, d.ServiceId })
@@ -407,7 +319,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Tenant>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Tenants__3214EC07C3EDF358");
+            entity.HasKey(e => e.Id).HasName("PK__Tenants__3214EC0764B5CC17");
 
             entity.HasIndex(e => e.IdCardNumber, "UQ__Tenants__713A7B91DE688DB7").IsUnique();
 
@@ -416,7 +328,6 @@ public partial class IHomeDbContext : DbContext
                 .HasMaxLength(150)
                 .IsUnicode(false);
             entity.Property(e => e.FullName).HasMaxLength(100);
-            entity.Property(e => e.IdCardImagePath).HasMaxLength(500);
             entity.Property(e => e.IdCardNumber)
                 .HasMaxLength(20)
                 .IsUnicode(false);
@@ -428,13 +339,11 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC07BEECA2B9");
+            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC07C20D73A2");
 
             entity.HasIndex(e => e.Role, "IX_Users_Role");
 
-            entity.HasIndex(e => e.Username, "IX_Users_Username");
-
-            entity.HasIndex(e => e.Username, "UQ__Users__536C85E40FC39C06").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__Users__536C85E4DBDBAB74").IsUnique();
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Email)

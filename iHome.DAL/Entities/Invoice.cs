@@ -9,17 +9,13 @@ public partial class Invoice
 
     public int ContractId { get; set; }
 
-    public int Month { get; set; }
-
-    public int Year { get; set; }
+    public DateTime InvoiceDate { get; set; }
 
     public decimal TotalAmount { get; set; }
 
     public string Status { get; set; } = null!;
 
     public DateOnly DueDate { get; set; }
-
-    public DateTime CreatedAt { get; set; }
 
     public virtual Contract Contract { get; set; } = null!;
 

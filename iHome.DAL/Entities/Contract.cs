@@ -7,8 +7,6 @@ public partial class Contract
 {
     public int Id { get; set; }
 
-    public string ContractCode { get; set; } = null!;
-
     public int RoomId { get; set; }
 
     public DateOnly StartDate { get; set; }
@@ -21,7 +19,7 @@ public partial class Contract
 
     public string Status { get; set; } = null!;
 
-    public string? TerminationReason { get; set; }
+    public string? Notes { get; set; }
 
     public int CreatedBy { get; set; }
 

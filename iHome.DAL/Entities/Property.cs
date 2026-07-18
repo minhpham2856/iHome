@@ -19,6 +19,8 @@ public partial class Property
 
     public DateTime CreatedAt { get; set; }
 
+    public DateTime? UpdatedAt { get; set; }
+
     public virtual ICollection<Building> Buildings { get; set; } = new List<Building>();
 
     public virtual User Landlord { get; set; } = null!;
