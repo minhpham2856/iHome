@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -10,8 +10,8 @@ namespace iHome.BLL.Services
 {
 	public class EmailService
 	{
-		private readonly string _email = "yourgmail@gmail.com";
-		private readonly string _appPassword = "xxxxxxxxxxxxxxxx";
+		private readonly string _email = Environment.GetEnvironmentVariable("SMTP_EMAIL") ?? "yourgmail@gmail.com";
+		private readonly string _appPassword = Environment.GetEnvironmentVariable("SMTP_APP_PASSWORD") ?? "xxxxxxxxxxxxxxxx";
 
 		public void SendLoginInfo(string toEmail, string username, string password)
 		{

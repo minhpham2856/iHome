@@ -19,8 +19,6 @@ public partial class Building
 
     public bool IsActive { get; set; }
 
-    public virtual ICollection<ElectricityTier> ElectricityTiers { get; set; } = new List<ElectricityTier>();
-
     public virtual User? Manager { get; set; }
 
     public virtual Property Property { get; set; } = null!;

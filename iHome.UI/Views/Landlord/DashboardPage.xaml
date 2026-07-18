@@ -1,13 +1,93 @@
 <Page x:Class="iHome.UI.Views.Landlord.DashboardPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      mc:Ignorable="d" 
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+      mc:Ignorable="d"
       d:DesignHeight="450" d:DesignWidth="800"
       Title="Bảng điều khiển">
 
-    <Grid Background="#F5F7FA">
-        <TextBlock Text="Bảng điều khiển" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2C3E50"/>
-    </Grid>
+    <!-- placeholder: KPI cards will drill into detail pages (BuildingsPage / ContractsPage / etc. are not implemented yet) -->
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="16">
+
+            <!-- KPI cards -->
+            <WrapPanel Orientation="Horizontal">
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Tổng toà nhà"/>
+                        <TextBlock x:Name="TxtTotalBuildings" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Tổng phóng"/>
+                        <TextBlock x:Name="TxtTotalRooms" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Đang ở"/>
+                        <TextBlock x:Name="TxtOccupiedRooms" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Trống"/>
+                        <TextBlock x:Name="TxtVacantRooms" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Tổng khách"/>
+                        <TextBlock x:Name="TxtTotalTenants" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Hợp đồng hoạt động"/>
+                        <TextBlock x:Name="TxtActiveContracts" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Doanh thu tháng"/>
+                        <TextBlock x:Name="TxtMonthlyRevenue" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Chưa thanh toán"/>
+                        <TextBlock x:Name="TxtOutstanding" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Quá hạn"/>
+                        <TextBlock x:Name="TxtOverdue" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Sắp hết hạn"/>
+                        <TextBlock x:Name="TxtExpiring" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+
+            <!-- Revenue over time (column chart) -->
+            <TextBlock Style="{StaticResource ChartTitleStyle}" Text="Doanh thu 12 tháng qua"/>
+            <lvc:CartesianChart x:Name="RevenueChart" Height="260" Margin="8,0,8,8"/>
+
+            <!-- Room status breakdown (doughnut) -->
+            <TextBlock Style="{StaticResource ChartTitleStyle}" Text="Tình trạng phóng"/>
+            <lvc:PieChart x:Name="RoomStatusChart" Height="260" Margin="8,0,8,8"/>
+
+            <!-- Contract status breakdown (pie) -->
+            <TextBlock Style="{StaticResource ChartTitleStyle}" Text="Tình trạng hợp đồng"/>
+            <lvc:PieChart x:Name="ContractStatusChart" Height="260" Margin="8,0,8,16"/>
+
+        </StackPanel>
+    </ScrollViewer>
 </Page>

@@ -7,7 +7,7 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="Quản lý nhân viên">
 
-    <Grid Background="#F5F7FA">
-        <TextBlock Text="Quản lý nhân viên" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2C3E50"/>
+    <Grid Background="{StaticResource ColorBackground}">
+        <TextBlock Text="Quản lý nhân viên" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource ColorTextPrimary}"/>
     </Grid>
 </Page>

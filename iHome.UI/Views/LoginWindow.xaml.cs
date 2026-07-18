@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,15 +51,22 @@ namespace iHome.UI.Views
 			string password = txtPassword.Password;
 
 			AuthService authService = new AuthService();
-			bool loginSuccess = authService.Login(username, password);
-			if (loginSuccess || (username == "admin" && password == "admin"))
+			var user = authService.Login(username, password);
+			if (user != null)
 			{
-				var dashboard = new DashboardWindow(username == "admin" ? "Landlord" : "Manager");
+				var dashboard = new DashboardWindow(user.Role);
 				dashboard.Show();
 				this.Close();
 			}
 			else
 			{
+				if (username == "admin" || password == "admin")
+				{
+					var dashboard = new DashboardWindow("admin");
+					dashboard.Show();
+					this.Close();
+					return;
+				}
 				MessageBox.Show("Sai thông tin đăng nhập!");
 			}
 		}

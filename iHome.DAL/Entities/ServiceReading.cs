@@ -11,17 +11,9 @@ public partial class ServiceReading
 
     public int ServiceId { get; set; }
 
-    public int Month { get; set; }
-
-    public int Year { get; set; }
-
-    public decimal? PreviousReading { get; set; }
+    public DateTime ReadingDate { get; set; }
 
     public decimal CurrentReading { get; set; }
-
-    public decimal? Consumption { get; set; }
-
-    public DateTime CreatedAt { get; set; }
 
     public virtual RoomService RoomService { get; set; } = null!;
 }

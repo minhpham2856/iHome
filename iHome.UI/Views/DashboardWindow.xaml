@@ -18,7 +18,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- Sidebar -->
-        <Border Grid.Column="0" Background="#fff">
+        <Border Grid.Column="0" Background="{StaticResource ColorSurface}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -28,7 +28,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- Header Sidebar: Logo -->
-                <Border Grid.Row="0" Background="#fff" Padding="10">
+                <Border Grid.Row="0" Background="{StaticResource ColorSurface}" Padding="10">
                     <Image Source="pack://application:,,,/Assets/Images/logo.png" 
                                Height="100" Width="100" 
                                HorizontalAlignment="Center"/>
@@ -39,7 +39,7 @@
                               VerticalScrollBarVisibility="Auto" 
                               HorizontalScrollBarVisibility="Disabled" 
                               BorderThickness="0"
-                              Background="#fff">
+                              Background="{StaticResource ColorSurface}">
                     <ItemsControl x:Name="icSidebarMenu">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -59,8 +59,8 @@
                         HorizontalContentAlignment="Center"
                         FontWeight="Bold" 
                         FontSize="14"
-                        Foreground="White" 
-                        Background="#000"
+                        Foreground="{StaticResource ColorSurface}" 
+                        Background="{StaticResource ColorPrimary}"
                         BorderThickness="0"
                         Cursor="Hand"
                         Click="btnLogout_Click">
@@ -68,10 +68,12 @@
                         <Style TargetType="Button">
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#1A252F"/>
+                                    <Setter Property="Background" 
+                                            Value="{StaticResource ColorPrimaryHover}"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter Property="Background" Value="#0F1A22"/>
+                                    <Setter Property="Background" 
+                                            Value="{StaticResource ColorPrimaryPressed}"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
@@ -81,14 +83,14 @@
         </Border>
 
         <!-- Content Area -->
-        <Grid Grid.Column="1" Background="#F5F7FA">
+        <Grid Grid.Column="1" Background="{StaticResource ColorBackground}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <!-- Header Content -->
-            <Border Grid.Row="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+            <Border Grid.Row="0" Background="{StaticResource ColorSurface}" BorderBrush="{StaticResource ColorBorder}" BorderThickness="0,0,0,1">
                 <Grid Margin="20,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -99,14 +101,14 @@
                                Text="Bảng điều khiển" 
                                FontSize="20" 
                                FontWeight="Bold"
-                               Foreground="#2C3E50"
+                               Foreground="{StaticResource ColorTextPrimary}"
                                VerticalAlignment="Center"/>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock x:Name="txtWelcome" 
                                    Text="Xin chào" 
                                    FontSize="14"
-                                   Foreground="#555555"
+                                   Foreground="{StaticResource ColorTextSecondary}"
                                    VerticalAlignment="Center"/>
                     </StackPanel>
                 </Grid>
