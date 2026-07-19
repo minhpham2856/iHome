@@ -54,19 +54,12 @@ namespace iHome.UI.Views
 			var user = authService.Login(username, password);
 			if (user != null)
 			{
-				var dashboard = new DashboardWindow(user.Role);
+				var dashboard = new DashboardWindow(user);
 				dashboard.Show();
 				this.Close();
 			}
 			else
 			{
-				if (username == "admin" || password == "admin")
-				{
-					var dashboard = new DashboardWindow("admin");
-					dashboard.Show();
-					this.Close();
-					return;
-				}
 				MessageBox.Show("Sai thông tin đăng nhập!");
 			}
 		}
