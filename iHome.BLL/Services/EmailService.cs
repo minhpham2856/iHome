@@ -22,10 +22,11 @@ namespace iHome.BLL.Services
 				mail.From = new MailAddress(_email);
 				mail.To.Add(toEmail);
 				mail.Subject = "Thông tin tài khoản iHome";
-				mail.Body = $"Xin chào, tài khoản của bạn đã được tạo thành công." +
-					$"Username: {username}" +
-					$"Password: {password}" +
-					$"Vui lòng đổi mật khẩu sau lần đăng nhập đầu tiên.";
+				mail.Body =
+					"Xin chào, tài khoản của bạn đã được tạo thành công.\n\n" +
+					$"Tên đăng nhập: {username}\n" +
+					$"Mật khẩu tạm thời: {password}\n\n" +
+					"Vui lòng đổi mật khẩu sau lần đăng nhập đầu tiên.";
 
 				var smtp = new SmtpClient("smtp.gmail.com", 587);
 				smtp.EnableSsl = true;
@@ -33,9 +34,9 @@ namespace iHome.BLL.Services
 
 				smtp.Send(mail);
 			}
-			catch
+			catch (Exception ex)
 			{
-				throw new();
+				throw new InvalidOperationException("Không thể gửi email thông tin tài khoản. Kiểm tra cấu hình SMTP.", ex);
 			}
 		}
 
@@ -48,18 +49,19 @@ namespace iHome.BLL.Services
 				mail.From = new MailAddress(_email);
 				mail.To.Add(toEmail);
 				mail.Subject = "Thông tin đặt lại mật khẩu iHome";
-				mail.Body = $"Xin chào, mật khẩu của bạn đã được đặt lại thành công." +
-					$"Mật khẩu mới: {newPassword}" +
-					$"Vui lòng đổi mật khẩu sau lần đăng nhập đầu tiên.";
+				mail.Body =
+					"Xin chào, mật khẩu của bạn đã được đặt lại thành công.\n\n" +
+					$"Mật khẩu mới: {newPassword}\n\n" +
+					"Vui lòng đổi mật khẩu sau lần đăng nhập đầu tiên.";
 
 				var smtp = new SmtpClient("smtp.gmail.com", 587);
 				smtp.EnableSsl = true;
 				smtp.Credentials = new NetworkCredential(_email, _appPassword);
 				smtp.Send(mail);
 			}
-			catch
+			catch (Exception ex)
 			{
-				throw new();
+				throw new InvalidOperationException("Không thể gửi email đặt lại mật khẩu. Kiểm tra cấu hình SMTP.", ex);
 			}
 		}
 	}

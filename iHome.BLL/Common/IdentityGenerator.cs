@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace iHome.BLL.Common
 {
@@ -24,25 +23,48 @@ namespace iHome.BLL.Common
 			return new string(passwordChars);
 		}
 
-		// Generates a username based on the user's full name (Format: Last name + Middle name + First name).
+		// Ví dụ: Nguyễn Văn Bình → binhnv + 6 số ngẫu nhiên
 		public static string GenerateUsername(string fullName)
 		{
 			string[] nameParts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+			if (nameParts.Length == 0)
+			{
+				throw new ArgumentException("Họ tên không hợp lệ để tạo tài khoản.");
+			}
 
-			// First name
-			string firstName = nameParts.Last().ToLower();
-
-			// Initials of the remaining names
+			string firstName = RemoveDiacritics(nameParts.Last()).ToLowerInvariant();
 			string initials = string.Concat(
 				nameParts.Take(nameParts.Length - 1)
-						 .Select(p => char.ToLower(p[0]))
-			);
+					.Select(p =>
+					{
+						string cleaned = RemoveDiacritics(p);
+						return cleaned.Length == 0 ? string.Empty : char.ToLowerInvariant(cleaned[0]).ToString();
+					}));
+
+			if (string.IsNullOrWhiteSpace(firstName))
+			{
+				firstName = "user";
+			}
 
 			return $"{firstName}{initials}{GenerateRandomId()}";
 		}
 
-		// Generates a random integer ID of length 6.
 		public static int GenerateRandomId() => Random.Shared.Next(100000, 999999);
 
+		private static string RemoveDiacritics(string text)
+		{
+			string normalized = text.Normalize(NormalizationForm.FormD);
+			var sb = new StringBuilder();
+			foreach (char c in normalized)
+			{
+				UnicodeCategory category = CharUnicodeInfo.GetUnicodeCategory(c);
+				if (category == UnicodeCategory.NonSpacingMark) continue;
+				sb.Append(c);
+			}
+			return sb.ToString()
+				.Normalize(NormalizationForm.FormC)
+				.Replace('đ', 'd')
+				.Replace('Đ', 'D');
+		}
 	}
 }
