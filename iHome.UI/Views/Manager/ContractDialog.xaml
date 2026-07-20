@@ -1,0 +1,38 @@
+<Window x:Class="iHome.UI.Views.Manager.ContractDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Thông tin hợp đồng"
+        Width="560" Height="680" MinHeight="620"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{StaticResource ColorBackground}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock x:Name="TxtTitle" Text="Tạo hợp đồng" Style="{StaticResource ManagerDialogTitleStyle}"/>
+                <TextBlock Text="PHÒNG" Style="{StaticResource ManagerDialogLabelStyle}"/>
+                <ComboBox x:Name="CboRoom" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName" SelectionChanged="RoomChanged"/>
+                <TextBlock Text="NGƯỜI THUÊ CHÍNH" Style="{StaticResource ManagerDialogLabelStyle}"/>
+                <ComboBox x:Name="CboMainTenant" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"/>
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <StackPanel><TextBlock Text="NGÀY BẮT ĐẦU" Style="{StaticResource ManagerDialogLabelStyle}"/><DatePicker x:Name="DtpStart" Style="{StaticResource ManagerDatePickerStyle}"/></StackPanel>
+                    <StackPanel Grid.Column="2"><TextBlock Text="NGÀY KẾT THÚC" Style="{StaticResource ManagerDialogLabelStyle}"/><DatePicker x:Name="DtpEnd" Style="{StaticResource ManagerDatePickerStyle}"/></StackPanel>
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <StackPanel><TextBlock Text="TIỀN THUÊ / THÁNG" Style="{StaticResource ManagerDialogLabelStyle}"/><TextBox x:Name="TxtRent" Style="{StaticResource ManagerTextBoxStyle}"/></StackPanel>
+                    <StackPanel Grid.Column="2"><TextBlock Text="TIỀN CỌC" Style="{StaticResource ManagerDialogLabelStyle}"/><TextBox x:Name="TxtDeposit" Style="{StaticResource ManagerTextBoxStyle}"/></StackPanel>
+                </Grid>
+                <TextBlock Text="TRẠNG THÁI" Style="{StaticResource ManagerDialogLabelStyle}"/>
+                <ComboBox x:Name="CboStatus" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="Name"/>
+                <TextBlock Text="GHI CHÚ" Style="{StaticResource ManagerDialogLabelStyle}"/>
+                <TextBox x:Name="TxtNotes" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="300"/>
+            </StackPanel>
+        </ScrollViewer>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Hủy" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="Cancel_Click"/>
+            <Button Content="Lưu" Style="{StaticResource ManagerToolbarButtonStyle}" Click="Save_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

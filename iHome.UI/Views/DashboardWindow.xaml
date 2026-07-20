@@ -3,11 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:iHome.UI"
+        xmlns:shared="clr-namespace:iHome.UI.Views.Shared"
         mc:Ignorable="d"
-        Title="iHome - Quản lý nhà trọ sinh viên" 
-        Height="600" 
+        Title="iHome - Quản lý nhà trọ sinh viên"
+        Height="600"
         Width="1000"
+        MinHeight="560"
+        MinWidth="900"
+        Background="{StaticResource ColorBackground}"
         WindowStartupLocation="CenterScreen"
         WindowStyle="SingleBorderWindow">
 
@@ -17,104 +20,39 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Sidebar -->
-        <Border Grid.Column="0" Background="{StaticResource ColorSurface}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+        <shared:Sidebar x:Name="MainSidebar" Grid.Column="0"/>
 
-                <!-- Header Sidebar: Logo -->
-                <Border Grid.Row="0" Background="{StaticResource ColorSurface}" Padding="10">
-                    <Image Source="pack://application:,,,/Assets/Images/logo.png" 
-                               Height="100" Width="100" 
-                               HorizontalAlignment="Center"/>
-                </Border>
-
-                <!-- Menu Items -->
-                <ScrollViewer Grid.Row="2" Margin="0" 
-                              VerticalScrollBarVisibility="Auto" 
-                              HorizontalScrollBarVisibility="Disabled" 
-                              BorderThickness="0"
-                              Background="{StaticResource ColorSurface}">
-                    <ItemsControl x:Name="icSidebarMenu">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button Content="{Binding Title}"
-                                        Style="{StaticResource SidebarButtonStyle}"
-                                        Click="SidebarButton_Click"/>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-
-                <!-- Logout Button -->
-                <Button Grid.Row="3" 
-                        Content="Đăng xuất"
-                        Height="40" 
-                        VerticalAlignment="Bottom"
-                        HorizontalContentAlignment="Center"
-                        FontWeight="Bold" 
-                        FontSize="14"
-                        Foreground="{StaticResource ColorSurface}" 
-                        Background="{StaticResource ColorPrimary}"
-                        BorderThickness="0"
-                        Cursor="Hand"
-                        Click="btnLogout_Click">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" 
-                                            Value="{StaticResource ColorPrimaryHover}"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter Property="Background" 
-                                            Value="{StaticResource ColorPrimaryPressed}"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-            </Grid>
-        </Border>
-
-        <!-- Content Area -->
         <Grid Grid.Column="1" Background="{StaticResource ColorBackground}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Header Content -->
-            <Border Grid.Row="0" Background="{StaticResource ColorSurface}" BorderBrush="{StaticResource ColorBorder}" BorderThickness="0,0,0,1">
+            <Border Grid.Row="0" Style="{StaticResource DashboardHeaderStyle}">
                 <Grid Margin="20,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock x:Name="txtPageTitle" 
-                               Text="Bảng điều khiển" 
-                               FontSize="20" 
-                               FontWeight="Bold"
-                               Foreground="{StaticResource ColorTextPrimary}"
-                               VerticalAlignment="Center"/>
+                    <TextBlock x:Name="txtPageTitle"
+                               Text="Bảng điều khiển"
+                               Style="{StaticResource DashboardHeaderTitleStyle}"/>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock x:Name="txtWelcome" 
-                                   Text="Xin chào" 
-                                   FontSize="14"
-                                   Foreground="{StaticResource ColorTextSecondary}"
-                                   VerticalAlignment="Center"/>
+                        <ComboBox x:Name="CboProperty"
+                                  Style="{StaticResource DashboardPropertyComboBoxStyle}"
+                                  DisplayMemberPath="Name"
+                                  SelectedValuePath="Id"
+                                  Visibility="Collapsed"
+                                  SelectionChanged="CboProperty_SelectionChanged"/>
+                        <TextBlock x:Name="txtWelcome"
+                                   Text="Xin chào"
+                                   Style="{StaticResource DashboardWelcomeStyle}"/>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Main Content -->
             <Border Grid.Row="1" Margin="20">
                 <Frame x:Name="mainFrame" NavigationUIVisibility="Hidden"/>
             </Border>

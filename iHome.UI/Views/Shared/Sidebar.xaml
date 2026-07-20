@@ -1,0 +1,40 @@
+<UserControl x:Class="iHome.UI.Views.Shared.Sidebar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Border Style="{StaticResource SidebarContainerStyle}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Style="{StaticResource SidebarLogoHostStyle}">
+                <Image Source="pack://application:,,,/Assets/Images/logo.png"
+                       Style="{StaticResource AuthLogoStyle}"
+                       Margin="0"/>
+            </Border>
+
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          BorderThickness="0"
+                          Background="{StaticResource ColorSurface}">
+                <ItemsControl x:Name="MenuItemsControl">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Content="{Binding Title}"
+                                    Style="{StaticResource SidebarButtonStyle}"
+                                    Click="MenuButton_Click"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <Button Grid.Row="2"
+                    Content="Đăng xuất"
+                    Style="{StaticResource SidebarLogoutButtonStyle}"
+                    Click="LogoutButton_Click"/>
+        </Grid>
+    </Border>
+</UserControl>
