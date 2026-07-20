@@ -9,27 +9,11 @@ namespace iHome.BLL.Services.Manager
 	{
 		private readonly ManagerReadRepository _repository = new();
 
-		public List<ManagerPropertyOptionDto> GetProperties(int managerId)
+		public List<ManagerBuildingOptionDto> GetAssignedBuildings(int managerId)
 		{
 			ManagerServiceGuard.EnsureValidManagerId(managerId);
 
-			return _repository.GetProperties(managerId)
-				.Select(p => new ManagerPropertyOptionDto
-				{
-					Id = p.Id,
-					Name = p.Name,
-					Address = p.Address
-				})
-				.ToList();
-		}
-
-		public List<ManagerBuildingOptionDto> GetBuildings(
-			int managerId,
-			int? propertyId = null)
-		{
-			ManagerServiceGuard.EnsureValidManagerId(managerId);
-
-			return _repository.GetBuildings(managerId, propertyId)
+			return _repository.GetBuildings(managerId)
 				.Select(b => new ManagerBuildingOptionDto
 				{
 					Id = b.Id,

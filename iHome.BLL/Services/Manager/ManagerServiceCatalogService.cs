@@ -9,16 +9,16 @@ namespace iHome.BLL.Services.Manager
 	{
 		private readonly ManagerReadRepository _repository = new();
 
-		public List<ManagerServiceDto> GetServices(int managerId, int? propertyId = null)
+		public List<ManagerServiceDto> GetServices(int managerId, int? buildingId = null)
 		{
 			ManagerServiceGuard.EnsureValidManagerId(managerId);
 
-			return _repository.GetServices(managerId, propertyId)
+			return _repository.GetServices(managerId, buildingId)
 				.Select(s => new ManagerServiceDto
 				{
 					Id = s.Id,
-					BuildingId = s.BuildingId,
-					BuildingName = s.Building.Name,
+					PropertyId = s.PropertyId,
+					PropertyName = s.Property.Name,
 					ServiceName = s.ServiceName,
 					Unit = s.Unit,
 					UnitPrice = s.UnitPrice,

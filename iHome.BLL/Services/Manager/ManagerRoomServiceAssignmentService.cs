@@ -10,10 +10,10 @@ namespace iHome.BLL.Services.Manager
 		private readonly ManagerOperationsRepository _operationsRepository = new();
 		private readonly ManagerReadRepository _readRepository = new();
 
-		public List<ManagerRoomServiceAssignmentDto> GetAssignments(int managerId, int? propertyId = null)
+		public List<ManagerRoomServiceAssignmentDto> GetAssignments(int managerId, int? buildingId = null)
 		{
 			ManagerServiceGuard.EnsureValidManagerId(managerId);
-			return _operationsRepository.GetRoomServices(managerId, propertyId)
+			return _operationsRepository.GetRoomServices(managerId, buildingId)
 				.Select(item => new ManagerRoomServiceAssignmentDto
 				{
 					RoomId = item.RoomId,
@@ -28,23 +28,24 @@ namespace iHome.BLL.Services.Manager
 				.ToList();
 		}
 
-		public List<ManagerLookupOptionDto> GetRoomOptions(int managerId, int? propertyId = null) =>
-			_readRepository.GetRooms(managerId, propertyId)
+		public List<ManagerLookupOptionDto> GetRoomOptions(int managerId, int? buildingId = null) =>
+			_readRepository.GetRooms(managerId, buildingId)
 				.Select(room => new ManagerLookupOptionDto
 				{
 					Id = room.Id,
 					BuildingId = room.BuildingId,
+					PropertyId = room.Building.PropertyId,
 					DisplayName = $"{room.Building.Name} - Phòng {room.RoomNumber}"
 				})
 				.ToList();
 
-		public List<ManagerLookupOptionDto> GetServiceOptions(int managerId, int? propertyId = null) =>
-			_readRepository.GetServices(managerId, propertyId)
+		public List<ManagerLookupOptionDto> GetServiceOptions(int managerId, int? buildingId = null) =>
+			_readRepository.GetServices(managerId, buildingId)
 				.Where(service => service.IsActive)
 				.Select(service => new ManagerLookupOptionDto
 				{
 					Id = service.Id,
-					BuildingId = service.BuildingId,
+					PropertyId = service.PropertyId,
 					DisplayName = $"{service.ServiceName} - {service.UnitPrice:N0} đ/{service.Unit}"
 				})
 				.ToList();

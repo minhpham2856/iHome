@@ -12,31 +12,32 @@ namespace iHome.BLL.Services.Manager
 		private readonly ManagerOperationsRepository _operationsRepository = new();
 		private readonly ManagerReadRepository _readRepository = new();
 
-		public List<ManagerContractDto> GetContracts(int managerId, int? propertyId = null)
+		public List<ManagerContractDto> GetContracts(int managerId, int? buildingId = null)
 		{
 			ManagerServiceGuard.EnsureValidManagerId(managerId);
-			return _operationsRepository.GetContracts(managerId, propertyId)
+			return _operationsRepository.GetContracts(managerId, buildingId)
 				.Select(ToDto)
 				.ToList();
 		}
 
-		public List<ManagerLookupOptionDto> GetRoomOptions(int managerId, int? propertyId = null)
+		public List<ManagerLookupOptionDto> GetRoomOptions(int managerId, int? buildingId = null)
 		{
 			ManagerServiceGuard.EnsureValidManagerId(managerId);
-			return _readRepository.GetRooms(managerId, propertyId)
+			return _readRepository.GetRooms(managerId, buildingId)
 				.Where(room => !string.Equals(room.Status, "Maintenance", StringComparison.OrdinalIgnoreCase))
 				.Select(room => new ManagerLookupOptionDto
 				{
 					Id = room.Id,
 					BuildingId = room.BuildingId,
+					PropertyId = room.Building.PropertyId,
 					DisplayName = $"{room.Building.Name} - Phòng {room.RoomNumber}",
-					SuggestedAmount = room.BaseRent
+					SuggestedAmount = room.RoomType.BaseRent
 				})
 				.ToList();
 		}
 
-		public List<ManagerContractOptionDto> GetContractOptions(int managerId, int? propertyId = null) =>
-			GetContracts(managerId, propertyId)
+		public List<ManagerContractOptionDto> GetContractOptions(int managerId, int? buildingId = null) =>
+			GetContracts(managerId, buildingId)
 				.Where(contract => contract.Status == "Active")
 				.Select(contract => new ManagerContractOptionDto
 				{

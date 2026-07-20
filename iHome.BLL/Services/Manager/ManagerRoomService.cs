@@ -10,11 +10,11 @@ namespace iHome.BLL.Services.Manager
 		private const string ContractActive = "Active";
 		private readonly ManagerReadRepository _repository = new();
 
-		public List<ManagerRoomDto> GetRooms(int managerId, int? propertyId = null)
+		public List<ManagerRoomDto> GetRooms(int managerId, int? buildingId = null)
 		{
 			ManagerServiceGuard.EnsureValidManagerId(managerId);
 
-			return _repository.GetRooms(managerId, propertyId)
+			return _repository.GetRooms(managerId, buildingId)
 				.Select(r => new ManagerRoomDto
 				{
 					Id = r.Id,
@@ -23,8 +23,8 @@ namespace iHome.BLL.Services.Manager
 					RoomNumber = r.RoomNumber,
 					RoomTypeName = r.RoomType.TypeName,
 					Floor = r.Floor,
-					Area = r.Area,
-					BaseRent = r.BaseRent,
+					Area = r.RoomType.Area,
+					BaseRent = r.RoomType.BaseRent,
 					CurrentOccupancy = r.Contracts
 						.Where(c => c.Status == ContractActive)
 						.SelectMany(c => c.ContractTenants)

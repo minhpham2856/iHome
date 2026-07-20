@@ -17,6 +17,7 @@ namespace iHome.BLL.DTOs
 	{
 		public int Id { get; set; }
 		public int BuildingId { get; set; }
+		public int PropertyId { get; set; }
 		public string DisplayName { get; set; } = string.Empty;
 		public decimal SuggestedAmount { get; set; }
 	}

@@ -18,51 +18,51 @@ namespace iHome.BLL.Services.Manager
 		private const string InvoicePaid = "Paid";
 		private readonly ManagerReadRepository _repository = new();
 
-		public ManagerDashboardDto GetDashboard(int managerId, int? propertyId = null) =>
-			GetDashboard(managerId, propertyId, DateTime.Now);
+		public ManagerDashboardDto GetDashboard(int managerId, int? buildingId = null) =>
+			GetDashboard(managerId, buildingId, DateTime.Now);
 
 		public ManagerDashboardDto GetDashboard(
 			int managerId,
-			int? propertyId,
+			int? buildingId,
 			DateTime referenceDate)
 		{
 			ManagerServiceGuard.EnsureValidManagerId(managerId);
 
 			var today = DateOnly.FromDateTime(referenceDate);
 			var currentMonth = new DateOnly(referenceDate.Year, referenceDate.Month, 1);
-			var roomStatusCounts = _repository.GetRoomStatusCounts(managerId, propertyId);
-			var contractStatusCounts = _repository.GetContractStatusCounts(managerId, propertyId);
+			var roomStatusCounts = _repository.GetRoomStatusCounts(managerId, buildingId);
+			var contractStatusCounts = _repository.GetContractStatusCounts(managerId, buildingId);
 			var monthlyRevenue = _repository.GetMonthlyRevenue(
 				managerId,
 				currentMonth.AddMonths(-11),
 				currentMonth.AddMonths(1),
-				propertyId);
+				buildingId);
 			var data = new ManagerDashboardDto
 			{
-				AssignedBuildings = _repository.CountAssignedBuildings(managerId, propertyId),
+				AssignedBuildings = _repository.CountAssignedBuildings(managerId, buildingId),
 				TotalRooms = roomStatusCounts.Values.Sum(),
 				OccupiedRooms = GetCount(roomStatusCounts, RoomOccupied),
 				VacantRooms = GetCount(roomStatusCounts, RoomVacant) +
 					GetCount(roomStatusCounts, RoomEmpty),
 				MaintenanceRooms = GetCount(roomStatusCounts, RoomMaintenance),
-				ActiveTenants = _repository.CountActiveTenants(managerId, ContractActive, propertyId),
+				ActiveTenants = _repository.CountActiveTenants(managerId, ContractActive, buildingId),
 				ActiveContracts = GetCount(contractStatusCounts, ContractActive),
 				ExpiringContracts = _repository.CountExpiringContracts(
 					managerId,
 					ContractActive,
 					today,
 					today.AddMonths(1).AddDays(-1),
-					propertyId),
+					buildingId),
 				OverdueInvoices = _repository.CountOverdueInvoices(
 					managerId,
 					InvoicePaid,
 					today,
-					propertyId),
+					buildingId),
 				MonthlyRevenue = GetRevenue(monthlyRevenue, currentMonth),
 				OutstandingAmount = _repository.GetOutstandingAmount(
 					managerId,
 					InvoicePaid,
-					propertyId)
+					buildingId)
 			};
 
 			BuildRevenueSeries(data, monthlyRevenue, currentMonth);

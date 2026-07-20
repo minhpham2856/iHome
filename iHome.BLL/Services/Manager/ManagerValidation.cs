@@ -5,7 +5,7 @@ using System.Net.Mail;
 
 namespace iHome.BLL.Services.Manager
 {
-	// Validate dùng chung cho BLL và UI — Try* trả về message, không ném exception
+	// Validate dùng chung cho BLL và UI - Try* trả về message, không ném exception
 	public static class ManagerValidation
 	{
 		private static readonly string[] ContractStatuses = { "Active", "Expired", "Terminated" };

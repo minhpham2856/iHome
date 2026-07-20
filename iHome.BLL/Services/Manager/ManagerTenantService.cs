@@ -12,11 +12,11 @@ namespace iHome.BLL.Services.Manager
 		private readonly ManagerReadRepository _readRepository = new();
 		private readonly ManagerOperationsRepository _operationsRepository = new();
 
-		public List<ManagerTenantDto> GetTenants(int managerId, int? propertyId = null)
+		public List<ManagerTenantDto> GetTenants(int managerId, int? buildingId = null)
 		{
 			ManagerServiceGuard.EnsureValidManagerId(managerId);
 
-			var rows = _readRepository.GetContractTenants(managerId, propertyId)
+			var rows = _readRepository.GetContractTenants(managerId, buildingId)
 				.Select(ct => new ManagerTenantDto
 				{
 					TenantId = ct.TenantId,
@@ -42,7 +42,7 @@ namespace iHome.BLL.Services.Manager
 				})
 				.ToList();
 
-			if (!propertyId.HasValue)
+			if (!buildingId.HasValue)
 			{
 				var linkedIds = rows.Select(row => row.TenantId).ToHashSet();
 				rows.AddRange(_operationsRepository.GetUnassignedManagerTenants(managerId)
@@ -57,7 +57,7 @@ namespace iHome.BLL.Services.Manager
 						Email = tenant.Email,
 						PermanentAddress = tenant.PermanentAddress,
 						BuildingName = "Chưa gán",
-						RoomNumber = "—",
+						RoomNumber = "-",
 						TenantRoleDisplay = "Chưa gán",
 						ContractStatusDisplay = "Chưa có hợp đồng"
 					}));

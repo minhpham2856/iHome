@@ -9,6 +9,7 @@ namespace iHome.BLL.Services.Manager
 			"Occupied" => "Đang ở",
 			"Vacant" => "Còn trống",
 			"Empty" => "Còn trống",
+			"Deposited" => "Đã đặt cọc",
 			"Maintenance" => "Bảo trì",
 			_ => status
 		};
@@ -44,10 +45,10 @@ namespace iHome.BLL.Services.Manager
 
 		public static string FormatCalculationMethod(string method) => method switch
 		{
-			"Fixed" => "Cố định",
-			"Metered" => "Theo chỉ số",
+			"Metered" => "Chỉ số (theo phòng)",
 			"PerPerson" => "Theo người",
 			"PerRoom" => "Theo phòng",
+			"Fixed" => "Theo phòng",
 			_ => method
 		};
 	}

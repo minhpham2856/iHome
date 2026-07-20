@@ -14,10 +14,10 @@ namespace iHome.BLL.Services.Manager
 		private const string MeteredMethod = "Metered";
 		private readonly ManagerOperationsRepository _repository = new();
 
-		public List<ManagerInvoiceDto> GetInvoices(int managerId, int? propertyId = null)
+		public List<ManagerInvoiceDto> GetInvoices(int managerId, int? buildingId = null)
 		{
 			ManagerServiceGuard.EnsureValidManagerId(managerId);
-			return _repository.GetInvoices(managerId, propertyId)
+			return _repository.GetInvoices(managerId, buildingId)
 				.Select(invoice =>
 				{
 					decimal paid = invoice.Payments.Sum(payment => payment.Amount);

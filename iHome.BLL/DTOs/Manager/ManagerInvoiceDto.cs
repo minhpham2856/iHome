@@ -70,8 +70,9 @@ namespace iHome.BLL.DTOs
 		public string CalculationDisplay => CalculationMethod switch
 		{
 			"Rent" => "Tiền phòng",
-			"Metered" => "Theo chỉ số",
+			"Metered" => "Chỉ số (theo phòng)",
 			"PerPerson" => "Theo người",
+			"PerRoom" => "Theo phòng",
 			"Stored" => "Đã tính",
 			_ => "Theo tháng"
 		};
