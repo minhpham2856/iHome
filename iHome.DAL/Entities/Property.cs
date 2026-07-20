@@ -24,4 +24,10 @@ public partial class Property
     public virtual ICollection<Building> Buildings { get; set; } = new List<Building>();
 
     public virtual User Landlord { get; set; } = null!;
+
+    public virtual ICollection<RoomType> RoomTypes { get; set; } = new List<RoomType>();
+
+    public virtual ICollection<Service> Services { get; set; } = new List<Service>();
+
+    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

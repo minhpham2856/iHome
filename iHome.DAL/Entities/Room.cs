@@ -15,10 +15,6 @@ public partial class Room
 
     public int Floor { get; set; }
 
-    public decimal? Area { get; set; }
-
-    public decimal BaseRent { get; set; }
-
     public string Status { get; set; } = null!;
 
     public string? Notes { get; set; }

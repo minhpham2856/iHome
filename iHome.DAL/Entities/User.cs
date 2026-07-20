@@ -29,11 +29,15 @@ public partial class User
 
     public DateTime? UpdatedAt { get; set; }
 
+    public int? ManagedPropertyId { get; set; }
+
     public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
 
     public virtual ICollection<Building> Buildings { get; set; } = new List<Building>();
 
     public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
+
+    public virtual Property? ManagedProperty { get; set; }
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 

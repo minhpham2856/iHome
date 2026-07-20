@@ -23,9 +23,5 @@ public partial class Building
 
     public virtual Property Property { get; set; } = null!;
 
-    public virtual ICollection<RoomType> RoomTypes { get; set; } = new List<RoomType>();
-
     public virtual ICollection<Room> Rooms { get; set; } = new List<Room>();
-
-    public virtual ICollection<Service> Services { get; set; } = new List<Service>();
 }

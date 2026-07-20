@@ -7,7 +7,7 @@ public partial class Service
 {
     public int Id { get; set; }
 
-    public int BuildingId { get; set; }
+    public int PropertyId { get; set; }
 
     public string ServiceName { get; set; } = null!;
 
@@ -19,7 +19,7 @@ public partial class Service
 
     public bool IsActive { get; set; }
 
-    public virtual Building Building { get; set; } = null!;
+    public virtual Property Property { get; set; } = null!;
 
     public virtual ICollection<RoomService> RoomServices { get; set; } = new List<RoomService>();
 }

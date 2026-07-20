@@ -6,62 +6,66 @@ namespace iHome.DAL.Entities;
 
 public partial class IHomeDbContext : DbContext
 {
-    public IHomeDbContext()
-    {
-    }
+	public IHomeDbContext()
+	{
+	}
 
-    public IHomeDbContext(DbContextOptions<IHomeDbContext> options)
-        : base(options)
-    {
-    }
+	public IHomeDbContext(DbContextOptions<IHomeDbContext> options)
+		: base(options)
+	{
+	}
 
-    public virtual DbSet<AuditLog> AuditLogs { get; set; }
+	public virtual DbSet<AuditLog> AuditLogs { get; set; }
 
-    public virtual DbSet<Building> Buildings { get; set; }
+	public virtual DbSet<Building> Buildings { get; set; }
 
-    public virtual DbSet<Contract> Contracts { get; set; }
+	public virtual DbSet<Contract> Contracts { get; set; }
 
-    public virtual DbSet<ContractTenant> ContractTenants { get; set; }
+	public virtual DbSet<ContractTenant> ContractTenants { get; set; }
 
-    public virtual DbSet<Invoice> Invoices { get; set; }
+	public virtual DbSet<Invoice> Invoices { get; set; }
 
-    public virtual DbSet<InvoiceItem> InvoiceItems { get; set; }
+	public virtual DbSet<InvoiceItem> InvoiceItems { get; set; }
 
-    public virtual DbSet<Payment> Payments { get; set; }
+	public virtual DbSet<Payment> Payments { get; set; }
 
-    public virtual DbSet<Property> Properties { get; set; }
+	public virtual DbSet<Property> Properties { get; set; }
 
-    public virtual DbSet<Room> Rooms { get; set; }
+	public virtual DbSet<Room> Rooms { get; set; }
 
-    public virtual DbSet<RoomService> RoomServices { get; set; }
+	public virtual DbSet<RoomService> RoomServices { get; set; }
 
-    public virtual DbSet<RoomType> RoomTypes { get; set; }
+	public virtual DbSet<RoomType> RoomTypes { get; set; }
 
-    public virtual DbSet<Service> Services { get; set; }
+	public virtual DbSet<Service> Services { get; set; }
 
-    public virtual DbSet<ServiceReading> ServiceReadings { get; set; }
+	public virtual DbSet<ServiceReading> ServiceReadings { get; set; }
 
-    public virtual DbSet<Tenant> Tenants { get; set; }
+	public virtual DbSet<Tenant> Tenants { get; set; }
 
-    public virtual DbSet<User> Users { get; set; }
+	public virtual DbSet<User> Users { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (optionsBuilder.IsConfigured)
-        {
-            return;
-        }
+	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+	{
+		if (optionsBuilder.IsConfigured)
+		{
+			return;
+		}
 
-		string connectionString = Environment.GetEnvironmentVariable("IHOME_CONNECTION_STRING")
-			?? "Server=(local)\\MSSQLSERVER01;uid=sa;password=123;database=iHomeDB;Encrypt=False;TrustServerCertificate=True;";
-        optionsBuilder.UseSqlServer(connectionString);
-    }
+		// prefer IHOME_CONNECTION_STRING; fall back to CONNECTION_STRING then hardcoded local
+		string? connectionString =
+			Environment.GetEnvironmentVariable("IHOME_CONNECTION_STRING")
+			?? Environment.GetEnvironmentVariable("CONNECTION_STRING")
+			?? "Server=(local);uid=sa;password=123;database=iHomeDB;Encrypt=False;TrustServerCertificate=True;";
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
+		optionsBuilder.UseSqlServer(connectionString);
+	}
+
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
+	{
         modelBuilder.Entity<AuditLog>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__AuditLog__3214EC07EA75D0E3");
+            entity.HasKey(e => e.Id).HasName("PK__AuditLog__3214EC074732BA37");
 
             entity.HasIndex(e => e.Timestamp, "IX_AuditLogs_Timestamp");
 
@@ -80,7 +84,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Building>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Building__3214EC07077E5BEA");
+            entity.HasKey(e => e.Id).HasName("PK__Building__3214EC0763337048");
 
             entity.HasIndex(e => e.ManagerId, "IX_Buildings_ManagerId");
 
@@ -102,7 +106,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Contract>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Contract__3214EC07BDC69C71");
+            entity.HasKey(e => e.Id).HasName("PK__Contract__3214EC0725C8B93B");
 
             entity.HasIndex(e => e.RoomId, "IX_Contracts_RoomId");
 
@@ -148,7 +152,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Invoice>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Invoices__3214EC07A64D3CB4");
+            entity.HasKey(e => e.Id).HasName("PK__Invoices__3214EC07278534F6");
 
             entity.HasIndex(e => e.ContractId, "IX_Invoices_ContractId");
 
@@ -172,7 +176,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<InvoiceItem>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__InvoiceI__3214EC0746E50CFC");
+            entity.HasKey(e => e.Id).HasName("PK__InvoiceI__3214EC0702D07FAF");
 
             entity.Property(e => e.Amount).HasColumnType("decimal(15, 2)");
             entity.Property(e => e.Description).HasMaxLength(200);
@@ -187,7 +191,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Payments__3214EC071BFFADFD");
+            entity.HasKey(e => e.Id).HasName("PK__Payments__3214EC07386BD24D");
 
             entity.HasIndex(e => e.InvoiceId, "IX_Payments_InvoiceId");
 
@@ -211,7 +215,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Property>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Properti__3214EC07A0632B4C");
+            entity.HasKey(e => e.Id).HasName("PK__Properti__3214EC07ED0187EA");
 
             entity.HasIndex(e => e.LandlordId, "IX_Properties_LandlordId");
 
@@ -229,7 +233,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Room>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Rooms__3214EC07ACEE2830");
+            entity.HasKey(e => e.Id).HasName("PK__Rooms__3214EC076B1B83F8");
 
             entity.HasIndex(e => e.BuildingId, "IX_Rooms_BuildingId");
 
@@ -237,8 +241,6 @@ public partial class IHomeDbContext : DbContext
 
             entity.HasIndex(e => e.Status, "IX_Rooms_Status");
 
-            entity.Property(e => e.Area).HasColumnType("decimal(8, 2)");
-            entity.Property(e => e.BaseRent).HasColumnType("decimal(15, 2)");
             entity.Property(e => e.Notes).HasMaxLength(300);
             entity.Property(e => e.RoomNumber).HasMaxLength(20);
             entity.Property(e => e.Status)
@@ -277,24 +279,26 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<RoomType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RoomType__3214EC07F94F5D00");
+            entity.HasKey(e => e.Id).HasName("PK__RoomType__3214EC071F1A884C");
 
-            entity.HasIndex(e => e.BuildingId, "IX_RoomTypes_BuildingId");
+            entity.HasIndex(e => e.PropertyId, "IX_RoomTypes_PropertyId");
 
+            entity.Property(e => e.Area).HasColumnType("decimal(8, 2)");
+            entity.Property(e => e.BaseRent).HasColumnType("decimal(15, 2)");
             entity.Property(e => e.Description).HasMaxLength(300);
             entity.Property(e => e.TypeName).HasMaxLength(100);
 
-            entity.HasOne(d => d.Building).WithMany(p => p.RoomTypes)
-                .HasForeignKey(d => d.BuildingId)
+            entity.HasOne(d => d.Property).WithMany(p => p.RoomTypes)
+                .HasForeignKey(d => d.PropertyId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_RoomTypes_Buildings");
+                .HasConstraintName("FK_RoomTypes_Properties");
         });
 
         modelBuilder.Entity<Service>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Services__3214EC079990BFF3");
+            entity.HasKey(e => e.Id).HasName("PK__Services__3214EC0702CA7CC1");
 
-            entity.HasIndex(e => e.BuildingId, "IX_Services_BuildingId");
+            entity.HasIndex(e => e.PropertyId, "IX_Services_PropertyId");
 
             entity.Property(e => e.CalculationMethod)
                 .HasMaxLength(20)
@@ -304,15 +308,15 @@ public partial class IHomeDbContext : DbContext
             entity.Property(e => e.Unit).HasMaxLength(20);
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(15, 2)");
 
-            entity.HasOne(d => d.Building).WithMany(p => p.Services)
-                .HasForeignKey(d => d.BuildingId)
+            entity.HasOne(d => d.Property).WithMany(p => p.Services)
+                .HasForeignKey(d => d.PropertyId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Services_Buildings");
+                .HasConstraintName("FK_Services_Properties");
         });
 
         modelBuilder.Entity<ServiceReading>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ServiceR__3214EC07537F0AAF");
+            entity.HasKey(e => e.Id).HasName("PK__ServiceR__3214EC07FCEBEF5C");
 
             entity.HasIndex(e => new { e.RoomId, e.ServiceId }, "IX_ServiceReadings_RoomService");
 
@@ -327,7 +331,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Tenant>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Tenants__3214EC0764B5CC17");
+            entity.HasKey(e => e.Id).HasName("PK__Tenants__3214EC07A4918FB0");
 
             entity.HasIndex(e => e.IdCardNumber, "UQ__Tenants__713A7B91DE688DB7").IsUnique();
 
@@ -347,11 +351,15 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC07C20D73A2");
+            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC07165423AE");
+
+            entity.HasIndex(e => e.ManagedPropertyId, "IX_Users_ManagedPropertyId");
 
             entity.HasIndex(e => e.Role, "IX_Users_Role");
 
-            entity.HasIndex(e => e.Username, "UQ__Users__536C85E4DBDBAB74").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__Users__536C85E45D12BBD5").IsUnique();
+
+            entity.HasIndex(e => e.Email, "UQ__Users__A9D10534AE50468A").IsUnique();
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Email)
@@ -371,6 +379,10 @@ public partial class IHomeDbContext : DbContext
             entity.Property(e => e.Username)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+
+            entity.HasOne(d => d.ManagedProperty).WithMany(p => p.Users)
+                .HasForeignKey(d => d.ManagedPropertyId)
+                .HasConstraintName("FK_Users_ManagedProperty");
         });
 
         OnModelCreatingPartial(modelBuilder);
