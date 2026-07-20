@@ -97,7 +97,7 @@ namespace iHome.DAL.Repositories
 				t.IdCardNumber == idCardNumber &&
 				(!excludingTenantId.HasValue || t.Id != excludingTenantId.Value));
 
-		public List<Contract> GetContracts(int managerId, int? propertyId = null) =>
+		public List<Contract> GetContracts(int managerId, int? buildingId = null) =>
 			_context.Contracts
 				.AsNoTracking()
 				.Include(c => c.Room)
@@ -106,7 +106,7 @@ namespace iHome.DAL.Repositories
 					.ThenInclude(ct => ct.Tenant)
 				.Where(c =>
 					c.Room.Building.ManagerId == managerId &&
-					(!propertyId.HasValue || c.Room.Building.PropertyId == propertyId.Value))
+					(!buildingId.HasValue || c.Room.BuildingId == buildingId.Value))
 				.OrderByDescending(c => c.StartDate)
 				.ThenBy(c => c.Room.Building.Name)
 				.ThenBy(c => c.Room.RoomNumber)
@@ -257,7 +257,7 @@ namespace iHome.DAL.Repositories
 			_context.SaveChanges();
 		}
 
-		public List<Invoice> GetInvoices(int managerId, int? propertyId = null) =>
+		public List<Invoice> GetInvoices(int managerId, int? buildingId = null) =>
 			_context.Invoices
 				.AsNoTracking()
 				.Include(i => i.InvoiceItems)
@@ -270,7 +270,7 @@ namespace iHome.DAL.Repositories
 				.Include(i => i.Payments)
 				.Where(i =>
 					i.Contract.Room.Building.ManagerId == managerId &&
-					(!propertyId.HasValue || i.Contract.Room.Building.PropertyId == propertyId.Value))
+					(!buildingId.HasValue || i.Contract.Room.BuildingId == buildingId.Value))
 				.OrderByDescending(i => i.InvoiceDate)
 				.ToList();
 
@@ -352,7 +352,7 @@ namespace iHome.DAL.Repositories
 			transaction.Commit();
 		}
 
-		public List<RoomService> GetRoomServices(int managerId, int? propertyId = null) =>
+		public List<RoomService> GetRoomServices(int managerId, int? buildingId = null) =>
 			_context.RoomServices
 				.AsNoTracking()
 				.Include(rs => rs.Room)
@@ -360,7 +360,7 @@ namespace iHome.DAL.Repositories
 				.Include(rs => rs.Service)
 				.Where(rs =>
 					rs.Room.Building.ManagerId == managerId &&
-					(!propertyId.HasValue || rs.Room.Building.PropertyId == propertyId.Value))
+					(!buildingId.HasValue || rs.Room.BuildingId == buildingId.Value))
 				.OrderBy(rs => rs.Room.Building.Name)
 				.ThenBy(rs => rs.Room.RoomNumber)
 				.ThenBy(rs => rs.Service.ServiceName)
@@ -369,13 +369,21 @@ namespace iHome.DAL.Repositories
 		public void SetRoomService(int managerId, int roomId, int serviceId, bool isActive)
 		{
 			var room = GetManagedRoom(managerId, roomId);
-			var service = _context.Services.SingleOrDefault(s =>
-				s.Id == serviceId &&
-				s.Building.ManagerId == managerId)
-				?? throw new UnauthorizedAccessException("Dịch vụ không thuộc tòa nhà được phân công.");
-			if (room.BuildingId != service.BuildingId)
+			var service = _context.Services
+				.Include(s => s.Property)
+				.SingleOrDefault(s => s.Id == serviceId)
+				?? throw new UnauthorizedAccessException("Dịch vụ không tồn tại.");
+			if (room.Building.PropertyId != service.PropertyId)
 			{
-				throw new InvalidOperationException("Chỉ có thể gán dịch vụ cùng tòa nhà với phòng.");
+				throw new InvalidOperationException("Chỉ có thể gán dịch vụ cùng nhà trọ với phòng.");
+			}
+			bool managesProperty = _context.Buildings.Any(b =>
+				b.ManagerId == managerId &&
+				b.IsActive &&
+				b.PropertyId == service.PropertyId);
+			if (!managesProperty)
+			{
+				throw new UnauthorizedAccessException("Dịch vụ không thuộc nhà trọ được phân công.");
 			}
 			if (!service.IsActive && isActive)
 			{

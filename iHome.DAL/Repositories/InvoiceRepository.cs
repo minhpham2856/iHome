@@ -8,7 +8,7 @@ namespace iHome.DAL.Repositories
 	{
 		private readonly IHomeDbContext _context;
 
-		// build the context internally — no constructor injection by design
+		// build the context internally - no constructor injection by design
 		public InvoiceRepository()
 		{
 			_context = new IHomeDbContext();

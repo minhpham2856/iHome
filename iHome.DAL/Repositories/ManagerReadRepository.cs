@@ -27,17 +27,17 @@ namespace iHome.DAL.Repositories
 				.OrderBy(p => p.Name)
 				.ToList();
 
-		public List<Building> GetBuildings(int managerId, int? propertyId = null) =>
+		public List<Building> GetBuildings(int managerId, int? buildingId = null) =>
 			_context.Buildings
 				.AsNoTracking()
 				.Where(b =>
 					b.ManagerId == managerId &&
 					b.IsActive &&
-					(!propertyId.HasValue || b.PropertyId == propertyId.Value))
+					(!buildingId.HasValue || b.Id == buildingId.Value))
 				.OrderBy(b => b.Name)
 				.ToList();
 
-		public List<Room> GetRooms(int managerId, int? propertyId = null) =>
+		public List<Room> GetRooms(int managerId, int? buildingId = null) =>
 			_context.Rooms
 				.AsNoTracking()
 				.Include(r => r.Building)
@@ -47,13 +47,13 @@ namespace iHome.DAL.Repositories
 				.Where(r =>
 					r.Building.ManagerId == managerId &&
 					r.Building.IsActive &&
-					(!propertyId.HasValue || r.Building.PropertyId == propertyId.Value))
+					(!buildingId.HasValue || r.BuildingId == buildingId.Value))
 				.OrderBy(r => r.Building.Name)
 				.ThenBy(r => r.Floor)
 				.ThenBy(r => r.RoomNumber)
 				.ToList();
 
-		public List<ContractTenant> GetContractTenants(int managerId, int? propertyId = null) =>
+		public List<ContractTenant> GetContractTenants(int managerId, int? buildingId = null) =>
 			_context.ContractTenants
 				.AsNoTracking()
 				.Include(ct => ct.Tenant)
@@ -63,40 +63,49 @@ namespace iHome.DAL.Repositories
 				.Where(ct =>
 					ct.Contract.Room.Building.ManagerId == managerId &&
 					ct.Contract.Room.Building.IsActive &&
-					(!propertyId.HasValue ||
-					 ct.Contract.Room.Building.PropertyId == propertyId.Value))
+					(!buildingId.HasValue ||
+					 ct.Contract.Room.BuildingId == buildingId.Value))
 				.OrderBy(ct => ct.Contract.Room.Building.Name)
 				.ThenBy(ct => ct.Contract.Room.RoomNumber)
 				.ThenBy(ct => ct.Tenant.FullName)
 				.ToList();
 
-		public List<Service> GetServices(int managerId, int? propertyId = null) =>
-			_context.Services
+		public List<Service> GetServices(int managerId, int? buildingId = null)
+		{
+			var managedPropertyIds = _context.Buildings
 				.AsNoTracking()
-				.Include(s => s.Building)
+				.Where(b =>
+					b.ManagerId == managerId &&
+					b.IsActive &&
+					(!buildingId.HasValue || b.Id == buildingId.Value))
+				.Select(b => b.PropertyId)
+				.Distinct();
+
+			return _context.Services
+				.AsNoTracking()
+				.Include(s => s.Property)
 				.Where(s =>
-					s.Building.ManagerId == managerId &&
-					s.Building.IsActive &&
-					(!propertyId.HasValue || s.Building.PropertyId == propertyId.Value))
-				.OrderBy(s => s.Building.Name)
+					managedPropertyIds.Contains(s.PropertyId) &&
+					s.Property.IsActive)
+				.OrderBy(s => s.Property.Name)
 				.ThenBy(s => s.ServiceName)
 				.ToList();
-
-		public int CountAssignedBuildings(int managerId, int? propertyId = null) =>
+		}
+		public int CountAssignedBuildings(int managerId, int? buildingId = null) =>
 			_context.Buildings
 				.AsNoTracking()
 				.Count(b =>
 					b.ManagerId == managerId &&
 					b.IsActive &&
-					(!propertyId.HasValue || b.PropertyId == propertyId.Value));
+					(!buildingId.HasValue || b.Id == buildingId.Value));
 
-		public Dictionary<string, int> GetRoomStatusCounts(int managerId, int? propertyId = null) =>
+		public Dictionary<string, int> GetRoomStatusCounts(int managerId, int? buildingId = null) =>
 			_context.Rooms
 				.AsNoTracking()
 				.Where(r =>
 					r.Building.ManagerId == managerId &&
 					r.Building.IsActive &&
-					(!propertyId.HasValue || r.Building.PropertyId == propertyId.Value))
+					(!buildingId.HasValue || r.BuildingId == buildingId.Value))
 				.GroupBy(r => r.Status)
 				.Select(group => new
 				{
@@ -112,28 +121,28 @@ namespace iHome.DAL.Repositories
 		public int CountActiveTenants(
 			int managerId,
 			string activeContractStatus,
-			int? propertyId = null) =>
+			int? buildingId = null) =>
 			_context.ContractTenants
 				.AsNoTracking()
 				.Where(ct =>
 					ct.Contract.Room.Building.ManagerId == managerId &&
 					ct.Contract.Room.Building.IsActive &&
 					ct.Contract.Status == activeContractStatus &&
-					(!propertyId.HasValue ||
-					 ct.Contract.Room.Building.PropertyId == propertyId.Value))
+					(!buildingId.HasValue ||
+					 ct.Contract.Room.BuildingId == buildingId.Value))
 				.Select(ct => ct.TenantId)
 				.Distinct()
 				.Count();
 
 		public Dictionary<string, int> GetContractStatusCounts(
 			int managerId,
-			int? propertyId = null) =>
+			int? buildingId = null) =>
 			_context.Contracts
 				.AsNoTracking()
 				.Where(c =>
 					c.Room.Building.ManagerId == managerId &&
 					c.Room.Building.IsActive &&
-					(!propertyId.HasValue || c.Room.Building.PropertyId == propertyId.Value))
+					(!buildingId.HasValue || c.Room.BuildingId == buildingId.Value))
 				.GroupBy(c => c.Status)
 				.Select(group => new
 				{
@@ -151,7 +160,7 @@ namespace iHome.DAL.Repositories
 			string activeStatus,
 			DateOnly fromDate,
 			DateOnly toDate,
-			int? propertyId = null) =>
+			int? buildingId = null) =>
 			_context.Contracts
 				.AsNoTracking()
 				.Count(c =>
@@ -160,13 +169,13 @@ namespace iHome.DAL.Repositories
 					c.Status == activeStatus &&
 					c.EndDate >= fromDate &&
 					c.EndDate <= toDate &&
-					(!propertyId.HasValue || c.Room.Building.PropertyId == propertyId.Value));
+					(!buildingId.HasValue || c.Room.BuildingId == buildingId.Value));
 
 		public int CountOverdueInvoices(
 			int managerId,
 			string paidStatus,
 			DateOnly today,
-			int? propertyId = null) =>
+			int? buildingId = null) =>
 			_context.Invoices
 				.AsNoTracking()
 				.Count(i =>
@@ -174,13 +183,13 @@ namespace iHome.DAL.Repositories
 					i.Contract.Room.Building.IsActive &&
 					i.Status != paidStatus &&
 					i.DueDate < today &&
-					(!propertyId.HasValue ||
-					 i.Contract.Room.Building.PropertyId == propertyId.Value));
+					(!buildingId.HasValue ||
+					 i.Contract.Room.BuildingId == buildingId.Value));
 
 		public decimal GetOutstandingAmount(
 			int managerId,
 			string paidStatus,
-			int? propertyId = null)
+			int? buildingId = null)
 		{
 			var unpaidInvoices = _context.Invoices
 				.AsNoTracking()
@@ -188,8 +197,8 @@ namespace iHome.DAL.Repositories
 					i.Contract.Room.Building.ManagerId == managerId &&
 					i.Contract.Room.Building.IsActive &&
 					i.Status != paidStatus &&
-					(!propertyId.HasValue ||
-					 i.Contract.Room.Building.PropertyId == propertyId.Value));
+					(!buildingId.HasValue ||
+					 i.Contract.Room.BuildingId == buildingId.Value));
 
 			var invoiceTotal = unpaidInvoices
 				.Select(i => (decimal?)i.TotalAmount)
@@ -200,8 +209,8 @@ namespace iHome.DAL.Repositories
 					p.Invoice.Contract.Room.Building.ManagerId == managerId &&
 					p.Invoice.Contract.Room.Building.IsActive &&
 					p.Invoice.Status != paidStatus &&
-					(!propertyId.HasValue ||
-					 p.Invoice.Contract.Room.Building.PropertyId == propertyId.Value))
+					(!buildingId.HasValue ||
+					 p.Invoice.Contract.Room.BuildingId == buildingId.Value))
 				.Select(p => (decimal?)p.Amount)
 				.Sum() ?? 0m;
 
@@ -212,7 +221,7 @@ namespace iHome.DAL.Repositories
 			int managerId,
 			DateOnly startDate,
 			DateOnly endDate,
-			int? propertyId = null)
+			int? buildingId = null)
 		{
 			return _context.Payments
 				.AsNoTracking()
@@ -221,8 +230,8 @@ namespace iHome.DAL.Repositories
 					p.Invoice.Contract.Room.Building.IsActive &&
 					p.PaymentDate >= startDate &&
 					p.PaymentDate < endDate &&
-					(!propertyId.HasValue ||
-					 p.Invoice.Contract.Room.Building.PropertyId == propertyId.Value))
+					(!buildingId.HasValue ||
+					 p.Invoice.Contract.Room.BuildingId == buildingId.Value))
 				.GroupBy(p => new
 				{
 					p.PaymentDate.Year,
