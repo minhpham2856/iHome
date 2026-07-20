@@ -21,11 +21,14 @@ namespace iHome.DAL.Repositories
 		public int CountByStatus(string status) =>
 			_context.Contracts.Count(c => c.Status == status);
 
-		// contracts that match the given status and end within the next 'days' days
+		// Hợp đồng Active còn hiệu lực dưới 1 tháng (tính theo tháng lịch)
 		public List<Contract> ExpiringSoon(string status, int days)
 		{
-			var limit = DateOnly.FromDateTime(DateTime.Now.AddDays(days));
-			return _context.Contracts.Where(c => c.Status == status && c.EndDate <= limit).ToList();
+			DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+			DateOnly limit = today.AddMonths(1);
+			return _context.Contracts
+				.Where(c => c.Status == status && c.EndDate >= today && c.EndDate < limit)
+				.ToList();
 		}
 	}
 }

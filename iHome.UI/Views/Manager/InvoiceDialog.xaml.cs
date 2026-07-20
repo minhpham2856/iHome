@@ -92,42 +92,33 @@ namespace iHome.UI.Views.Manager
 			int version = ++_draftVersion;
 			int contractId = contract.Id;
 			DateTime invoiceDate = DtpInvoiceDate.SelectedDate.Value;
-			try
+			SetState("Đang tính tiền phòng và dịch vụ...", true);
+			BtnSave.IsEnabled = false;
+			var (ok, draft, error) = await ManagerUi.TryGetAsync(() => _service.GetInvoiceDraft(
+				_managerId,
+				contractId,
+				invoiceDate));
+			if (version != _draftVersion)
 			{
-				SetState("Đang tính tiền phòng và dịch vụ...", true);
-				BtnSave.IsEnabled = false;
-				var draft = await Task.Run(() => _service.GetInvoiceDraft(
-					_managerId,
-					contractId,
-					invoiceDate));
-				if (version != _draftVersion)
-				{
-					return;
-				}
+				return;
+			}
 
-				_items = draft.Items;
-				ItemsGrid.ItemsSource = _items;
-				DtpDueDate.SelectedDate = draft.DueDate.ToDateTime(TimeOnly.MinValue);
-				RecalculateTotal();
-				SetState(string.Empty, false);
-			}
-			catch (Exception ex)
+			if (!ok || draft == null)
 			{
-				if (version == _draftVersion)
-				{
-					_items.Clear();
-					ItemsGrid.ItemsSource = null;
-					TxtTotal.Text = "0 đ";
-					SetState(ex.Message, true);
-				}
+				_items.Clear();
+				ItemsGrid.ItemsSource = null;
+				TxtTotal.Text = "0 đ";
+				SetState(error ?? "Không thể tính hóa đơn.", true);
+				BtnSave.IsEnabled = false;
+				return;
 			}
-			finally
-			{
-				if (version == _draftVersion)
-				{
-					BtnSave.IsEnabled = _items.Count > 0;
-				}
-			}
+
+			_items = draft.Items;
+			ItemsGrid.ItemsSource = _items;
+			DtpDueDate.SelectedDate = draft.DueDate.ToDateTime(TimeOnly.MinValue);
+			RecalculateTotal();
+			SetState(string.Empty, false);
+			BtnSave.IsEnabled = _items.Count > 0;
 		}
 
 		private void CurrentReading_TextChanged(object sender, TextChangedEventArgs e)
@@ -181,7 +172,7 @@ namespace iHome.UI.Views.Manager
 				!DtpDueDate.SelectedDate.HasValue ||
 				_items.Count == 0)
 			{
-				ShowInvalid("Vui lòng nhập đầy đủ thông tin hóa đơn.");
+				ManagerUi.ShowValidation("Vui lòng nhập đầy đủ thông tin hóa đơn.");
 				return;
 			}
 
@@ -190,11 +181,11 @@ namespace iHome.UI.Views.Manager
 				(!item.CurrentReading.HasValue || item.CurrentReading.Value < (item.PreviousReading ?? 0)));
 			if (invalidReading != null)
 			{
-				ShowInvalid($"Chỉ số mới của {invalidReading.Description} phải lớn hơn hoặc bằng chỉ số cũ.");
+				ManagerUi.ShowValidation($"Chỉ số mới của {invalidReading.Description} phải lớn hơn hoặc bằng chỉ số cũ.");
 				return;
 			}
 
-			Result = new ManagerInvoiceFormDto
+			var form = new ManagerInvoiceFormDto
 			{
 				Id = _invoiceId,
 				ContractId = contract.Id,
@@ -204,6 +195,14 @@ namespace iHome.UI.Views.Manager
 				Status = status.Code,
 				Items = _items
 			};
+			string? error = ManagerValidation.GetInvoiceError(form, !_isEdit);
+			if (error != null)
+			{
+				ManagerUi.ShowValidation(error);
+				return;
+			}
+
+			Result = form;
 			DialogResult = true;
 		}
 
@@ -216,13 +215,6 @@ namespace iHome.UI.Views.Manager
 		private static bool TryParseDecimal(string value, out decimal result) =>
 			decimal.TryParse(value, NumberStyles.Number, CultureInfo.CurrentCulture, out result) ||
 			decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out result);
-
-		private static void ShowInvalid(string message) =>
-			MessageBox.Show(
-				message,
-				"Dữ liệu không hợp lệ",
-				MessageBoxButton.OK,
-				MessageBoxImage.Warning);
 
 		private void Cancel_Click(object sender, RoutedEventArgs e) => DialogResult = false;
 

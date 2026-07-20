@@ -513,6 +513,10 @@
         <Style.Triggers>
             <DataTrigger Binding="{Binding ContractStatus}" Value="Expired"><Setter Property="Background" Value="{StaticResource ColorDangerSoft}"/></DataTrigger>
             <DataTrigger Binding="{Binding ContractStatus}" Value="Terminated"><Setter Property="Background" Value="{StaticResource ColorSurfaceHover}"/></DataTrigger>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Sắp hết hạn"><Setter Property="Background" Value="{StaticResource ColorDangerSoft}"/></DataTrigger>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Đã hết hạn"><Setter Property="Background" Value="{StaticResource ColorDangerSoft}"/></DataTrigger>
+            <DataTrigger Binding="{Binding ContractStatusDisplay}" Value="Sắp hết hạn"><Setter Property="Background" Value="{StaticResource ColorDangerSoft}"/></DataTrigger>
+            <DataTrigger Binding="{Binding ContractStatusDisplay}" Value="Đã hết hạn"><Setter Property="Background" Value="{StaticResource ColorDangerSoft}"/></DataTrigger>
         </Style.Triggers>
     </Style>
 
@@ -521,6 +525,10 @@
         <Style.Triggers>
             <DataTrigger Binding="{Binding ContractStatus}" Value="Expired"><Setter Property="Foreground" Value="{StaticResource ColorDanger}"/></DataTrigger>
             <DataTrigger Binding="{Binding ContractStatus}" Value="Terminated"><Setter Property="Foreground" Value="{StaticResource ColorTextSecondary}"/></DataTrigger>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Sắp hết hạn"><Setter Property="Foreground" Value="{StaticResource ColorDanger}"/></DataTrigger>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Đã hết hạn"><Setter Property="Foreground" Value="{StaticResource ColorDanger}"/></DataTrigger>
+            <DataTrigger Binding="{Binding ContractStatusDisplay}" Value="Sắp hết hạn"><Setter Property="Foreground" Value="{StaticResource ColorDanger}"/></DataTrigger>
+            <DataTrigger Binding="{Binding ContractStatusDisplay}" Value="Đã hết hạn"><Setter Property="Foreground" Value="{StaticResource ColorDanger}"/></DataTrigger>
         </Style.Triggers>
     </Style>
 

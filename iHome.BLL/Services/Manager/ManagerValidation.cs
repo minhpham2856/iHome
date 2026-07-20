@@ -5,12 +5,13 @@ using System.Net.Mail;
 
 namespace iHome.BLL.Services.Manager
 {
-	internal static class ManagerValidation
+	// Validate dùng chung cho BLL và UI — Try* trả về message, không ném exception
+	public static class ManagerValidation
 	{
 		private static readonly string[] ContractStatuses = { "Active", "Expired", "Terminated" };
 		private static readonly string[] InvoiceStatuses = { "Unpaid", "Paid" };
 
-		public static void ValidateTenant(ManagerTenantFormDto input)
+		public static string? GetTenantError(ManagerTenantFormDto input)
 		{
 			input.FullName = input.FullName.Trim();
 			input.IdCardNumber = input.IdCardNumber.Trim();
@@ -22,21 +23,21 @@ namespace iHome.BLL.Services.Manager
 
 			if (input.FullName.Length < 2 || input.FullName.Length > 100)
 			{
-				throw new ArgumentException("Họ tên phải có từ 2 đến 100 ký tự.");
+				return "Họ tên phải có từ 2 đến 100 ký tự.";
 			}
 			if (input.DateOfBirth == default || input.DateOfBirth > DateOnly.FromDateTime(DateTime.Today))
 			{
-				throw new ArgumentException("Ngày sinh không hợp lệ.");
+				return "Ngày sinh không hợp lệ.";
 			}
 			if (input.IdCardNumber.Length < 9 || input.IdCardNumber.Length > 20 ||
 				!input.IdCardNumber.All(char.IsDigit))
 			{
-				throw new ArgumentException("CCCD phải gồm từ 9 đến 20 chữ số.");
+				return "CCCD phải gồm từ 9 đến 20 chữ số.";
 			}
 			string phoneDigits = input.PhoneNumber.TrimStart('+');
 			if (phoneDigits.Length < 9 || phoneDigits.Length > 15 || !phoneDigits.All(char.IsDigit))
 			{
-				throw new ArgumentException("Số điện thoại không hợp lệ.");
+				return "Số điện thoại không hợp lệ.";
 			}
 			if (input.Email != null)
 			{
@@ -46,57 +47,91 @@ namespace iHome.BLL.Services.Manager
 				}
 				catch (FormatException)
 				{
-					throw new ArgumentException("Email không hợp lệ.");
+					return "Email không hợp lệ.";
 				}
+			}
+			return null;
+		}
+
+		public static string? GetContractError(ManagerContractFormDto input, bool isCreate)
+		{
+			if (isCreate && input.RoomId <= 0)
+			{
+				return "Vui lòng chọn phòng.";
+			}
+			if (isCreate && input.MainTenantId <= 0)
+			{
+				return "Vui lòng chọn người thuê chính.";
+			}
+			if (input.StartDate == default || input.EndDate <= input.StartDate)
+			{
+				return "Ngày kết thúc phải sau ngày bắt đầu.";
+			}
+			if (input.EndDate < input.StartDate.AddMonths(1))
+			{
+				return "Thời hạn hợp đồng phải ít nhất 1 tháng.";
+			}
+			if (input.MonthlyRent <= 0 || input.DepositAmount < 0)
+			{
+				return "Tiền thuê phải lớn hơn 0 và tiền cọc không được âm.";
+			}
+			if (!ContractStatuses.Contains(input.Status))
+			{
+				return "Trạng thái hợp đồng không hợp lệ.";
+			}
+			input.Notes = string.IsNullOrWhiteSpace(input.Notes) ? null : input.Notes.Trim();
+			if (input.Notes?.Length > 300)
+			{
+				return "Ghi chú không được vượt quá 300 ký tự.";
+			}
+			return null;
+		}
+
+		public static string? GetInvoiceError(ManagerInvoiceFormDto input, bool isCreate)
+		{
+			if (isCreate && input.ContractId <= 0)
+			{
+				return "Vui lòng chọn hợp đồng.";
+			}
+			if (input.InvoiceDate == default || input.DueDate < DateOnly.FromDateTime(input.InvoiceDate))
+			{
+				return "Hạn thanh toán không được trước ngày lập hóa đơn.";
+			}
+			if (input.TotalAmount <= 0)
+			{
+				return "Tổng tiền hóa đơn phải lớn hơn 0.";
+			}
+			if (!InvoiceStatuses.Contains(input.Status))
+			{
+				return "Trạng thái hóa đơn không hợp lệ.";
+			}
+			return null;
+		}
+
+		public static void ValidateTenant(ManagerTenantFormDto input)
+		{
+			string? error = GetTenantError(input);
+			if (error != null)
+			{
+				throw new ArgumentException(error);
 			}
 		}
 
 		public static void ValidateContract(ManagerContractFormDto input, bool isCreate)
 		{
-			if (isCreate && input.RoomId <= 0)
+			string? error = GetContractError(input, isCreate);
+			if (error != null)
 			{
-				throw new ArgumentException("Vui lòng chọn phòng.");
-			}
-			if (isCreate && input.MainTenantId <= 0)
-			{
-				throw new ArgumentException("Vui lòng chọn người thuê chính.");
-			}
-			if (input.StartDate == default || input.EndDate <= input.StartDate)
-			{
-				throw new ArgumentException("Ngày kết thúc phải sau ngày bắt đầu.");
-			}
-			if (input.MonthlyRent <= 0 || input.DepositAmount < 0)
-			{
-				throw new ArgumentException("Tiền thuê phải lớn hơn 0 và tiền cọc không được âm.");
-			}
-			if (!ContractStatuses.Contains(input.Status))
-			{
-				throw new ArgumentException("Trạng thái hợp đồng không hợp lệ.");
-			}
-			input.Notes = string.IsNullOrWhiteSpace(input.Notes) ? null : input.Notes.Trim();
-			if (input.Notes?.Length > 300)
-			{
-				throw new ArgumentException("Ghi chú không được vượt quá 300 ký tự.");
+				throw new ArgumentException(error);
 			}
 		}
 
 		public static void ValidateInvoice(ManagerInvoiceFormDto input, bool isCreate)
 		{
-			if (isCreate && input.ContractId <= 0)
+			string? error = GetInvoiceError(input, isCreate);
+			if (error != null)
 			{
-				throw new ArgumentException("Vui lòng chọn hợp đồng.");
-			}
-			if (input.InvoiceDate == default || input.DueDate < DateOnly.FromDateTime(input.InvoiceDate))
-			{
-				throw new ArgumentException("Hạn thanh toán không được trước ngày lập hóa đơn.");
-			}
-			if (input.TotalAmount <= 0)
-			{
-				throw new ArgumentException("Tổng tiền hóa đơn phải lớn hơn 0.");
-			}
-			if (!InvoiceStatuses.Contains(input.Status))
-			{
-				throw new ArgumentException("Trạng thái hóa đơn không hợp lệ.");
+				throw new ArgumentException(error);
 			}
 		}
 	}

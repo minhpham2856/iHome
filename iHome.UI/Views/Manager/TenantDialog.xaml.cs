@@ -1,4 +1,5 @@
 using iHome.BLL.DTOs;
+using iHome.BLL.Services.Manager;
 using System;
 using System.Windows;
 
@@ -32,11 +33,11 @@ namespace iHome.UI.Views.Manager
 		{
 			if (!DtpDateOfBirth.SelectedDate.HasValue)
 			{
-				MessageBox.Show("Vui lòng chọn ngày sinh.", "Thiếu thông tin", MessageBoxButton.OK, MessageBoxImage.Warning);
+				ManagerUi.ShowValidation("Vui lòng chọn ngày sinh.");
 				return;
 			}
 
-			Result = new ManagerTenantFormDto
+			var form = new ManagerTenantFormDto
 			{
 				Id = _tenantId,
 				FullName = TxtFullName.Text,
@@ -46,6 +47,14 @@ namespace iHome.UI.Views.Manager
 				Email = TxtEmail.Text,
 				PermanentAddress = TxtAddress.Text
 			};
+			string? error = ManagerValidation.GetTenantError(form);
+			if (error != null)
+			{
+				ManagerUi.ShowValidation(error);
+				return;
+			}
+
+			Result = form;
 			DialogResult = true;
 		}
 

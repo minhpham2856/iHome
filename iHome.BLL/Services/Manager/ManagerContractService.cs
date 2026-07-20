@@ -129,7 +129,7 @@ namespace iHome.BLL.Services.Manager
 				MonthlyRent = contract.MonthlyRent,
 				DepositAmount = contract.DepositAmount,
 				Status = contract.Status,
-				StatusDisplay = ManagerDisplayFormatter.FormatContractStatus(contract.Status),
+				StatusDisplay = ManagerDisplayFormatter.FormatContractStatus(contract.Status, contract.EndDate),
 				MainTenantName = tenants.FirstOrDefault(ct => ct.IsMainTenant)?.Tenant.FullName ?? "Chưa có",
 				TenantNames = string.Join(", ", tenants.Select(ct => ct.Tenant.FullName)),
 				TenantCount = tenants.Count,

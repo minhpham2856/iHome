@@ -75,21 +75,21 @@ namespace iHome.UI.Views.Manager
 
 		private async void AssignService_Click(object sender, RoutedEventArgs e)
 		{
-			try
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			var (roomsOk, rooms, roomsError) = await ManagerUi.TryGetAsync(() => _assignmentService.GetRoomOptions(managerId, _propertyId));
+			var (servicesOk, services, servicesError) = await ManagerUi.TryGetAsync(() => _assignmentService.GetServiceOptions(managerId, _propertyId));
+			if (!roomsOk || !servicesOk || rooms == null || services == null)
 			{
-				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				var rooms = await Task.Run(() => _assignmentService.GetRoomOptions(managerId, _propertyId));
-				var services = await Task.Run(() => _assignmentService.GetServiceOptions(managerId, _propertyId));
-				var dialog = new RoomServiceDialog(rooms, services) { Owner = Window.GetWindow(this) };
-				if (dialog.ShowDialog() == true)
+				ManagerUi.ShowError(roomsError ?? servicesError ?? "Không thể tải dữ liệu.");
+				return;
+			}
+			var dialog = new RoomServiceDialog(rooms, services) { Owner = Window.GetWindow(this) };
+			if (dialog.ShowDialog() == true)
+			{
+				if (await ManagerUi.TryRunAsync(() => _assignmentService.SetAssignment(managerId, dialog.RoomId, dialog.ServiceId, true)))
 				{
-					await Task.Run(() => _assignmentService.SetAssignment(managerId, dialog.RoomId, dialog.ServiceId, true));
 					await LoadServicesAsync();
 				}
-			}
-			catch (Exception ex)
-			{
-				ShowOperationError(ex);
 			}
 		}
 
@@ -110,15 +110,10 @@ namespace iHome.UI.Views.Manager
 					MessageBoxImage.Information);
 				return;
 			}
-			try
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			if (await ManagerUi.TryRunAsync(() => _assignmentService.SetAssignment(managerId, selected.RoomId, selected.ServiceId, isActive)))
 			{
-				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				await Task.Run(() => _assignmentService.SetAssignment(managerId, selected.RoomId, selected.ServiceId, isActive));
 				await LoadServicesAsync();
-			}
-			catch (Exception ex)
-			{
-				ShowOperationError(ex);
 			}
 		}
 
@@ -176,8 +171,5 @@ namespace iHome.UI.Views.Manager
 			StateText.Text = message;
 			StatePanel.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
 		}
-
-		private static void ShowOperationError(Exception exception) =>
-			MessageBox.Show(exception.Message, "Không thể thực hiện", MessageBoxButton.OK, MessageBoxImage.Warning);
 	}
 }

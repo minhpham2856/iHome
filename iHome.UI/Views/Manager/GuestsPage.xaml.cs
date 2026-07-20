@@ -45,23 +45,20 @@ namespace iHome.UI.Views.Manager
 				return;
 			}
 
-			try
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			var (ok, tenantId) = await ManagerUi.TryRunAsync(() => _service.CreateTenant(managerId, dialog.Result));
+			if (!ok)
 			{
-				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				int tenantId = await Task.Run(() => _service.CreateTenant(managerId, dialog.Result));
-				await LoadTenantsAsync();
-				if (MessageBox.Show(
-					"Đã thêm khách. Bạn có muốn gán khách vào phòng qua hợp đồng ngay không?",
-					"Thêm khách thành công",
-					MessageBoxButton.YesNo,
-					MessageBoxImage.Question) == MessageBoxResult.Yes)
-				{
-					await ShowAssignDialogAsync(tenantId);
-				}
+				return;
 			}
-			catch (Exception ex)
+			await LoadTenantsAsync();
+			if (MessageBox.Show(
+				"Đã thêm khách. Bạn có muốn gán khách vào phòng qua hợp đồng ngay không?",
+				"Thêm khách thành công",
+				MessageBoxButton.YesNo,
+				MessageBoxImage.Question) == MessageBoxResult.Yes)
 			{
-				ShowOperationError(ex);
+				await ShowAssignDialogAsync(tenantId);
 			}
 		}
 
@@ -73,20 +70,20 @@ namespace iHome.UI.Views.Manager
 				return;
 			}
 
-			try
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			var (formOk, form, formError) = await ManagerUi.TryGetAsync(() => _service.GetTenant(managerId, selected.TenantId));
+			if (!formOk || form == null)
 			{
-				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				var form = await Task.Run(() => _service.GetTenant(managerId, selected.TenantId));
-				var dialog = new TenantDialog(form) { Owner = Window.GetWindow(this) };
-				if (dialog.ShowDialog() == true && dialog.Result != null)
+				ManagerUi.ShowError(formError ?? "Không thể tải thông tin khách.");
+				return;
+			}
+			var dialog = new TenantDialog(form) { Owner = Window.GetWindow(this) };
+			if (dialog.ShowDialog() == true && dialog.Result != null)
+			{
+				if (await ManagerUi.TryRunAsync(() => _service.UpdateTenant(managerId, dialog.Result)))
 				{
-					await Task.Run(() => _service.UpdateTenant(managerId, dialog.Result));
 					await LoadTenantsAsync();
 				}
-			}
-			catch (Exception ex)
-			{
-				ShowOperationError(ex);
 			}
 		}
 
@@ -106,15 +103,10 @@ namespace iHome.UI.Views.Manager
 				return;
 			}
 
-			try
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			if (await ManagerUi.TryRunAsync(() => _service.DeleteTenant(managerId, selected.TenantId)))
 			{
-				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				await Task.Run(() => _service.DeleteTenant(managerId, selected.TenantId));
 				await LoadTenantsAsync();
-			}
-			catch (Exception ex)
-			{
-				ShowOperationError(ex);
 			}
 		}
 
@@ -126,28 +118,28 @@ namespace iHome.UI.Views.Manager
 
 		private async Task ShowAssignDialogAsync(int? selectedTenantId)
 		{
-			try
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			var (contractsOk, contracts, contractsError) = await ManagerUi.TryGetAsync(() => _contractService.GetContractOptions(managerId, _propertyId));
+			var (tenantsOk, tenants, tenantsError) = await ManagerUi.TryGetAsync(() => _service.GetTenantOptions(managerId));
+			if (!contractsOk || !tenantsOk || contracts == null || tenants == null)
 			{
-				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				var contracts = await Task.Run(() => _contractService.GetContractOptions(managerId, _propertyId));
-				var tenants = await Task.Run(() => _service.GetTenantOptions(managerId));
-				var dialog = new AssignTenantDialog(contracts, tenants, selectedTenantId)
+				ManagerUi.ShowError(contractsError ?? tenantsError ?? "Không thể tải dữ liệu.");
+				return;
+			}
+			var dialog = new AssignTenantDialog(contracts, tenants, selectedTenantId)
+			{
+				Owner = Window.GetWindow(this)
+			};
+			if (dialog.ShowDialog() == true)
+			{
+				if (await ManagerUi.TryRunAsync(() => _contractService.AssignTenant(
+					managerId,
+					dialog.ContractId,
+					dialog.TenantId,
+					dialog.IsMainTenant)))
 				{
-					Owner = Window.GetWindow(this)
-				};
-				if (dialog.ShowDialog() == true)
-				{
-					await Task.Run(() => _contractService.AssignTenant(
-						managerId,
-						dialog.ContractId,
-						dialog.TenantId,
-						dialog.IsMainTenant));
 					await LoadTenantsAsync();
 				}
-			}
-			catch (Exception ex)
-			{
-				ShowOperationError(ex);
 			}
 		}
 
@@ -167,15 +159,10 @@ namespace iHome.UI.Views.Manager
 				return;
 			}
 
-			try
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			if (await ManagerUi.TryRunAsync(() => _contractService.RemoveTenant(managerId, selected.ContractId, selected.TenantId)))
 			{
-				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				await Task.Run(() => _contractService.RemoveTenant(managerId, selected.ContractId, selected.TenantId));
 				await LoadTenantsAsync();
-			}
-			catch (Exception ex)
-			{
-				ShowOperationError(ex);
 			}
 		}
 
@@ -225,14 +212,11 @@ namespace iHome.UI.Views.Manager
 
 		private void UpdateSummary()
 		{
-			var today = DateOnly.FromDateTime(DateTime.Now);
 			TxtTotalTenants.Text = _tenants.Select(tenant => tenant.TenantId).Distinct().Count().ToString();
 			TxtMainTenants.Text = _tenants.Count(tenant => tenant.IsMainTenant).ToString();
 			TxtRoommates.Text = _tenants.Count(tenant => !tenant.IsMainTenant).ToString();
 			TxtExpiringTenants.Text = _tenants.Count(tenant =>
-				string.Equals(tenant.ContractStatus, "Active", StringComparison.OrdinalIgnoreCase) &&
-				tenant.EndDate >= today &&
-				tenant.EndDate <= today.AddDays(30)).ToString();
+				tenant.ContractStatusDisplay == "Sắp hết hạn").ToString();
 		}
 
 		private void PopulateRoomFilter()
@@ -299,8 +283,5 @@ namespace iHome.UI.Views.Manager
 
 		private static void ShowSelectMessage(string message) =>
 			MessageBox.Show(message, "Chưa chọn dữ liệu", MessageBoxButton.OK, MessageBoxImage.Information);
-
-		private static void ShowOperationError(Exception exception) =>
-			MessageBox.Show(exception.Message, "Không thể thực hiện", MessageBoxButton.OK, MessageBoxImage.Warning);
 	}
 }

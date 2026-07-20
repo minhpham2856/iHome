@@ -41,7 +41,7 @@ namespace iHome.UI.Views.Manager
 			if (CboContract.SelectedItem is not ManagerContractOptionDto contract ||
 				CboTenant.SelectedItem is not ManagerLookupOptionDto tenant)
 			{
-				MessageBox.Show("Không có hợp đồng hoặc khách phù hợp.", "Không thể gán", MessageBoxButton.OK, MessageBoxImage.Warning);
+				ManagerUi.ShowValidation("Không có hợp đồng hoặc khách phù hợp.");
 				return;
 			}
 			ContractId = contract.Id;

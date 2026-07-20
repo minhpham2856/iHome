@@ -36,7 +36,9 @@ namespace iHome.BLL.Services.Manager
 					StartDate = ct.Contract.StartDate,
 					EndDate = ct.Contract.EndDate,
 					ContractStatus = ct.Contract.Status,
-					ContractStatusDisplay = ManagerDisplayFormatter.FormatContractStatus(ct.Contract.Status)
+					ContractStatusDisplay = ManagerDisplayFormatter.FormatContractStatus(
+						ct.Contract.Status,
+						ct.Contract.EndDate)
 				})
 				.ToList();
 

@@ -51,7 +51,7 @@ namespace iHome.BLL.Services.Manager
 					managerId,
 					ContractActive,
 					today,
-					today.AddDays(30),
+					today.AddMonths(1).AddDays(-1),
 					propertyId),
 				OverdueInvoices = _repository.CountOverdueInvoices(
 					managerId,

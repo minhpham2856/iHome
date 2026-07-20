@@ -44,12 +44,17 @@ namespace iHome.UI.Views.Manager
 			{
 				_isLoading = true; BtnRefresh.IsEnabled = false; SetState("Đang tải danh sách hóa đơn...", true);
 				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				_invoices = await Task.Run(() => _service.GetInvoices(managerId, _propertyId));
+				var (ok, invoices, error) = await ManagerUi.TryGetAsync(() => _service.GetInvoices(managerId, _propertyId));
+				if (!ok || invoices == null)
+				{
+					SetState(error ?? "Không thể tải danh sách hóa đơn.", true);
+					return;
+				}
+				_invoices = invoices;
 				_view = CollectionViewSource.GetDefaultView(_invoices); _view.Filter = FilterInvoice; InvoicesGrid.ItemsSource = _view;
 				CboStatus.ItemsSource = new[] { All }.Concat(_invoices.Select(item => item.StatusDisplay).Distinct()); CboStatus.SelectedIndex = 0;
 				UpdateSummary(); RefreshView();
 			}
-			catch (Exception ex) { SetState(ex.Message, true); }
 			finally { _isLoading = false; BtnRefresh.IsEnabled = true; }
 		}
 
@@ -58,7 +63,8 @@ namespace iHome.UI.Views.Manager
 			TxtTotal.Text = _invoices.Count.ToString();
 			TxtUnpaid.Text = _invoices.Count(item => item.Status != "Paid").ToString();
 			TxtOverdue.Text = _invoices.Count(item => item.StatusDisplay == "Quá hạn").ToString();
-			TxtOutstanding.Text = $"{_invoices.Sum(item => Math.Max(0, item.Balance)):N0} đ";
+			// Chỉ cộng số còn lại của hóa đơn chưa thanh toán
+			TxtOutstanding.Text = $"{_invoices.Where(item => item.Status != "Paid").Sum(item => Math.Max(0, item.Balance)):N0} đ";
 		}
 
 		private bool FilterInvoice(object item)
@@ -75,37 +81,57 @@ namespace iHome.UI.Views.Manager
 
 		private async void AddInvoice_Click(object sender, RoutedEventArgs e)
 		{
-			try
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			var (ok, contracts, error) = await ManagerUi.TryGetAsync(() => _contractService.GetContractOptions(managerId, _propertyId));
+			if (!ok || contracts == null)
 			{
-				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				var contracts = await Task.Run(() => _contractService.GetContractOptions(managerId, _propertyId));
-				var dialog = new InvoiceDialog(contracts, managerId, _service) { Owner = Window.GetWindow(this) };
-				if (dialog.ShowDialog() == true && dialog.Result != null) { await Task.Run(() => _service.CreateInvoice(managerId, dialog.Result)); await LoadAsync(); }
+				ManagerUi.ShowError(error ?? "Không thể tải danh sách hợp đồng.");
+				return;
 			}
-			catch (Exception ex) { ShowError(ex); }
+			var dialog = new InvoiceDialog(contracts, managerId, _service) { Owner = Window.GetWindow(this) };
+			if (dialog.ShowDialog() == true && dialog.Result != null)
+			{
+				if (await ManagerUi.TryRunAsync(() => { _service.CreateInvoice(managerId, dialog.Result); }))
+				{
+					await LoadAsync();
+				}
+			}
 		}
 
 		private async void EditInvoice_Click(object sender, RoutedEventArgs e)
 		{
 			if (InvoicesGrid.SelectedItem is not ManagerInvoiceDto selected) { ShowSelect(); return; }
-			try
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			var (formOk, form, formError) = await ManagerUi.TryGetAsync(() => _service.GetInvoice(managerId, selected.Id));
+			var (contractsOk, contracts, contractsError) = await ManagerUi.TryGetAsync(() => _contractService.GetContractOptions(managerId, _propertyId));
+			if (!formOk || !contractsOk || form == null || contracts == null)
 			{
-				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				var form = await Task.Run(() => _service.GetInvoice(managerId, selected.Id));
-				var contracts = await Task.Run(() => _contractService.GetContractOptions(managerId, _propertyId));
-				if (contracts.All(item => item.Id != form.ContractId)) contracts.Add(new ManagerContractOptionDto { Id = form.ContractId, DisplayName = $"HĐ #{form.ContractId}" });
-				var dialog = new InvoiceDialog(contracts, managerId, _service, form) { Owner = Window.GetWindow(this) };
-				if (dialog.ShowDialog() == true && dialog.Result != null) { await Task.Run(() => _service.UpdateInvoice(managerId, dialog.Result)); await LoadAsync(); }
+				ManagerUi.ShowError(formError ?? contractsError ?? "Không thể tải dữ liệu hóa đơn.");
+				return;
 			}
-			catch (Exception ex) { ShowError(ex); }
+			if (contracts.All(item => item.Id != form.ContractId))
+			{
+				contracts.Add(new ManagerContractOptionDto { Id = form.ContractId, DisplayName = $"HĐ #{form.ContractId}" });
+			}
+			var dialog = new InvoiceDialog(contracts, managerId, _service, form) { Owner = Window.GetWindow(this) };
+			if (dialog.ShowDialog() == true && dialog.Result != null)
+			{
+				if (await ManagerUi.TryRunAsync(() => _service.UpdateInvoice(managerId, dialog.Result)))
+				{
+					await LoadAsync();
+				}
+			}
 		}
 
 		private async void DeleteInvoice_Click(object sender, RoutedEventArgs e)
 		{
 			if (InvoicesGrid.SelectedItem is not ManagerInvoiceDto selected) { ShowSelect(); return; }
 			if (MessageBox.Show($"Xóa hóa đơn #{selected.Id}?", "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-			try { int managerId = ManagerPageAccess.GetManagerId(_currentUser); await Task.Run(() => _service.DeleteInvoice(managerId, selected.Id)); await LoadAsync(); }
-			catch (Exception ex) { ShowError(ex); }
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			if (await ManagerUi.TryRunAsync(() => _service.DeleteInvoice(managerId, selected.Id)))
+			{
+				await LoadAsync();
+			}
 		}
 
 		private async void ExportInvoice_Click(object sender, RoutedEventArgs e)
@@ -116,23 +142,28 @@ namespace iHome.UI.Views.Manager
 				return;
 			}
 
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			var (ok, invoice, error) = await ManagerUi.TryGetAsync(() => _service.GetInvoice(managerId, selected.Id));
+			if (!ok || invoice == null)
+			{
+				ManagerUi.ShowError(error ?? "Không thể tải hóa đơn.");
+				return;
+			}
+			var dialog = new SaveFileDialog
+			{
+				Title = "Xuất hóa đơn CSV",
+				Filter = "CSV UTF-8 (*.csv)|*.csv",
+				DefaultExt = ".csv",
+				AddExtension = true,
+				FileName = $"HoaDon_{selected.Id}_{selected.InvoiceDate:yyyy-MM}.csv"
+			};
+			if (dialog.ShowDialog(Window.GetWindow(this)) != true)
+			{
+				return;
+			}
+
 			try
 			{
-				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				var invoice = await Task.Run(() => _service.GetInvoice(managerId, selected.Id));
-				var dialog = new SaveFileDialog
-				{
-					Title = "Xuất hóa đơn CSV",
-					Filter = "CSV UTF-8 (*.csv)|*.csv",
-					DefaultExt = ".csv",
-					AddExtension = true,
-					FileName = $"HoaDon_{selected.Id}_{selected.InvoiceDate:yyyy-MM}.csv"
-				};
-				if (dialog.ShowDialog(Window.GetWindow(this)) != true)
-				{
-					return;
-				}
-
 				string csv = BuildInvoiceCsv(selected, invoice);
 				await File.WriteAllTextAsync(dialog.FileName, csv, new UTF8Encoding(true));
 				MessageBox.Show(
@@ -143,7 +174,7 @@ namespace iHome.UI.Views.Manager
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex);
+				ManagerUi.ShowError(ex.Message);
 			}
 		}
 
@@ -200,6 +231,5 @@ namespace iHome.UI.Views.Manager
 
 		private void SetState(string message, bool visible) { StateText.Text = message; StatePanel.Visibility = visible ? Visibility.Visible : Visibility.Collapsed; }
 		private static void ShowSelect() => MessageBox.Show("Vui lòng chọn hóa đơn.", "Chưa chọn dữ liệu", MessageBoxButton.OK, MessageBoxImage.Information);
-		private static void ShowError(Exception ex) => MessageBox.Show(ex.Message, "Không thể thực hiện", MessageBoxButton.OK, MessageBoxImage.Warning);
 	}
 }

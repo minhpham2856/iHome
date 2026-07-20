@@ -21,6 +21,7 @@ namespace iHome.BLL.Services.Manager
 				.Select(invoice =>
 				{
 					decimal paid = invoice.Payments.Sum(payment => payment.Amount);
+					bool isPaid = string.Equals(invoice.Status, "Paid", StringComparison.OrdinalIgnoreCase);
 					return new ManagerInvoiceDto
 					{
 						Id = invoice.Id,
@@ -33,7 +34,8 @@ namespace iHome.BLL.Services.Manager
 						DueDate = invoice.DueDate,
 						TotalAmount = invoice.TotalAmount,
 						PaidAmount = paid,
-						Balance = invoice.TotalAmount - paid,
+						// Hóa đơn đã thanh toán không còn số dư phải thu
+						Balance = isPaid ? 0m : Math.Max(0m, invoice.TotalAmount - paid),
 						Status = invoice.Status,
 						StatusDisplay = FormatStatus(invoice.Status, invoice.DueDate)
 					};

@@ -38,7 +38,7 @@ namespace iHome.UI.Views.Manager
 			if (CboRoom.SelectedItem is not ManagerLookupOptionDto room ||
 				CboService.SelectedItem is not ManagerLookupOptionDto service)
 			{
-				MessageBox.Show("Không có phòng hoặc dịch vụ phù hợp.", "Không thể gán", MessageBoxButton.OK, MessageBoxImage.Warning);
+				ManagerUi.ShowValidation("Không có phòng hoặc dịch vụ phù hợp.");
 				return;
 			}
 			RoomId = room.Id;

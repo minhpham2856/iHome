@@ -42,7 +42,13 @@ namespace iHome.UI.Views.Manager
 				BtnRefresh.IsEnabled = false;
 				SetState("Đang tải danh sách hợp đồng...", true);
 				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				_contracts = await Task.Run(() => _service.GetContracts(managerId, _propertyId));
+				var (ok, contracts, error) = await ManagerUi.TryGetAsync(() => _service.GetContracts(managerId, _propertyId));
+				if (!ok || contracts == null)
+				{
+					SetState(error ?? "Không thể tải danh sách hợp đồng.", true);
+					return;
+				}
+				_contracts = contracts;
 				_view = CollectionViewSource.GetDefaultView(_contracts);
 				_view.Filter = FilterContract;
 				ContractsGrid.ItemsSource = _view;
@@ -51,16 +57,14 @@ namespace iHome.UI.Views.Manager
 				UpdateSummary();
 				RefreshView();
 			}
-			catch (Exception ex) { SetState(ex.Message, true); }
 			finally { _isLoading = false; BtnRefresh.IsEnabled = true; }
 		}
 
 		private void UpdateSummary()
 		{
-			var today = DateOnly.FromDateTime(DateTime.Today);
 			TxtTotal.Text = _contracts.Count.ToString();
 			TxtActive.Text = _contracts.Count(item => item.Status == "Active").ToString();
-			TxtExpiring.Text = _contracts.Count(item => item.Status == "Active" && item.EndDate >= today && item.EndDate <= today.AddDays(30)).ToString();
+			TxtExpiring.Text = _contracts.Count(item => item.StatusDisplay == "Sắp hết hạn").ToString();
 			TxtTerminated.Text = _contracts.Count(item => item.Status == "Terminated").ToString();
 		}
 
@@ -78,56 +82,79 @@ namespace iHome.UI.Views.Manager
 
 		private async void AddContract_Click(object sender, RoutedEventArgs e)
 		{
-			try
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			var (roomsOk, rooms, roomsError) = await ManagerUi.TryGetAsync(() => _service.GetRoomOptions(managerId, _propertyId));
+			var (tenantsOk, tenants, tenantsError) = await ManagerUi.TryGetAsync(() => _tenantService.GetTenantOptions(managerId));
+			if (!roomsOk || !tenantsOk || rooms == null || tenants == null)
 			{
-				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				var rooms = await Task.Run(() => _service.GetRoomOptions(managerId, _propertyId));
-				var tenants = await Task.Run(() => _tenantService.GetTenantOptions(managerId));
-				var dialog = new ContractDialog(rooms, tenants) { Owner = Window.GetWindow(this) };
-				if (dialog.ShowDialog() == true && dialog.Result != null) { await Task.Run(() => _service.CreateContract(managerId, dialog.Result)); await LoadAsync(); }
+				ManagerUi.ShowError(roomsError ?? tenantsError ?? "Không thể tải dữ liệu.");
+				return;
 			}
-			catch (Exception ex) { ShowError(ex); }
+			var dialog = new ContractDialog(rooms, tenants) { Owner = Window.GetWindow(this) };
+			if (dialog.ShowDialog() == true && dialog.Result != null)
+			{
+				if (await ManagerUi.TryRunAsync(() => { _service.CreateContract(managerId, dialog.Result); }))
+				{
+					await LoadAsync();
+				}
+			}
 		}
 
 		private async void EditContract_Click(object sender, RoutedEventArgs e)
 		{
 			if (ContractsGrid.SelectedItem is not ManagerContractDto selected) { ShowSelect(); return; }
-			try
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			var (formOk, form, formError) = await ManagerUi.TryGetAsync(() => _service.GetContract(managerId, selected.Id));
+			var (roomsOk, rooms, roomsError) = await ManagerUi.TryGetAsync(() => _service.GetRoomOptions(managerId, _propertyId));
+			var (tenantsOk, tenants, tenantsError) = await ManagerUi.TryGetAsync(() => _tenantService.GetTenantOptions(managerId));
+			if (!formOk || !roomsOk || !tenantsOk || form == null || rooms == null || tenants == null)
 			{
-				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				var form = await Task.Run(() => _service.GetContract(managerId, selected.Id));
-				var rooms = await Task.Run(() => _service.GetRoomOptions(managerId, _propertyId));
-				var tenants = await Task.Run(() => _tenantService.GetTenantOptions(managerId));
-				var dialog = new ContractDialog(rooms, tenants, form) { Owner = Window.GetWindow(this) };
-				if (dialog.ShowDialog() == true && dialog.Result != null) { await Task.Run(() => _service.UpdateContract(managerId, dialog.Result)); await LoadAsync(); }
+				ManagerUi.ShowError(formError ?? roomsError ?? tenantsError ?? "Không thể tải dữ liệu.");
+				return;
 			}
-			catch (Exception ex) { ShowError(ex); }
+			var dialog = new ContractDialog(rooms, tenants, form) { Owner = Window.GetWindow(this) };
+			if (dialog.ShowDialog() == true && dialog.Result != null)
+			{
+				if (await ManagerUi.TryRunAsync(() => _service.UpdateContract(managerId, dialog.Result)))
+				{
+					await LoadAsync();
+				}
+			}
 		}
 
 		private async void AssignTenant_Click(object sender, RoutedEventArgs e)
 		{
 			int? selectedContractId = (ContractsGrid.SelectedItem as ManagerContractDto)?.Id;
-			try
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			var (contractsOk, contracts, contractsError) = await ManagerUi.TryGetAsync(() => _service.GetContractOptions(managerId, _propertyId));
+			var (tenantsOk, tenants, tenantsError) = await ManagerUi.TryGetAsync(() => _tenantService.GetTenantOptions(managerId));
+			if (!contractsOk || !tenantsOk || contracts == null || tenants == null)
 			{
-				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				var contracts = await Task.Run(() => _service.GetContractOptions(managerId, _propertyId));
-				var tenants = await Task.Run(() => _tenantService.GetTenantOptions(managerId));
-				var dialog = new AssignTenantDialog(contracts, tenants, null, selectedContractId) { Owner = Window.GetWindow(this) };
-				if (dialog.ShowDialog() == true) { await Task.Run(() => _service.AssignTenant(managerId, dialog.ContractId, dialog.TenantId, dialog.IsMainTenant)); await LoadAsync(); }
+				ManagerUi.ShowError(contractsError ?? tenantsError ?? "Không thể tải dữ liệu.");
+				return;
 			}
-			catch (Exception ex) { ShowError(ex); }
+			var dialog = new AssignTenantDialog(contracts, tenants, null, selectedContractId) { Owner = Window.GetWindow(this) };
+			if (dialog.ShowDialog() == true)
+			{
+				if (await ManagerUi.TryRunAsync(() => _service.AssignTenant(managerId, dialog.ContractId, dialog.TenantId, dialog.IsMainTenant)))
+				{
+					await LoadAsync();
+				}
+			}
 		}
 
 		private async void DeleteContract_Click(object sender, RoutedEventArgs e)
 		{
 			if (ContractsGrid.SelectedItem is not ManagerContractDto selected) { ShowSelect(); return; }
 			if (MessageBox.Show($"Xóa hợp đồng #{selected.Id}?", "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-			try { int managerId = ManagerPageAccess.GetManagerId(_currentUser); await Task.Run(() => _service.DeleteContract(managerId, selected.Id)); await LoadAsync(); }
-			catch (Exception ex) { ShowError(ex); }
+			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
+			if (await ManagerUi.TryRunAsync(() => _service.DeleteContract(managerId, selected.Id)))
+			{
+				await LoadAsync();
+			}
 		}
 
 		private void SetState(string message, bool visible) { StateText.Text = message; StatePanel.Visibility = visible ? Visibility.Visible : Visibility.Collapsed; }
 		private static void ShowSelect() => MessageBox.Show("Vui lòng chọn hợp đồng.", "Chưa chọn dữ liệu", MessageBoxButton.OK, MessageBoxImage.Information);
-		private static void ShowError(Exception ex) => MessageBox.Show(ex.Message, "Không thể thực hiện", MessageBoxButton.OK, MessageBoxImage.Warning);
 	}
 }

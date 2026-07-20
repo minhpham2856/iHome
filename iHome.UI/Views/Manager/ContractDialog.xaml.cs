@@ -1,4 +1,5 @@
 using iHome.BLL.DTOs;
+using iHome.BLL.Services.Manager;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -73,11 +74,11 @@ namespace iHome.UI.Views.Manager
 				!decimal.TryParse(TxtRent.Text, out decimal rent) ||
 				!decimal.TryParse(TxtDeposit.Text, out decimal deposit))
 			{
-				MessageBox.Show("Vui lòng nhập đầy đủ và đúng định dạng.", "Dữ liệu không hợp lệ", MessageBoxButton.OK, MessageBoxImage.Warning);
+				ManagerUi.ShowValidation("Vui lòng nhập đầy đủ và đúng định dạng.");
 				return;
 			}
 
-			Result = new ManagerContractFormDto
+			var form = new ManagerContractFormDto
 			{
 				Id = _contractId,
 				RoomId = room.Id,
@@ -89,6 +90,14 @@ namespace iHome.UI.Views.Manager
 				Status = status.Code,
 				Notes = TxtNotes.Text
 			};
+			string? error = ManagerValidation.GetContractError(form, !_isEditing);
+			if (error != null)
+			{
+				ManagerUi.ShowValidation(error);
+				return;
+			}
+
+			Result = form;
 			DialogResult = true;
 		}
 
