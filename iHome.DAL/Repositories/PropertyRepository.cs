@@ -1,9 +1,5 @@
 ﻿using iHome.DAL.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace iHome.DAL.Repositories
 {
@@ -11,10 +7,11 @@ namespace iHome.DAL.Repositories
 	{
 		private readonly IHomeDbContext _context;
 
-		// build the context internally — no constructor injection by design
-		public PropertyRepository()
+		public PropertyRepository() : this(new IHomeDbContext()) { }
+
+		public PropertyRepository(IHomeDbContext context)
 		{
-			_context = new IHomeDbContext();
+			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
 		public bool Add(Property newProperty)
@@ -23,18 +20,51 @@ namespace iHome.DAL.Repositories
 			return _context.SaveChanges() > 0;
 		}
 
-		public List<Property> GetAll(int id) => _context.Properties.ToList();
-		public Property GetById(int id) => _context.Properties.FirstOrDefault(b => b.Id == id);
+		public List<Property> GetByLandlord(int landlordId) =>
+			_context.Properties
+				.Include(p => p.Buildings)
+				.Where(p => p.LandlordId == landlordId)
+				.OrderByDescending(p => p.IsActive)
+				.ThenBy(p => p.Name)
+				.ToList();
+
+		public List<Property> GetAll(int landlordId) => GetByLandlord(landlordId);
+
+		public Property GetById(int id) => _context.Properties.Include(p => p.Buildings).FirstOrDefault(p => p.Id == id);
+
 		public void Update(Property newProperty)
 		{
-			var property = _context.Properties.FirstOrDefault(b => b.Id == newProperty.Id);
-			if (property != null)
+			var property = _context.Properties.FirstOrDefault(p => p.Id == newProperty.Id);
+			if (property == null) return;
+
+			property.Name = newProperty.Name;
+			property.Address = newProperty.Address;
+			property.Description = newProperty.Description;
+			property.IsActive = newProperty.IsActive;
+			property.UpdatedAt = DateTime.Now;
+
+			// sync every building of this property to the same active status
+			foreach (var building in _context.Buildings.Where(b => b.PropertyId == newProperty.Id))
 			{
-				property.Name = newProperty.Name;
-				property.Address = newProperty.Address;
-				_context.SaveChanges();
+				building.IsActive = newProperty.IsActive;
 			}
+
+			_context.SaveChanges();
 		}
 
+		public bool Disable(int id)
+		{
+			var property = _context.Properties.FirstOrDefault(p => p.Id == id);
+			if (property == null) return false;
+
+			property.IsActive = false;
+			property.UpdatedAt = DateTime.Now;
+			foreach (var building in _context.Buildings.Where(b => b.PropertyId == id))
+			{
+				building.IsActive = false;
+			}
+
+			return _context.SaveChanges() > 0;
+		}
 	}
 }
