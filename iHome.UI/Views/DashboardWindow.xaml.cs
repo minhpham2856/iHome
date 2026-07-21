@@ -1,4 +1,5 @@
 using iHome.BLL.DTOs;
+using iHome.BLL.Services;
 using iHome.BLL.Services.Manager;
 using iHome.DAL.Entities;
 using iHome.UI.Views.Shared;
@@ -6,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Navigation;
 
 namespace iHome.UI.Views
 {
@@ -13,12 +15,17 @@ namespace iHome.UI.Views
 	{
 		private readonly User _currentUser;
 		private readonly ManagerBuildingService _managerBuildingService = new();
-		private bool _isLoadingPropertyFilter;
+		private bool _isLoadingBuildingFilter;
 		private string _currentPageName = "DashboardPage";
 		private string _currentPageTitle = "Bảng điều khiển";
-		private int? _selectedPropertyId;
+		private int? _selectedBuildingId;
 
 		public string CurrentRole => _currentUser.Role;
+
+		public void RefreshWelcome()
+		{
+			txtWelcome.Text = $"Xin chào, {_currentUser.FullName}";
+		}
 
 		public DashboardWindow(User user)
 		{
@@ -27,9 +34,9 @@ namespace iHome.UI.Views
 			MainSidebar.MenuItemSelected += MainSidebar_MenuItemSelected;
 			MainSidebar.LogoutRequested += MainSidebar_LogoutRequested;
 
-			txtWelcome.Text = $"Xin chào, {_currentUser.FullName}";
+			RefreshWelcome();
 			LoadSidebar();
-			LoadPropertyFilter();
+			LoadBuildingFilter();
 			Forward(_currentPageName, _currentPageTitle);
 		}
 
@@ -47,6 +54,7 @@ namespace iHome.UI.Views
 				menuItems.Add(new SidebarMenuItem { Title = "Quản lý nhân viên", PageName = "ManagersPage" });
 				menuItems.Add(new SidebarMenuItem { Title = "Quản lý dịch vụ", PageName = "ServicesPage" });
 				menuItems.Add(new SidebarMenuItem { Title = "Báo cáo thống kê", PageName = "ReportsPage" });
+				menuItems.Add(new SidebarMenuItem { Title = "Nhật ký", PageName = "AuditLogsPage" });
 				menuItems.Add(new SidebarMenuItem { Title = "Cài đặt", PageName = "SettingsPage" });
 			}
 			else if (CurrentRole == "Manager")
@@ -68,36 +76,36 @@ namespace iHome.UI.Views
 			MainSidebar.SetItems(menuItems);
 		}
 
-		private void LoadPropertyFilter()
+		private void LoadBuildingFilter()
 		{
 			if (CurrentRole != "Manager")
 			{
-				CboProperty.Visibility = Visibility.Collapsed;
+				CbProperty.Visibility = Visibility.Collapsed;
 				return;
 			}
 
 			try
 			{
-				_isLoadingPropertyFilter = true;
-				var properties = _managerBuildingService.GetProperties(_currentUser.Id);
-				properties.Insert(0, new ManagerPropertyOptionDto
+				_isLoadingBuildingFilter = true;
+				var buildings = _managerBuildingService.GetAssignedBuildings(_currentUser.Id);
+				buildings.Insert(0, new ManagerBuildingOptionDto
 				{
 					Id = null,
-					Name = "Tất cả nhà trọ"
+					Name = "Tất cả tòa"
 				});
 
-				CboProperty.ItemsSource = properties;
-				CboProperty.SelectedIndex = 0;
-				CboProperty.Visibility = Visibility.Visible;
+				CbProperty.ItemsSource = buildings;
+				CbProperty.SelectedIndex = 0;
+				CbProperty.Visibility = Visibility.Visible;
 			}
 			catch (Exception)
 			{
-				CboProperty.Visibility = Visibility.Collapsed;
-				MessageBox.Show("Không thể tải danh sách nhà trọ được phân công.");
+				CbProperty.Visibility = Visibility.Collapsed;
+				MessageBox.Show("Không thể tải danh sách tòa nhà được phân công.");
 			}
 			finally
 			{
-				_isLoadingPropertyFilter = false;
+				_isLoadingBuildingFilter = false;
 			}
 		}
 
@@ -112,6 +120,10 @@ namespace iHome.UI.Views
 			{
 				mainFrame.Navigate(CreateManagerPage(pageName));
 			}
+			else if (CurrentRole == "Landlord")
+			{
+				mainFrame.Navigate(CreateLandlordPage(pageName));
+			}
 			else
 			{
 				string uriString = $"Views/{CurrentRole}/{pageName}.xaml";
@@ -122,35 +134,70 @@ namespace iHome.UI.Views
 			MainSidebar.SetSelected(pageName);
 		}
 
+		private Page CreateLandlordPage(string pageName) => pageName switch
+		{
+			"DashboardPage" => new Landlord.DashboardPage(_currentUser),
+			"BuildingsPage" => new Landlord.BuildingsPage(_currentUser),
+			"RoomsPage" => new Landlord.RoomsPage(_currentUser),
+			"GuestsPage" => new Landlord.GuestsPage(_currentUser),
+			"ContractsPage" => new Landlord.ContractsPage(),
+			"ManagersPage" => new Landlord.ManagersPage(_currentUser),
+			"ServicesPage" => new Landlord.ServicesPage(_currentUser),
+			"AuditLogsPage" => new Landlord.AuditLogsPage(_currentUser),
+			"ReportsPage" => new Landlord.ReportsPage(),
+			"SettingsPage" => new Landlord.SettingsPage(_currentUser),
+			_ => throw new InvalidOperationException("Trang chủ trọ không tồn tại.")
+		};
+
 		private Page CreateManagerPage(string pageName) => pageName switch
 		{
-			"DashboardPage" => new Manager.DashboardPage(_currentUser, _selectedPropertyId),
-			"RoomsPage" => new Manager.RoomsPage(_currentUser, _selectedPropertyId),
-			"GuestsPage" => new Manager.GuestsPage(_currentUser, _selectedPropertyId),
-			"ContractsPage" => new Manager.ContractsPage(_currentUser, _selectedPropertyId),
-			"InvoicesPage" => new Manager.InvoicesPage(_currentUser, _selectedPropertyId),
-			"ServicesPage" => new Manager.ServicesPage(_currentUser, _selectedPropertyId),
+			"DashboardPage" => new Manager.DashboardPage(_currentUser, _selectedBuildingId),
+			"RoomsPage" => new Manager.RoomsPage(_currentUser, _selectedBuildingId),
+			"GuestsPage" => new Manager.GuestsPage(_currentUser, _selectedBuildingId),
+			"ContractsPage" => new Manager.ContractsPage(_currentUser, _selectedBuildingId),
+			"InvoicesPage" => new Manager.InvoicesPage(_currentUser, _selectedBuildingId),
+			"ServicesPage" => new Manager.ServicesPage(_currentUser, _selectedBuildingId),
 			_ => throw new InvalidOperationException("Trang quản lý không tồn tại.")
 		};
 
 		private void MainSidebar_MenuItemSelected(SidebarMenuItem item) =>
 			Forward(item.PageName, item.Title);
 
-		private void CboProperty_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		private void CbProperty_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			if (_isLoadingPropertyFilter || CurrentRole != "Manager")
+			if (_isLoadingBuildingFilter || CurrentRole != "Manager")
 			{
 				return;
 			}
 
-			_selectedPropertyId = (CboProperty.SelectedItem as ManagerPropertyOptionDto)?.Id;
+			_selectedBuildingId = (CbProperty.SelectedItem as ManagerBuildingOptionDto)?.Id;
 			Forward(_currentPageName, _currentPageTitle);
 		}
 
 		private void MainSidebar_LogoutRequested()
 		{
+			try
+			{
+				new AuthService().Logout(_currentUser.Id);
+			}
+			catch
+			{
+			}
+
 			new LoginWindow().Show();
 			Close();
+		}
+
+		// stretch page content to fill the frame (window - sidebar - header)
+		private void mainFrame_Navigated(object sender, NavigationEventArgs e)
+		{
+			if (mainFrame.Content is FrameworkElement page)
+			{
+				page.HorizontalAlignment = HorizontalAlignment.Stretch;
+				page.VerticalAlignment = VerticalAlignment.Stretch;
+				page.Width = double.NaN;
+				page.Height = double.NaN;
+			}
 		}
 	}
 }
