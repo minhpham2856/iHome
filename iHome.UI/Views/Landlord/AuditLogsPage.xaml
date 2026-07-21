@@ -1,0 +1,63 @@
+<Page x:Class="iHome.UI.Views.Landlord.AuditLogsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Nhật ký">
+
+    <Grid Background="{StaticResource ColorBackground}" TextElement.FontFamily="Segoe UI">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Background="{StaticResource ColorSurface}"
+                BorderBrush="{StaticResource ColorBorder}" BorderThickness="0,0,0,1" Padding="12,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Vai trò" Style="{StaticResource FilterInlineLabelStyle}"/>
+                    <ComboBox x:Name="cbRole"
+                              Style="{StaticResource ManagerComboBoxStyle}"
+                              Width="180"
+                              DisplayMemberPath="Name"
+                              VerticalAlignment="Center"
+                              SelectionChanged="FilterChanged"/>
+                    <TextBlock Text="Người dùng" Style="{StaticResource FilterInlineLabelStyle}" Margin="12,0,6,0"/>
+                    <ComboBox x:Name="cbUser"
+                              Style="{StaticResource ManagerComboBoxStyle}"
+                              Width="220"
+                              DisplayMemberPath="Name"
+                              VerticalAlignment="Center"
+                              SelectionChanged="FilterChanged"/>
+                    <Button x:Name="btnRefresh" Content="↻" Style="{StaticResource ManagerSecondaryButtonStyle}"
+                            Click="btnRefresh_Click" ToolTip="Làm mới"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Style="{StaticResource ManagerCardStyle}" Margin="0" Padding="0" BorderThickness="0">
+            <Grid>
+                <DataGrid x:Name="dgLogs" Style="{StaticResource ManagerDataGridStyle}"
+                          CanUserSortColumns="True"
+                          HorizontalScrollBarVisibility="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="THỜI GIAN" Binding="{Binding TimestampDisplay}" SortMemberPath="Timestamp" Width="Auto" MinWidth="130"/>
+                        <DataGridTextColumn Header="NGƯỜI DÙNG" Binding="{Binding UserFullName}" SortMemberPath="UserFullName" Width="Auto" MinWidth="110"/>
+                        <DataGridTextColumn Header="TÀI KHOẢN" Binding="{Binding Username}" SortMemberPath="Username" Width="Auto" MinWidth="90"/>
+                        <DataGridTextColumn Header="VAI TRÒ" Binding="{Binding RoleDisplay}" SortMemberPath="RoleDisplay" Width="Auto" MinWidth="80"/>
+                        <DataGridTextColumn Header="HÀNH ĐỘNG" Binding="{Binding Action}" SortMemberPath="Action" Width="Auto" MinWidth="80"/>
+                        <DataGridTextColumn Header="BẢNG" Binding="{Binding TableName}" SortMemberPath="TableName" Width="Auto" MinWidth="80"/>
+                        <DataGridTextColumn Header="BẢN GHI" Binding="{Binding RecordId}" SortMemberPath="RecordId" Width="Auto" MinWidth="60"/>
+                        <DataGridTextColumn Header="GIÁ TRỊ CŨ" Binding="{Binding OldValue}" Width="*" MinWidth="100"/>
+                        <DataGridTextColumn Header="GIÁ TRỊ MỚI" Binding="{Binding NewValue}" Width="*" MinWidth="100"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Border x:Name="brdState" Background="{StaticResource ColorOverlay}" Visibility="Collapsed">
+                    <TextBlock Text="Không có nhật ký phù hợp bộ lọc." Style="{StaticResource ManagerStateTextStyle}"/>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

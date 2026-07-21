@@ -1,21 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using iHome.BLL.Services;
 
 namespace iHome.UI.Views
 {
-
 	public partial class LoginWindow : Window
 	{
 		public LoginWindow()
@@ -24,25 +12,10 @@ namespace iHome.UI.Views
 			txtUsername.Focus();
 		}
 
-		private void txtUsername_KeyDown(object sender, KeyEventArgs e)
-		{
-			if (e.Key == Key.Enter)
-			{
-				txtPassword.Focus();
-			}
-		}
-
-		private void txtPassword_KeyDown(object sender, KeyEventArgs e)
-		{
-			if (e.Key == Key.Enter)
-			{
-				btnLogin_Click(sender, e);
-			}
-		}
-
 		private void tbForgotPassword_MouseDown(object sender, MouseButtonEventArgs e)
 		{
-
+			new ForgotPasswordWindow().Show();
+			Close();
 		}
 
 		private void btnLogin_Click(object sender, RoutedEventArgs e)
@@ -69,6 +42,21 @@ namespace iHome.UI.Views
 			var forgotPasswordWindow = new ForgotPasswordWindow();
 			forgotPasswordWindow.Show();
 			this.Close();
+		}
+
+		// key down enter
+		private void txtUsername_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter) { e.Handled = true; txtPassword.Focus(); }
+		}
+
+		private void txtPassword_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter)
+			{
+				e.Handled = true;
+				btnLogin_Click(sender, e);
+			}
 		}
 	}
 }

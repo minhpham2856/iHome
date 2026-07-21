@@ -1,39 +1,22 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using iHome.BLL.Services;
 
 namespace iHome.UI.Views
 {
-
 	public partial class ForgotPasswordWindow : Window
 	{
 		public ForgotPasswordWindow()
 		{
 			InitializeComponent();
-		}
-
-		private void txtEmail_KeyDown(object sender, KeyEventArgs e)
-		{
-			if (e.Key == Key.Enter)
-			{
-				RecoverPassword();
-			}
+			txtEmail.Focus();
 		}
 
 		private void tbReturnToLogin_MouseDown(object sender, MouseButtonEventArgs e)
 		{
 			new LoginWindow().Show();
-			this.Close();
+			Close();
 		}
 
 		private void btnLogin_Click(object sender, RoutedEventArgs e)
@@ -43,14 +26,46 @@ namespace iHome.UI.Views
 
 		private void RecoverPassword()
 		{
-
+			try
+			{
+				new AuthService().ForgotPassword(txtEmail.Text);
+				MessageBox.Show(
+					"Mật khẩu tạm đã được gửi tới email của bạn.",
+					"Thành công",
+					MessageBoxButton.OK,
+					MessageBoxImage.Information);
+				new LoginWindow().Show();
+				Close();
+			}
+			catch (ArgumentException ex)
+			{
+				MessageBox.Show(ex.Message, "Không thể khôi phục", MessageBoxButton.OK, MessageBoxImage.Warning);
+			}
+			catch (Exception)
+			{
+				MessageBox.Show(
+					"Không thể gửi email khôi phục. Kiểm tra cấu hình SMTP hoặc thử lại.",
+					"Lỗi",
+					MessageBoxButton.OK,
+					MessageBoxImage.Warning);
+			}
 		}
 
 		private void Hyperlink_Click(object sender, RoutedEventArgs e)
 		{
 			var loginWindow = new LoginWindow();
 			loginWindow.Show();
-			this.Close();
+			Close();
+		}
+
+		// key down enter
+		private void txtEmail_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter)
+			{
+				e.Handled = true;
+				RecoverPassword();
+			}
 		}
 	}
 }
