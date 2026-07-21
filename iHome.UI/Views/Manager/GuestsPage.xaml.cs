@@ -46,20 +46,18 @@ namespace iHome.UI.Views.Manager
 			}
 
 			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-			var (ok, tenantId) = await ManagerUi.TryRunAsync(() => _service.CreateTenant(managerId, dialog.Result));
+			var (ok, _) = await ManagerUi.TryRunAsync(() => _service.CreateTenant(managerId, dialog.Result));
 			if (!ok)
 			{
 				return;
 			}
 			await LoadTenantsAsync();
-			if (MessageBox.Show(
-				"Đã thêm khách. Bạn có muốn gán khách vào phòng qua hợp đồng ngay không?",
+			// Không gán phòng ngay: khách chỉ vào phòng khi tạo hợp đồng (đủ người đứng tên)
+			MessageBox.Show(
+				"Đã thêm khách. Hãy tạo hợp đồng để gắn khách vào phòng.",
 				"Thêm khách thành công",
-				MessageBoxButton.YesNo,
-				MessageBoxImage.Question) == MessageBoxResult.Yes)
-			{
-				await ShowAssignDialogAsync(tenantId);
-			}
+				MessageBoxButton.OK,
+				MessageBoxImage.Information);
 		}
 
 		private async void EditTenant_Click(object sender, RoutedEventArgs e)

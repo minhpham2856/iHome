@@ -31,7 +31,9 @@ namespace iHome.BLL.Services.Manager
 					BuildingId = room.BuildingId,
 					PropertyId = room.Building.PropertyId,
 					DisplayName = $"{room.Building.Name} - Phòng {room.RoomNumber}",
-					SuggestedAmount = room.RoomType.BaseRent
+					SuggestedAmount = room.RoomType.BaseRent,
+					// Truyền sức chứa để dialog bắt buộc đủ khách đứng tên khi tạo HĐ
+					MaxOccupancy = room.RoomType.MaxOccupancy
 				})
 				.ToList();
 		}
@@ -69,7 +71,12 @@ namespace iHome.BLL.Services.Manager
 		{
 			ManagerServiceGuard.EnsureValidManagerId(managerId);
 			ManagerValidation.ValidateContract(input, true);
-			var contract = _operationsRepository.CreateContract(managerId, ToEntity(input, managerId), input.MainTenantId);
+			// Truyền CoTenantIds để DAL kiểm tra đủ MaxOccupancy và lưu ContractTenants
+			var contract = _operationsRepository.CreateContract(
+				managerId,
+				ToEntity(input, managerId),
+				input.MainTenantId,
+				input.CoTenantIds);
 			return contract.Id;
 		}
 
@@ -119,6 +126,11 @@ namespace iHome.BLL.Services.Manager
 		private static ManagerContractDto ToDto(Contract contract)
 		{
 			var tenants = contract.ContractTenants.OrderByDescending(ct => ct.IsMainTenant).ToList();
+			// Hiển thị đủ tên: người chính gắn nhãn, các khách còn lại liệt kê sau
+			string tenantNames = string.Join(", ", tenants.Select(ct =>
+				ct.IsMainTenant
+					? $"{ct.Tenant.FullName} (chính)"
+					: ct.Tenant.FullName));
 			return new ManagerContractDto
 			{
 				Id = contract.Id,
@@ -132,7 +144,7 @@ namespace iHome.BLL.Services.Manager
 				Status = contract.Status,
 				StatusDisplay = ManagerDisplayFormatter.FormatContractStatus(contract.Status, contract.EndDate),
 				MainTenantName = tenants.FirstOrDefault(ct => ct.IsMainTenant)?.Tenant.FullName ?? "Chưa có",
-				TenantNames = string.Join(", ", tenants.Select(ct => ct.Tenant.FullName)),
+				TenantNames = string.IsNullOrWhiteSpace(tenantNames) ? "Chưa có" : tenantNames,
 				TenantCount = tenants.Count,
 				Notes = contract.Notes
 			};

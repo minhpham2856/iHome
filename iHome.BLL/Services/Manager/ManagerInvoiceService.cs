@@ -8,6 +8,7 @@ using System.Linq;
 
 namespace iHome.BLL.Services.Manager
 {
+	// Service hóa đơn Manager: danh sách, draft tính tiền, tạo/sửa/xóa trong phạm vi tòa được phân công
 	public class ManagerInvoiceService
 	{
 		private const string ActiveContract = "Active";
@@ -34,7 +35,7 @@ namespace iHome.BLL.Services.Manager
 						DueDate = invoice.DueDate,
 						TotalAmount = invoice.TotalAmount,
 						PaidAmount = paid,
-						// Hóa đơn đã thanh toán không còn số dư phải thu
+						// Paid: Balance = 0 dù chưa có bản ghi Payment (tránh KPI Còn phải thu cộng nhầm)
 						Balance = isPaid ? 0m : Math.Max(0m, invoice.TotalAmount - paid),
 						Status = invoice.Status,
 						StatusDisplay = FormatStatus(invoice.Status, invoice.DueDate)
@@ -72,6 +73,7 @@ namespace iHome.BLL.Services.Manager
 			};
 		}
 
+		// Draft hóa đơn tháng: tiền phòng + dịch vụ gán phòng (Fixed/PerPerson/Metered)
 		public ManagerInvoiceFormDto GetInvoiceDraft(int managerId, int contractId, DateTime invoiceDate)
 		{
 			ManagerServiceGuard.EnsureValidManagerId(managerId);
@@ -103,6 +105,7 @@ namespace iHome.BLL.Services.Manager
 				}
 			};
 
+			// PerPerson: nhân số khách trên hợp đồng; Metered: chờ nhập chỉ số; còn lại: cố định theo phòng
 			int tenantCount = contract.ContractTenants.Select(item => item.TenantId).Distinct().Count();
 			foreach (var assignment in contract.Room.RoomServices
 				.Where(item => item.IsActive && item.Service.IsActive)
@@ -111,11 +114,12 @@ namespace iHome.BLL.Services.Manager
 				var service = assignment.Service;
 				if (string.Equals(service.CalculationMethod, MeteredMethod, StringComparison.OrdinalIgnoreCase))
 				{
-					decimal previousReading = assignment.ServiceReadings
+					// Lấy chỉ số gần nhất trước tháng lập HĐ; null = chưa có → UI cho nhập chỉ số cũ
+					decimal? storedPrevious = assignment.ServiceReadings
 						.Where(reading => reading.ReadingDate < monthStart)
 						.OrderByDescending(reading => reading.ReadingDate)
 						.Select(reading => (decimal?)reading.CurrentReading)
-						.FirstOrDefault() ?? 0m;
+						.FirstOrDefault();
 					items.Add(new ManagerInvoiceLineDto
 					{
 						ServiceId = service.Id,
@@ -123,7 +127,8 @@ namespace iHome.BLL.Services.Manager
 						Unit = service.Unit,
 						CalculationMethod = service.CalculationMethod,
 						UnitPrice = service.UnitPrice,
-						PreviousReading = previousReading,
+						PreviousReading = storedPrevious ?? 0m,
+						CanEditPreviousReading = !storedPrevious.HasValue,
 						Quantity = 0,
 						Amount = 0
 					});
@@ -163,6 +168,7 @@ namespace iHome.BLL.Services.Manager
 		public int CreateInvoice(int managerId, ManagerInvoiceFormDto input)
 		{
 			ManagerServiceGuard.EnsureValidManagerId(managerId);
+			// Tính lại từ draft để không tin số tiền client gửi lên
 			var calculated = GetInvoiceDraft(managerId, input.ContractId, input.InvoiceDate);
 			var readings = new List<ServiceReading>();
 			DateTime readingDate = new DateTime(input.InvoiceDate.Year, input.InvoiceDate.Month, 1)
@@ -176,13 +182,23 @@ namespace iHome.BLL.Services.Manager
 				{
 					throw new ArgumentException($"Vui lòng nhập chỉ số mới cho dịch vụ {item.Description}.");
 				}
-				if (submitted.CurrentReading.Value < item.PreviousReading!.Value)
+
+				// Khách/phòng mới: ưu tiên chỉ số cũ user nhập; phòng đã có lịch sử: dùng DB
+				decimal previousReading = item.CanEditPreviousReading
+					? submitted.PreviousReading ?? item.PreviousReading ?? 0m
+					: item.PreviousReading ?? 0m;
+				if (item.CanEditPreviousReading && !submitted.PreviousReading.HasValue)
+				{
+					throw new ArgumentException($"Vui lòng nhập chỉ số cũ cho dịch vụ {item.Description}.");
+				}
+				if (submitted.CurrentReading.Value < previousReading)
 				{
 					throw new ArgumentException($"Chỉ số mới của {item.Description} không được nhỏ hơn chỉ số cũ.");
 				}
 
+				item.PreviousReading = previousReading;
 				item.CurrentReading = submitted.CurrentReading.Value;
-				item.Quantity = submitted.CurrentReading.Value - item.PreviousReading!.Value;
+				item.Quantity = submitted.CurrentReading.Value - previousReading;
 				item.Amount = item.Quantity * item.UnitPrice;
 				item.Description = string.Format(
 					CultureInfo.CurrentCulture,
@@ -191,6 +207,7 @@ namespace iHome.BLL.Services.Manager
 					item.PreviousReading,
 					item.CurrentReading,
 					item.Unit);
+				// Lưu chỉ số mới để tháng sau lấy làm chỉ số cũ
 				readings.Add(new ServiceReading
 				{
 					RoomId = calculated.RoomId,

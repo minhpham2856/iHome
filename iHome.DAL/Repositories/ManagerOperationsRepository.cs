@@ -112,7 +112,13 @@ namespace iHome.DAL.Repositories
 				.ThenBy(c => c.Room.RoomNumber)
 				.ToList();
 
-		public Contract CreateContract(int managerId, Contract contract, int mainTenantId)
+		// Tạo hợp đồng: bắt buộc đủ số khách đứng tên = MaxOccupancy phòng (vd. phòng đôi = 2)
+		// Tiền thuê/cọc vẫn 1 mức chung cho cả hợp đồng, không chia theo từng khách
+		public Contract CreateContract(
+			int managerId,
+			Contract contract,
+			int mainTenantId,
+			IReadOnlyCollection<int>? coTenantIds = null)
 		{
 			var room = GetManagedRoom(managerId, contract.RoomId);
 			EnsureTenantAccess(managerId, mainTenantId);
@@ -120,32 +126,55 @@ namespace iHome.DAL.Repositories
 			{
 				throw new InvalidOperationException("Không thể tạo hợp đồng cho phòng đang bảo trì.");
 			}
+
+			// Danh sách đứng tên: người thuê chính đứng đầu, sau đó khách còn lại (không trùng)
+			var tenantIds = new List<int> { mainTenantId };
+			if (coTenantIds != null)
+			{
+				tenantIds.AddRange(coTenantIds.Where(id => id > 0 && id != mainTenantId).Distinct());
+			}
+
+			int maxOccupancy = room.RoomType.MaxOccupancy;
+			if (maxOccupancy < 1)
+			{
+				throw new InvalidOperationException("Phòng không còn sức chứa cho khách thuê.");
+			}
+			if (tenantIds.Count != maxOccupancy)
+			{
+				throw new InvalidOperationException(
+					$"Hợp đồng phải có đủ {maxOccupancy} khách đứng tên theo sức chứa phòng.");
+			}
+
 			if (contract.Status == ActiveContract)
 			{
 				EnsureContractRoomAvailable(contract.RoomId, contract.StartDate, contract.EndDate, null);
-				EnsureTenantAvailable(mainTenantId, contract.StartDate, contract.EndDate, null);
-			}
-			if (room.RoomType.MaxOccupancy < 1)
-			{
-				throw new InvalidOperationException("Phòng không còn sức chứa cho khách thuê.");
+				foreach (int tenantId in tenantIds)
+				{
+					EnsureTenantAccess(managerId, tenantId);
+					EnsureTenantAvailable(tenantId, contract.StartDate, contract.EndDate, null);
+				}
 			}
 
 			using var transaction = _context.Database.BeginTransaction();
 			_context.Contracts.Add(contract);
 			_context.SaveChanges();
-			_context.ContractTenants.Add(new ContractTenant
+			// index 0 = người thuê chính (IsMainTenant = true)
+			for (int index = 0; index < tenantIds.Count; index++)
 			{
-				ContractId = contract.Id,
-				TenantId = mainTenantId,
-				IsMainTenant = true
-			});
+				_context.ContractTenants.Add(new ContractTenant
+				{
+					ContractId = contract.Id,
+					TenantId = tenantIds[index],
+					IsMainTenant = index == 0
+				});
+			}
 			var today = DateOnly.FromDateTime(DateTime.Today);
 			if (contract.Status == ActiveContract && contract.StartDate <= today && contract.EndDate >= today)
 			{
 				room.Status = OccupiedRoom;
 			}
 			AddAudit(managerId, "Create", "Contracts", contract.Id, null,
-				$"Room={contract.RoomId};Tenant={mainTenantId}");
+				$"Room={contract.RoomId};Tenants={string.Join(',', tenantIds)}");
 			_context.SaveChanges();
 			transaction.Commit();
 			return contract;

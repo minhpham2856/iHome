@@ -10,6 +10,8 @@ using System.Windows.Controls;
 
 namespace iHome.UI.Views.Manager
 {
+	// Dialog lập/sửa hóa đơn: draft tự tính tiền phòng + dịch vụ;
+	// dịch vụ Metered cho nhập chỉ số; chỉ số cũ editable nếu DB chưa có lịch sử
 	public partial class InvoiceDialog : Window
 	{
 		private readonly int _managerId;
@@ -19,6 +21,7 @@ namespace iHome.UI.Views.Manager
 		private List<ManagerInvoiceLineDto> _items = new();
 		private bool _suppressBillingChanges;
 		private bool _isRecalculating;
+		// Chống race khi user đổi hợp đồng/tháng liên tục trong lúc đang load draft
 		private int _draftVersion;
 
 		public ManagerInvoiceFormDto? Result { get; private set; }
@@ -69,6 +72,7 @@ namespace iHome.UI.Views.Manager
 			_suppressBillingChanges = false;
 		}
 
+		// Đổi hợp đồng hoặc tháng lập → tính lại draft (chỉ khi tạo mới)
 		private async void BillingInputChanged(object sender, EventArgs e)
 		{
 			if (_suppressBillingChanges || _isEdit)
@@ -98,6 +102,7 @@ namespace iHome.UI.Views.Manager
 				_managerId,
 				contractId,
 				invoiceDate));
+			// Bỏ kết quả cũ nếu user đã đổi lựa chọn trong lúc chờ
 			if (version != _draftVersion)
 			{
 				return;
@@ -121,6 +126,33 @@ namespace iHome.UI.Views.Manager
 			BtnSave.IsEnabled = _items.Count > 0;
 		}
 
+		// Chỉ số cũ chỉ sửa được khi CanEditPreviousReading (chưa có trong DB)
+		private void PreviousReading_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			if (_isRecalculating || sender is not TextBox textBox ||
+				textBox.DataContext is not ManagerInvoiceLineDto item ||
+				!item.RequiresReading ||
+				!item.CanEditPreviousReading)
+			{
+				return;
+			}
+
+			if (string.IsNullOrWhiteSpace(textBox.Text))
+			{
+				item.PreviousReading = null;
+			}
+			else if (TryParseDecimal(textBox.Text, out decimal previousReading))
+			{
+				item.PreviousReading = previousReading;
+			}
+			else
+			{
+				item.PreviousReading = null;
+			}
+			RecalculateMeteredLine(item);
+			RecalculateTotal();
+		}
+
 		private void CurrentReading_TextChanged(object sender, TextChangedEventArgs e)
 		{
 			if (_isRecalculating || sender is not TextBox textBox ||
@@ -133,22 +165,32 @@ namespace iHome.UI.Views.Manager
 			if (string.IsNullOrWhiteSpace(textBox.Text))
 			{
 				item.CurrentReading = null;
-				item.Quantity = 0;
-				item.Amount = 0;
 			}
 			else if (TryParseDecimal(textBox.Text, out decimal currentReading))
 			{
 				item.CurrentReading = currentReading;
-				item.Quantity = Math.Max(0, currentReading - (item.PreviousReading ?? 0));
-				item.Amount = item.Quantity * item.UnitPrice;
 			}
 			else
 			{
 				item.CurrentReading = null;
+			}
+			RecalculateMeteredLine(item);
+			RecalculateTotal();
+		}
+
+		// Sử dụng = chỉ số mới - chỉ số cũ; thành tiền = sử dụng * đơn giá
+		private static void RecalculateMeteredLine(ManagerInvoiceLineDto item)
+		{
+			if (!item.CurrentReading.HasValue)
+			{
 				item.Quantity = 0;
 				item.Amount = 0;
+				return;
 			}
-			RecalculateTotal();
+
+			decimal previous = item.PreviousReading ?? 0m;
+			item.Quantity = Math.Max(0, item.CurrentReading.Value - previous);
+			item.Amount = item.Quantity * item.UnitPrice;
 		}
 
 		private void RecalculateTotal()
@@ -173,6 +215,17 @@ namespace iHome.UI.Views.Manager
 				_items.Count == 0)
 			{
 				ManagerUi.ShowValidation("Vui lòng nhập đầy đủ thông tin hóa đơn.");
+				return;
+			}
+
+			// Phòng/khách mới: bắt buộc nhập chỉ số cũ trước khi lưu
+			var missingPrevious = _items.FirstOrDefault(item =>
+				item.RequiresReading &&
+				item.CanEditPreviousReading &&
+				!item.PreviousReading.HasValue);
+			if (missingPrevious != null)
+			{
+				ManagerUi.ShowValidation($"Vui lòng nhập chỉ số cũ cho {missingPrevious.Description}.");
 				return;
 			}
 

@@ -5,7 +5,9 @@ using System.Net.Mail;
 
 namespace iHome.BLL.Services.Manager
 {
-	// Validate dùng chung cho BLL và UI - Try* trả về message, không ném exception
+	// Validate dùng chung BLL + UI Manager
+	// Get*Error trả message (không throw) để dialog hiện MessageBox ngay trên form
+	// Validate* vẫn throw ArgumentException cho tầng service
 	public static class ManagerValidation
 	{
 		private static readonly string[] ContractStatuses = { "Active", "Expired", "Terminated" };
@@ -67,6 +69,7 @@ namespace iHome.BLL.Services.Manager
 			{
 				return "Ngày kết thúc phải sau ngày bắt đầu.";
 			}
+			// Quy tắc nghiệp vụ: thời hạn hợp đồng tối thiểu 1 tháng lịch
 			if (input.EndDate < input.StartDate.AddMonths(1))
 			{
 				return "Thời hạn hợp đồng phải ít nhất 1 tháng.";

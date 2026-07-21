@@ -2,6 +2,7 @@ using System;
 
 namespace iHome.BLL.Services.Manager
 {
+	// Map status DB → nhãn tiếng Việt cho UI Manager
 	internal static class ManagerDisplayFormatter
 	{
 		public static string FormatRoomStatus(string status) => status switch
@@ -17,7 +18,10 @@ namespace iHome.BLL.Services.Manager
 		public static string FormatContractStatus(string status) =>
 			FormatContractStatus(status, null);
 
-		// Tính trạng thái hiển thị theo thời gian thực: Active còn < 1 tháng → Sắp hết hạn
+		// Trạng thái hiển thị theo thời gian thực (không đổi Status trong DB):
+		// Active + quá EndDate → Đã hết hạn
+		// Active + còn < 1 tháng → Sắp hết hạn
+		// Active còn lại → Đang hoạt động
 		public static string FormatContractStatus(string status, DateOnly? endDate)
 		{
 			if (string.Equals(status, "Active", StringComparison.OrdinalIgnoreCase) &&

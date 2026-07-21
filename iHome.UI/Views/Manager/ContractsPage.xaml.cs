@@ -64,6 +64,7 @@ namespace iHome.UI.Views.Manager
 		{
 			TxtTotal.Text = _contracts.Count.ToString();
 			TxtActive.Text = _contracts.Count(item => item.Status == "Active").ToString();
+			// Đếm theo StatusDisplay đã tính thời gian thực (còn < 1 tháng → Sắp hết hạn)
 			TxtExpiring.Text = _contracts.Count(item => item.StatusDisplay == "Sắp hết hạn").ToString();
 			TxtTerminated.Text = _contracts.Count(item => item.Status == "Terminated").ToString();
 		}
@@ -72,7 +73,12 @@ namespace iHome.UI.Views.Manager
 		{
 			if (item is not ManagerContractDto contract) return false;
 			string keyword = TxtSearch.Text.Trim();
-			bool search = string.IsNullOrEmpty(keyword) || contract.Id.ToString().Contains(keyword) || contract.BuildingName.Contains(keyword, StringComparison.OrdinalIgnoreCase) || contract.RoomNumber.Contains(keyword, StringComparison.OrdinalIgnoreCase) || contract.MainTenantName.Contains(keyword, StringComparison.OrdinalIgnoreCase);
+			bool search = string.IsNullOrEmpty(keyword)
+				|| contract.Id.ToString().Contains(keyword)
+				|| contract.BuildingName.Contains(keyword, StringComparison.OrdinalIgnoreCase)
+				|| contract.RoomNumber.Contains(keyword, StringComparison.OrdinalIgnoreCase)
+				|| contract.MainTenantName.Contains(keyword, StringComparison.OrdinalIgnoreCase)
+				|| contract.TenantNames.Contains(keyword, StringComparison.OrdinalIgnoreCase);
 			bool status = CbStatus.SelectedItem is not string selected || selected == All || selected == contract.StatusDisplay;
 			return search && status;
 		}

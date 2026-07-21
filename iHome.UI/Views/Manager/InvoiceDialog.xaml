@@ -45,7 +45,7 @@
         </Grid>
 
         <Border Grid.Row="2" Style="{StaticResource ManagerCardStyle}" Padding="12" Margin="0,16,0,12">
-            <TextBlock Text="Tiền phòng và dịch vụ cố định được tự động lấy theo hợp đồng/phòng. Chỉ nhập chỉ số mới cho điện, nước hoặc dịch vụ tính theo đồng hồ."
+            <TextBlock Text="Tiền phòng và dịch vụ cố định lấy theo hợp đồng/phòng. Với dịch vụ theo đồng hồ: nhập chỉ số mới; nếu chưa có chỉ số cũ trong hệ thống (khách/phòng mới) hãy nhập chỉ số cũ."
                        Foreground="{StaticResource ColorTextSecondary}" TextWrapping="Wrap"/>
         </Border>
 
@@ -59,7 +59,17 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="KHOẢN THU" Binding="{Binding Description}" Width="1.7*" MinWidth="180" IsReadOnly="True"/>
                     <DataGridTextColumn Header="CÁCH TÍNH" Binding="{Binding CalculationDisplay}" Width="0.9*" MinWidth="105" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="CHỈ SỐ CŨ" Binding="{Binding PreviousReading, StringFormat={}{0:N2}}" Width="0.8*" MinWidth="90" IsReadOnly="True"/>
+                    <!-- Chỉ số cũ: editable khi CanEditPreviousReading (chưa có trong DB) -->
+                    <DataGridTemplateColumn Header="CHỈ SỐ CŨ" Width="0.9*" MinWidth="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding PreviousReading}"
+                                         IsEnabled="{Binding CanEditPreviousReading}"
+                                         Style="{StaticResource ManagerInvoiceReadingTextBoxStyle}"
+                                         TextChanged="PreviousReading_TextChanged"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTemplateColumn Header="CHỈ SỐ MỚI" Width="0.9*" MinWidth="105">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

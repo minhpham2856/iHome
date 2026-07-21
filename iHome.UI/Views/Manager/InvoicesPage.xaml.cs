@@ -63,7 +63,7 @@ namespace iHome.UI.Views.Manager
 			TxtTotal.Text = _invoices.Count.ToString();
 			TxtUnpaid.Text = _invoices.Count(item => item.Status != "Paid").ToString();
 			TxtOverdue.Text = _invoices.Count(item => item.StatusDisplay == "Quá hạn").ToString();
-			// Chỉ cộng số còn lại của hóa đơn chưa thanh toán
+			// KPI Còn phải thu: chỉ cộng Balance của hóa đơn chưa Paid (không gồm đã thanh toán)
 			TxtOutstanding.Text = $"{_invoices.Where(item => item.Status != "Paid").Sum(item => Math.Max(0, item.Balance)):N0} đ";
 		}
 

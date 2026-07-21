@@ -20,5 +20,7 @@ namespace iHome.BLL.DTOs
 		public int PropertyId { get; set; }
 		public string DisplayName { get; set; } = string.Empty;
 		public decimal SuggestedAmount { get; set; }
+		// Sức chứa phòng — dùng khi tạo hợp đồng bắt buộc đủ khách đứng tên
+		public int MaxOccupancy { get; set; } = 1;
 	}
 }

@@ -41,7 +41,7 @@
                         <DataGridTextColumn Header="MÃ HĐ" Binding="{Binding Id, StringFormat=HĐ #{0}}" Width="0.7*" MinWidth="80" ElementStyle="{StaticResource ManagerDataGridLinkTextStyle}"/>
                         <DataGridTextColumn Header="TÒA NHÀ" Binding="{Binding BuildingName}" Width="1.1*" MinWidth="115" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
                         <DataGridTextColumn Header="PHÒNG" Binding="{Binding RoomNumber}" Width="0.7*" MinWidth="75" ElementStyle="{StaticResource ManagerDataGridStrongTextStyle}"/>
-                        <DataGridTextColumn Header="NGƯỜI THUÊ CHÍNH" Binding="{Binding MainTenantName}" Width="1.5*" MinWidth="160" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
+                        <DataGridTextColumn Header="KHÁCH THUÊ" Binding="{Binding TenantNames}" Width="1.8*" MinWidth="180" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
                         <DataGridTextColumn Header="THỜI HẠN" Binding="{Binding StartDate, StringFormat={}{0:dd/MM/yyyy}}" Width="1*" MinWidth="110" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
                         <DataGridTextColumn Header="ĐẾN NGÀY" Binding="{Binding EndDate, StringFormat={}{0:dd/MM/yyyy}}" Width="1*" MinWidth="110" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
                         <DataGridTextColumn Header="TIỀN THUÊ" Binding="{Binding MonthlyRent, StringFormat={}{0:N0} đ}" Width="1*" MinWidth="115" ElementStyle="{StaticResource ManagerDataGridStrongTextStyle}"/>

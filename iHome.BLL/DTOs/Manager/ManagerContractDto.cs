@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace iHome.BLL.DTOs
 {
@@ -26,6 +27,8 @@ namespace iHome.BLL.DTOs
 		public int Id { get; set; }
 		public int RoomId { get; set; }
 		public int MainTenantId { get; set; }
+		// Khách đứng tên còn lại khi MaxOccupancy > 1 (phòng đôi/nhiều người)
+		public List<int> CoTenantIds { get; set; } = new();
 		public DateOnly StartDate { get; set; }
 		public DateOnly EndDate { get; set; }
 		public decimal MonthlyRent { get; set; }

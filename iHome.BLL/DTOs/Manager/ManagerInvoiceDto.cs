@@ -37,6 +37,8 @@ namespace iHome.BLL.DTOs
 	{
 		private decimal _quantity;
 		private decimal _amount;
+		private decimal? _previousReading;
+		private decimal? _currentReading;
 
 		public int? ServiceId { get; set; }
 		public string Description { get; set; } = string.Empty;
@@ -63,8 +65,28 @@ namespace iHome.BLL.DTOs
 				OnPropertyChanged();
 			}
 		}
-		public decimal? PreviousReading { get; set; }
-		public decimal? CurrentReading { get; set; }
+		public decimal? PreviousReading
+		{
+			get => _previousReading;
+			set
+			{
+				if (_previousReading == value) return;
+				_previousReading = value;
+				OnPropertyChanged();
+			}
+		}
+		public decimal? CurrentReading
+		{
+			get => _currentReading;
+			set
+			{
+				if (_currentReading == value) return;
+				_currentReading = value;
+				OnPropertyChanged();
+			}
+		}
+		// true khi DB chưa có chỉ số trước tháng lập HĐ → UI cho nhập chỉ số cũ (khách/phòng mới)
+		public bool CanEditPreviousReading { get; set; }
 		public bool RequiresReading =>
 			string.Equals(CalculationMethod, "Metered", StringComparison.OrdinalIgnoreCase);
 		public string CalculationDisplay => CalculationMethod switch

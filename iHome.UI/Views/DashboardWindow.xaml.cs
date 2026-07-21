@@ -65,6 +65,8 @@ namespace iHome.UI.Views
 				menuItems.Add(new SidebarMenuItem { Title = "Quản lý hợp đồng", PageName = "ContractsPage" });
 				menuItems.Add(new SidebarMenuItem { Title = "Quản lý hóa đơn", PageName = "InvoicesPage" });
 				menuItems.Add(new SidebarMenuItem { Title = "Quản lý dịch vụ", PageName = "ServicesPage" });
+				// Cài đặt tài khoản Manager (hồ sơ + đổi mật khẩu)
+				menuItems.Add(new SidebarMenuItem { Title = "Cài đặt tài khoản", PageName = "SettingsPage" });
 			}
 			else
 			{
@@ -157,6 +159,7 @@ namespace iHome.UI.Views
 			"ContractsPage" => new Manager.ContractsPage(_currentUser, _selectedBuildingId),
 			"InvoicesPage" => new Manager.InvoicesPage(_currentUser, _selectedBuildingId),
 			"ServicesPage" => new Manager.ServicesPage(_currentUser, _selectedBuildingId),
+			"SettingsPage" => new Manager.SettingsPage(_currentUser),
 			_ => throw new InvalidOperationException("Trang quản lý không tồn tại.")
 		};
 

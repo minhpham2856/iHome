@@ -4,7 +4,8 @@ using System.Windows;
 
 namespace iHome.UI.Views.Manager
 {
-	// Báo lỗi trên UI; bắt exception bên trong Task để debugger không dừng tại throw
+	// Helper UI Manager: hiện MessageBox lỗi trên form thay vì để exception nhảy vào debugger (Continue)
+	// TryRunAsync / TryGetAsync bắt lỗi nghiệp vụ bên trong Task.Run rồi trả message
 	internal static class ManagerUi
 	{
 		public static void ShowValidation(string message) =>
@@ -13,6 +14,7 @@ namespace iHome.UI.Views.Manager
 		public static void ShowError(string message) =>
 			MessageBox.Show(message, "Không thể thực hiện", MessageBoxButton.OK, MessageBoxImage.Warning);
 
+		// Chạy thao tác ghi (create/update/delete); false nếu lỗi nghiệp vụ đã được báo MessageBox
 		public static async Task<bool> TryRunAsync(Action action)
 		{
 			string? error = await Task.Run(() => Execute(action));
@@ -24,6 +26,7 @@ namespace iHome.UI.Views.Manager
 			return false;
 		}
 
+		// Chạy thao tác trả kết quả (vd. CreateTenant trả Id)
 		public static async Task<(bool ok, T value)> TryRunAsync<T>(Func<T> action)
 		{
 			var result = await Task.Run(() =>
@@ -45,6 +48,7 @@ namespace iHome.UI.Views.Manager
 			return (false, default!);
 		}
 
+		// Đọc dữ liệu; không tự MessageBox — caller quyết định hiện lỗi hay SetState trên trang
 		public static async Task<(bool ok, T? value, string? error)> TryGetAsync<T>(Func<T> action)
 		{
 			return await Task.Run(() =>
@@ -73,6 +77,7 @@ namespace iHome.UI.Views.Manager
 			}
 		}
 
+		// Chỉ coi là lỗi nghiệp vụ mong đợi; lỗi hệ thống khác vẫn throw bình thường
 		private static bool IsBusinessError(Exception ex) =>
 			ex is ArgumentException
 				or ArgumentOutOfRangeException
