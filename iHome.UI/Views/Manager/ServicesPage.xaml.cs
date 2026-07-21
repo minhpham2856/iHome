@@ -16,7 +16,7 @@ namespace iHome.UI.Views.Manager
 	{
 		private const string All = "Tất cả";
 		private readonly User _currentUser;
-		private readonly int? _propertyId;
+		private readonly int? _buildingId;
 		private readonly ManagerServiceCatalogService _service = new();
 		private readonly ManagerRoomServiceAssignmentService _assignmentService = new();
 		private List<ManagerServiceDto> _services = new();
@@ -24,11 +24,11 @@ namespace iHome.UI.Views.Manager
 		private ICollectionView? _serviceView;
 		private bool _isLoading;
 
-		public ServicesPage(User currentUser, int? propertyId)
+		public ServicesPage(User currentUser, int? buildingId)
 		{
 			InitializeComponent();
 			_currentUser = currentUser;
-			_propertyId = propertyId;
+			_buildingId = buildingId;
 			Loaded += ServicesPage_Loaded;
 		}
 
@@ -51,8 +51,8 @@ namespace iHome.UI.Views.Manager
 				BtnRefresh.IsEnabled = false;
 				SetState("Đang tải danh sách dịch vụ...", true);
 				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				_services = await Task.Run(() => _service.GetServices(managerId, _propertyId));
-				_assignments = await Task.Run(() => _assignmentService.GetAssignments(managerId, _propertyId));
+				_services = await Task.Run(() => _service.GetServices(managerId, _buildingId));
+				_assignments = await Task.Run(() => _assignmentService.GetAssignments(managerId, _buildingId));
 
 				_serviceView = CollectionViewSource.GetDefaultView(_services);
 				_serviceView.Filter = FilterService;
@@ -76,8 +76,8 @@ namespace iHome.UI.Views.Manager
 		private async void AssignService_Click(object sender, RoutedEventArgs e)
 		{
 			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-			var (roomsOk, rooms, roomsError) = await ManagerUi.TryGetAsync(() => _assignmentService.GetRoomOptions(managerId, _propertyId));
-			var (servicesOk, services, servicesError) = await ManagerUi.TryGetAsync(() => _assignmentService.GetServiceOptions(managerId, _propertyId));
+			var (roomsOk, rooms, roomsError) = await ManagerUi.TryGetAsync(() => _assignmentService.GetRoomOptions(managerId, _buildingId));
+			var (servicesOk, services, servicesError) = await ManagerUi.TryGetAsync(() => _assignmentService.GetServiceOptions(managerId, _buildingId));
 			if (!roomsOk || !servicesOk || rooms == null || services == null)
 			{
 				ManagerUi.ShowError(roomsError ?? servicesError ?? "Không thể tải dữ liệu.");
@@ -119,12 +119,12 @@ namespace iHome.UI.Views.Manager
 
 		private void PopulateFilters()
 		{
-			CboBuilding.ItemsSource = new[] { All }
-				.Concat(_services.Select(s => s.BuildingName).Distinct().OrderBy(name => name));
-			CboStatus.ItemsSource = new[] { All }
+			CbBuilding.ItemsSource = new[] { All }
+				.Concat(_services.Select(s => s.PropertyName).Distinct().OrderBy(name => name));
+			CbStatus.ItemsSource = new[] { All }
 				.Concat(_services.Select(s => s.StatusDisplay).Distinct().OrderBy(status => status));
-			CboBuilding.SelectedIndex = 0;
-			CboStatus.SelectedIndex = 0;
+			CbBuilding.SelectedIndex = 0;
+			CbStatus.SelectedIndex = 0;
 		}
 
 		private void UpdateSummary()
@@ -146,11 +146,11 @@ namespace iHome.UI.Views.Manager
 			string keyword = TxtSearch.Text.Trim();
 			bool matchesKeyword = string.IsNullOrEmpty(keyword) ||
 				service.ServiceName.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
-				service.BuildingName.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
+				service.PropertyName.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
 				service.Unit.Contains(keyword, StringComparison.OrdinalIgnoreCase);
-			bool matchesBuilding = CboBuilding.SelectedItem is not string building ||
-				building == All || service.BuildingName == building;
-			bool matchesStatus = CboStatus.SelectedItem is not string status ||
+			bool matchesBuilding = CbBuilding.SelectedItem is not string building ||
+				building == All || service.PropertyName == building;
+			bool matchesStatus = CbStatus.SelectedItem is not string status ||
 				status == All || service.StatusDisplay == status;
 
 			return matchesKeyword && matchesBuilding && matchesStatus;

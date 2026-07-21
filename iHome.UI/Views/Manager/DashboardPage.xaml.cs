@@ -15,15 +15,15 @@ namespace iHome.UI.Views.Manager
 	public partial class DashboardPage : Page
 	{
 		private readonly User _currentUser;
-		private readonly int? _propertyId;
+		private readonly int? _buildingId;
 		private readonly ManagerDashboardService _service = new();
 		private bool _isLoading;
 
-		public DashboardPage(User currentUser, int? propertyId)
+		public DashboardPage(User currentUser, int? buildingId)
 		{
 			InitializeComponent();
 			_currentUser = currentUser;
-			_propertyId = propertyId;
+			_buildingId = buildingId;
 			Loaded += DashboardPage_Loaded;
 		}
 
@@ -46,7 +46,7 @@ namespace iHome.UI.Views.Manager
 				SetState("Đang tải dữ liệu...", true);
 				BtnRefresh.IsEnabled = false;
 				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				var data = await Task.Run(() => _service.GetDashboard(managerId, _propertyId));
+				var data = await Task.Run(() => _service.GetDashboard(managerId, _buildingId));
 
 				BindCards(data);
 				BindCharts(data);

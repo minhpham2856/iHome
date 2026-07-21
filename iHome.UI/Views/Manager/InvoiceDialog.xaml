@@ -27,7 +27,7 @@
             </Grid.ColumnDefinitions>
             <StackPanel>
                 <TextBlock Text="HỢP ĐỒNG" Style="{StaticResource ManagerDialogLabelStyle}"/>
-                <ComboBox x:Name="CboContract"
+                <ComboBox x:Name="CbContract"
                           Style="{StaticResource ManagerComboBoxStyle}"
                           DisplayMemberPath="DisplayName"
                           SelectionChanged="BillingInputChanged"/>
@@ -88,7 +88,7 @@
             </Grid.ColumnDefinitions>
             <StackPanel>
                 <TextBlock Text="TRẠNG THÁI" Style="{StaticResource ManagerDialogLabelStyle}"/>
-                <ComboBox x:Name="CboStatus" Width="260" HorizontalAlignment="Left"
+                <ComboBox x:Name="CbStatus" Width="260" HorizontalAlignment="Left"
                           Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="Name"/>
             </StackPanel>
             <Border Grid.Column="2" Style="{StaticResource ManagerInvoiceTotalCardStyle}" Padding="16">

@@ -16,18 +16,18 @@ namespace iHome.UI.Views.Manager
 	{
 		private const string All = "Tất cả";
 		private readonly User _currentUser;
-		private readonly int? _propertyId;
+		private readonly int? _buildingId;
 		private readonly ManagerTenantService _service = new();
 		private readonly ManagerContractService _contractService = new();
 		private List<ManagerTenantDto> _tenants = new();
 		private ICollectionView? _tenantView;
 		private bool _isLoading;
 
-		public GuestsPage(User currentUser, int? propertyId)
+		public GuestsPage(User currentUser, int? buildingId)
 		{
 			InitializeComponent();
 			_currentUser = currentUser;
-			_propertyId = propertyId;
+			_buildingId = buildingId;
 			Loaded += GuestsPage_Loaded;
 		}
 
@@ -119,7 +119,7 @@ namespace iHome.UI.Views.Manager
 		private async Task ShowAssignDialogAsync(int? selectedTenantId)
 		{
 			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-			var (contractsOk, contracts, contractsError) = await ManagerUi.TryGetAsync(() => _contractService.GetContractOptions(managerId, _propertyId));
+			var (contractsOk, contracts, contractsError) = await ManagerUi.TryGetAsync(() => _contractService.GetContractOptions(managerId, _buildingId));
 			var (tenantsOk, tenants, tenantsError) = await ManagerUi.TryGetAsync(() => _service.GetTenantOptions(managerId));
 			if (!contractsOk || !tenantsOk || contracts == null || tenants == null)
 			{
@@ -179,7 +179,7 @@ namespace iHome.UI.Views.Manager
 				BtnRefresh.IsEnabled = false;
 				SetState("Đang tải danh sách người thuê...", true);
 				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				_tenants = await Task.Run(() => _service.GetTenants(managerId, _propertyId));
+				_tenants = await Task.Run(() => _service.GetTenants(managerId, _buildingId));
 
 				_tenantView = CollectionViewSource.GetDefaultView(_tenants);
 				_tenantView.Filter = FilterTenant;
@@ -201,12 +201,12 @@ namespace iHome.UI.Views.Manager
 
 		private void PopulateFilters()
 		{
-			CboBuilding.ItemsSource = new[] { All }
+			CbBuilding.ItemsSource = new[] { All }
 				.Concat(_tenants.Select(t => t.BuildingName).Distinct().OrderBy(name => name));
-			CboContractStatus.ItemsSource = new[] { All }
+			CbContractStatus.ItemsSource = new[] { All }
 				.Concat(_tenants.Select(t => t.ContractStatusDisplay).Distinct().OrderBy(status => status));
-			CboBuilding.SelectedIndex = 0;
-			CboContractStatus.SelectedIndex = 0;
+			CbBuilding.SelectedIndex = 0;
+			CbContractStatus.SelectedIndex = 0;
 			PopulateRoomFilter();
 		}
 
@@ -221,14 +221,14 @@ namespace iHome.UI.Views.Manager
 
 		private void PopulateRoomFilter()
 		{
-			string? building = CboBuilding.SelectedItem as string;
+			string? building = CbBuilding.SelectedItem as string;
 			var rooms = _tenants
 				.Where(t => building == null || building == All || t.BuildingName == building)
 				.Select(t => t.RoomNumber)
 				.Distinct()
 				.OrderBy(room => room);
-			CboRoom.ItemsSource = new[] { All }.Concat(rooms);
-			CboRoom.SelectedIndex = 0;
+			CbRoom.ItemsSource = new[] { All }.Concat(rooms);
+			CbRoom.SelectedIndex = 0;
 		}
 
 		private bool FilterTenant(object item)
@@ -246,11 +246,11 @@ namespace iHome.UI.Views.Manager
 				(tenant.Email?.Contains(keyword, StringComparison.OrdinalIgnoreCase) ?? false) ||
 				tenant.BuildingName.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
 				tenant.RoomNumber.Contains(keyword, StringComparison.OrdinalIgnoreCase);
-			bool matchesBuilding = CboBuilding.SelectedItem is not string building ||
+			bool matchesBuilding = CbBuilding.SelectedItem is not string building ||
 				building == All || tenant.BuildingName == building;
-			bool matchesRoom = CboRoom.SelectedItem is not string room ||
+			bool matchesRoom = CbRoom.SelectedItem is not string room ||
 				room == All || tenant.RoomNumber == room;
-			bool matchesStatus = CboContractStatus.SelectedItem is not string status ||
+			bool matchesStatus = CbContractStatus.SelectedItem is not string status ||
 				status == All || tenant.ContractStatusDisplay == status;
 
 			return matchesKeyword && matchesBuilding && matchesRoom && matchesStatus;

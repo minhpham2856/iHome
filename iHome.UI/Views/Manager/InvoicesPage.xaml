@@ -25,10 +25,10 @@
         <Border Grid.Row="2" Style="{StaticResource ManagerCardStyle}" Margin="4,0,4,14" Padding="16">
             <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                 <StackPanel Margin="0,0,12,0"><TextBlock Text="TÌM KIẾM" Style="{StaticResource ManagerFilterLabelStyle}"/><TextBox x:Name="TxtSearch" Style="{StaticResource ManagerTextBoxStyle}" TextChanged="FilterChanged"/></StackPanel>
-                <StackPanel Grid.Column="1"><TextBlock Text="TRẠNG THÁI" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="CboStatus" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
+                <StackPanel Grid.Column="1"><TextBlock Text="TRẠNG THÁI" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="CbStatus" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
             </Grid>
         </Border>
-        <Border Grid.Row="3" Margin="4,0,4,0" Style="{StaticResource ManagerCardStyle}" Padding="0" CornerRadius="14">
+        <Border Grid.Row="3" Margin="4,0,4,0" Style="{StaticResource ManagerCardStyle}" Padding="0">
             <Grid>
                 <DataGrid x:Name="InvoicesGrid" Style="{StaticResource ManagerDataGridStyle}" HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
@@ -43,7 +43,7 @@
                         <DataGridTemplateColumn Header="TRẠNG THÁI" Width="1.15*" MinWidth="130"><DataGridTemplateColumn.CellTemplate><DataTemplate><Border Style="{StaticResource ManagerInvoiceStatusTagStyle}"><TextBlock Text="{Binding StatusDisplay}" Style="{StaticResource ManagerInvoiceStatusTextStyle}"/></Border></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
-                <Border x:Name="StatePanel" Background="{StaticResource ColorOverlay}" Visibility="Collapsed" CornerRadius="14"><TextBlock x:Name="StateText" Style="{StaticResource ManagerStateTextStyle}"/></Border>
+                <Border x:Name="StatePanel" Background="{StaticResource ColorOverlay}" Visibility="Collapsed"><TextBlock x:Name="StateText" Style="{StaticResource ManagerStateTextStyle}"/></Border>
             </Grid>
         </Border>
         <TextBlock x:Name="TxtResultCount" Grid.Row="4" Margin="10,10,4,0" Foreground="{StaticResource ColorTextSecondary}" FontSize="12"/>

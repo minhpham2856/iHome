@@ -11,28 +11,44 @@
             <StackPanel>
                 <TextBlock x:Name="TxtTitle" Text="Tạo hợp đồng" Style="{StaticResource ManagerDialogTitleStyle}"/>
                 <TextBlock Text="PHÒNG" Style="{StaticResource ManagerDialogLabelStyle}"/>
-                <ComboBox x:Name="CboRoom" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName" SelectionChanged="RoomChanged"/>
+                <ComboBox x:Name="CbRoom" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"
+                          SelectionChanged="RoomChanged" KeyDown="CbRoom_KeyDown"/>
                 <TextBlock Text="NGƯỜI THUÊ CHÍNH" Style="{StaticResource ManagerDialogLabelStyle}"/>
-                <ComboBox x:Name="CboMainTenant" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"/>
+                <ComboBox x:Name="CbMainTenant" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"
+                          KeyDown="CbMainTenant_KeyDown"/>
                 <Grid>
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                    <StackPanel><TextBlock Text="NGÀY BẮT ĐẦU" Style="{StaticResource ManagerDialogLabelStyle}"/><DatePicker x:Name="DtpStart" Style="{StaticResource ManagerDatePickerStyle}"/></StackPanel>
-                    <StackPanel Grid.Column="2"><TextBlock Text="NGÀY KẾT THÚC" Style="{StaticResource ManagerDialogLabelStyle}"/><DatePicker x:Name="DtpEnd" Style="{StaticResource ManagerDatePickerStyle}"/></StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="NGÀY BẮT ĐẦU" Style="{StaticResource ManagerDialogLabelStyle}"/>
+                        <DatePicker x:Name="DtpStart" Style="{StaticResource ManagerDatePickerStyle}" KeyDown="DtpStart_KeyDown"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="NGÀY KẾT THÚC" Style="{StaticResource ManagerDialogLabelStyle}"/>
+                        <DatePicker x:Name="DtpEnd" Style="{StaticResource ManagerDatePickerStyle}" KeyDown="DtpEnd_KeyDown"/>
+                    </StackPanel>
                 </Grid>
                 <Grid>
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                    <StackPanel><TextBlock Text="TIỀN THUÊ / THÁNG" Style="{StaticResource ManagerDialogLabelStyle}"/><TextBox x:Name="TxtRent" Style="{StaticResource ManagerTextBoxStyle}"/></StackPanel>
-                    <StackPanel Grid.Column="2"><TextBlock Text="TIỀN CỌC" Style="{StaticResource ManagerDialogLabelStyle}"/><TextBox x:Name="TxtDeposit" Style="{StaticResource ManagerTextBoxStyle}"/></StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="TIỀN THUÊ / THÁNG" Style="{StaticResource ManagerDialogLabelStyle}"/>
+                        <TextBox x:Name="TxtRent" Style="{StaticResource ManagerTextBoxStyle}" KeyDown="TxtRent_KeyDown"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="TIỀN CỌC" Style="{StaticResource ManagerDialogLabelStyle}"/>
+                        <TextBox x:Name="TxtDeposit" Style="{StaticResource ManagerTextBoxStyle}" KeyDown="TxtDeposit_KeyDown"/>
+                    </StackPanel>
                 </Grid>
                 <TextBlock Text="TRẠNG THÁI" Style="{StaticResource ManagerDialogLabelStyle}"/>
-                <ComboBox x:Name="CboStatus" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="Name"/>
+                <ComboBox x:Name="CbStatus" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="Name"
+                          KeyDown="CbStatus_KeyDown"/>
                 <TextBlock Text="GHI CHÚ" Style="{StaticResource ManagerDialogLabelStyle}"/>
-                <TextBox x:Name="TxtNotes" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="300"/>
+                <TextBox x:Name="TxtNotes" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="300"
+                         KeyDown="TxtNotes_KeyDown"/>
             </StackPanel>
         </ScrollViewer>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
             <Button Content="Hủy" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="Cancel_Click"/>
-            <Button Content="Lưu" Style="{StaticResource ManagerToolbarButtonStyle}" Click="Save_Click"/>
+            <Button x:Name="BtnSave" Content="Lưu" Style="{StaticResource ManagerToolbarButtonStyle}" Click="Save_Click"/>
         </StackPanel>
     </Grid>
 </Window>

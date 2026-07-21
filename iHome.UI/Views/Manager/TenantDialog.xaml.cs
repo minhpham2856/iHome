@@ -2,6 +2,7 @@ using iHome.BLL.DTOs;
 using iHome.BLL.Services.Manager;
 using System;
 using System.Windows;
+using System.Windows.Input;
 
 namespace iHome.UI.Views.Manager
 {
@@ -59,5 +60,40 @@ namespace iHome.UI.Views.Manager
 		}
 
 		private void Cancel_Click(object sender, RoutedEventArgs e) => DialogResult = false;
+
+		// key down enter
+		private void TxtFullName_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter) { e.Handled = true; DtpDateOfBirth.Focus(); }
+		}
+
+		private void DtpDateOfBirth_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter) { e.Handled = true; TxtIdCard.Focus(); }
+		}
+
+		private void TxtIdCard_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter) { e.Handled = true; TxtPhone.Focus(); }
+		}
+
+		private void TxtPhone_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter) { e.Handled = true; TxtEmail.Focus(); }
+		}
+
+		private void TxtEmail_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter) { e.Handled = true; TxtAddress.Focus(); }
+		}
+
+		private void TxtAddress_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter)
+			{
+				e.Handled = true;
+				Save_Click(BtnSave, new RoutedEventArgs());
+			}
+		}
 	}
 }

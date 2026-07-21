@@ -16,18 +16,18 @@ namespace iHome.UI.Views.Manager
 	{
 		private const string All = "Tất cả";
 		private readonly User _currentUser;
-		private readonly int? _propertyId;
+		private readonly int? _buildingId;
 		private readonly ManagerContractService _service = new();
 		private readonly ManagerTenantService _tenantService = new();
 		private List<ManagerContractDto> _contracts = new();
 		private ICollectionView? _view;
 		private bool _isLoading;
 
-		public ContractsPage(User currentUser, int? propertyId)
+		public ContractsPage(User currentUser, int? buildingId)
 		{
 			InitializeComponent();
 			_currentUser = currentUser;
-			_propertyId = propertyId;
+			_buildingId = buildingId;
 			Loaded += async (_, _) => await LoadAsync();
 		}
 
@@ -42,7 +42,7 @@ namespace iHome.UI.Views.Manager
 				BtnRefresh.IsEnabled = false;
 				SetState("Đang tải danh sách hợp đồng...", true);
 				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				var (ok, contracts, error) = await ManagerUi.TryGetAsync(() => _service.GetContracts(managerId, _propertyId));
+				var (ok, contracts, error) = await ManagerUi.TryGetAsync(() => _service.GetContracts(managerId, _buildingId));
 				if (!ok || contracts == null)
 				{
 					SetState(error ?? "Không thể tải danh sách hợp đồng.", true);
@@ -52,8 +52,8 @@ namespace iHome.UI.Views.Manager
 				_view = CollectionViewSource.GetDefaultView(_contracts);
 				_view.Filter = FilterContract;
 				ContractsGrid.ItemsSource = _view;
-				CboStatus.ItemsSource = new[] { All }.Concat(_contracts.Select(item => item.StatusDisplay).Distinct());
-				CboStatus.SelectedIndex = 0;
+				CbStatus.ItemsSource = new[] { All }.Concat(_contracts.Select(item => item.StatusDisplay).Distinct());
+				CbStatus.SelectedIndex = 0;
 				UpdateSummary();
 				RefreshView();
 			}
@@ -73,7 +73,7 @@ namespace iHome.UI.Views.Manager
 			if (item is not ManagerContractDto contract) return false;
 			string keyword = TxtSearch.Text.Trim();
 			bool search = string.IsNullOrEmpty(keyword) || contract.Id.ToString().Contains(keyword) || contract.BuildingName.Contains(keyword, StringComparison.OrdinalIgnoreCase) || contract.RoomNumber.Contains(keyword, StringComparison.OrdinalIgnoreCase) || contract.MainTenantName.Contains(keyword, StringComparison.OrdinalIgnoreCase);
-			bool status = CboStatus.SelectedItem is not string selected || selected == All || selected == contract.StatusDisplay;
+			bool status = CbStatus.SelectedItem is not string selected || selected == All || selected == contract.StatusDisplay;
 			return search && status;
 		}
 
@@ -83,7 +83,7 @@ namespace iHome.UI.Views.Manager
 		private async void AddContract_Click(object sender, RoutedEventArgs e)
 		{
 			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-			var (roomsOk, rooms, roomsError) = await ManagerUi.TryGetAsync(() => _service.GetRoomOptions(managerId, _propertyId));
+			var (roomsOk, rooms, roomsError) = await ManagerUi.TryGetAsync(() => _service.GetRoomOptions(managerId, _buildingId));
 			var (tenantsOk, tenants, tenantsError) = await ManagerUi.TryGetAsync(() => _tenantService.GetTenantOptions(managerId));
 			if (!roomsOk || !tenantsOk || rooms == null || tenants == null)
 			{
@@ -105,7 +105,7 @@ namespace iHome.UI.Views.Manager
 			if (ContractsGrid.SelectedItem is not ManagerContractDto selected) { ShowSelect(); return; }
 			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
 			var (formOk, form, formError) = await ManagerUi.TryGetAsync(() => _service.GetContract(managerId, selected.Id));
-			var (roomsOk, rooms, roomsError) = await ManagerUi.TryGetAsync(() => _service.GetRoomOptions(managerId, _propertyId));
+			var (roomsOk, rooms, roomsError) = await ManagerUi.TryGetAsync(() => _service.GetRoomOptions(managerId, _buildingId));
 			var (tenantsOk, tenants, tenantsError) = await ManagerUi.TryGetAsync(() => _tenantService.GetTenantOptions(managerId));
 			if (!formOk || !roomsOk || !tenantsOk || form == null || rooms == null || tenants == null)
 			{
@@ -126,7 +126,7 @@ namespace iHome.UI.Views.Manager
 		{
 			int? selectedContractId = (ContractsGrid.SelectedItem as ManagerContractDto)?.Id;
 			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-			var (contractsOk, contracts, contractsError) = await ManagerUi.TryGetAsync(() => _service.GetContractOptions(managerId, _propertyId));
+			var (contractsOk, contracts, contractsError) = await ManagerUi.TryGetAsync(() => _service.GetContractOptions(managerId, _buildingId));
 			var (tenantsOk, tenants, tenantsError) = await ManagerUi.TryGetAsync(() => _tenantService.GetTenantOptions(managerId));
 			if (!contractsOk || !tenantsOk || contracts == null || tenants == null)
 			{

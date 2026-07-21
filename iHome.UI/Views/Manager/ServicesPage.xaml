@@ -17,7 +17,7 @@
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
             <StackPanel>
                 <TextBlock Text="Quản lý dịch vụ" Style="{StaticResource ManagerPageTitleStyle}"/>
-                <TextBlock Text="Theo dõi danh mục tiện ích, đơn giá và cách tính theo từng tòa nhà."
+                <TextBlock Text="Theo dõi danh mục tiện ích, đơn giá và cách tính theo từng nhà trọ."
                            Style="{StaticResource ManagerPageDescriptionStyle}"/>
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
@@ -31,7 +31,7 @@
         <UniformGrid Grid.Row="1" Columns="4" Margin="4,0,-6,14">
             <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="TỔNG DỊCH VỤ" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtTotalServices" Style="{StaticResource ManagerKpiPrimaryValueStyle}"/></StackPanel></Border>
             <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="ĐANG HOẠT ĐỘNG" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtActiveServices" Style="{StaticResource ManagerKpiInfoValueStyle}"/></StackPanel></Border>
-            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="THEO CHỈ SỐ" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtMeteredServices" Style="{StaticResource ManagerKpiValueStyle}"/></StackPanel></Border>
+            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="CHỈ SỐ (PHÒNG)" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtMeteredServices" Style="{StaticResource ManagerKpiValueStyle}"/></StackPanel></Border>
             <Border Style="{StaticResource ManagerKpiCardStyle}" Margin="0"><StackPanel><TextBlock Text="NGỪNG HOẠT ĐỘNG" Style="{StaticResource ManagerDangerLabelStyle}"/><TextBlock x:Name="TxtInactiveServices" Style="{StaticResource ManagerKpiDangerValueStyle}"/></StackPanel></Border>
         </UniformGrid>
 
@@ -39,18 +39,18 @@
             <Grid>
                 <Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                 <StackPanel Margin="0,0,12,0"><TextBlock Text="TÌM KIẾM DỊCH VỤ" Style="{StaticResource ManagerFilterLabelStyle}"/><TextBox x:Name="TxtSearch" Style="{StaticResource ManagerTextBoxStyle}" TextChanged="FilterChanged"/></StackPanel>
-                <StackPanel Grid.Column="1" Margin="0,0,12,0"><TextBlock Text="TÒA NHÀ" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="CboBuilding" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
-                <StackPanel Grid.Column="2"><TextBlock Text="TRẠNG THÁI" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="CboStatus" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
+                <StackPanel Grid.Column="1" Margin="0,0,12,0"><TextBlock Text="NHÀ TRỌ" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="CbBuilding" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
+                <StackPanel Grid.Column="2"><TextBlock Text="TRẠNG THÁI" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="CbStatus" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
             </Grid>
         </Border>
 
-        <Border Grid.Row="3" Margin="4,0,4,0" Style="{StaticResource ManagerCardStyle}" Padding="6" CornerRadius="14">
+        <Border Grid.Row="3" Margin="4,0,4,0" Style="{StaticResource ManagerCardStyle}" Padding="6">
             <TabControl Background="{StaticResource ColorSurface}" BorderThickness="0">
                 <TabItem Header="Danh mục &amp; đơn giá (chỉ xem)">
                     <Grid>
                         <DataGrid x:Name="ServicesGrid" Style="{StaticResource ManagerDataGridStyle}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="TÒA NHÀ" Binding="{Binding BuildingName}" Width="1.1*" MinWidth="110" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
+                                <DataGridTextColumn Header="NHÀ TRỌ" Binding="{Binding PropertyName}" Width="1.1*" MinWidth="110" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
                                 <DataGridTextColumn Header="DỊCH VỤ" Binding="{Binding ServiceName}" Width="1.45*" MinWidth="140" ElementStyle="{StaticResource ManagerDataGridStrongTextStyle}"/>
                                 <DataGridTextColumn Header="ĐƠN VỊ" Binding="{Binding Unit}" Width="0.75*" MinWidth="80" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
                                 <DataGridTextColumn Header="ĐƠN GIÁ" Binding="{Binding UnitPrice, StringFormat={}{0:N0} đ}" Width="1*" MinWidth="110" ElementStyle="{StaticResource ManagerDataGridLinkTextStyle}"/>
@@ -58,7 +58,7 @@
                                 <DataGridTemplateColumn Header="TRẠNG THÁI" Width="1.15*" MinWidth="125"><DataGridTemplateColumn.CellTemplate><DataTemplate><Border Style="{StaticResource ManagerServiceStatusTagStyle}"><TextBlock Text="{Binding StatusDisplay}" Style="{StaticResource ManagerServiceStatusTextStyle}"/></Border></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
-                        <Border x:Name="StatePanel" Background="{StaticResource ColorOverlay}" Visibility="Collapsed" CornerRadius="14"><TextBlock x:Name="StateText" Style="{StaticResource ManagerStateTextStyle}"/></Border>
+                        <Border x:Name="StatePanel" Background="{StaticResource ColorOverlay}" Visibility="Collapsed"><TextBlock x:Name="StateText" Style="{StaticResource ManagerStateTextStyle}"/></Border>
                     </Grid>
                 </TabItem>
                 <TabItem Header="Dịch vụ đã gán theo phòng">

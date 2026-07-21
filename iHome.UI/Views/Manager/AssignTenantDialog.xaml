@@ -10,14 +10,16 @@
             <TextBlock Text="Gán khách vào phòng" Style="{StaticResource ManagerDialogTitleStyle}"/>
             <TextBlock Text="Khách được gán vào phòng thông qua hợp đồng đang hoạt động." Style="{StaticResource ManagerPageDescriptionStyle}"/>
             <TextBlock Text="HỢP ĐỒNG / PHÒNG" Style="{StaticResource ManagerDialogLabelStyle}"/>
-            <ComboBox x:Name="CboContract" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"/>
+            <ComboBox x:Name="CbContract" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"
+                      KeyDown="CbContract_KeyDown"/>
             <TextBlock Text="KHÁCH THUÊ" Style="{StaticResource ManagerDialogLabelStyle}"/>
-            <ComboBox x:Name="CboTenant" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"/>
+            <ComboBox x:Name="CbTenant" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"
+                      KeyDown="CbTenant_KeyDown"/>
             <CheckBox x:Name="ChkMainTenant" Content="Đặt làm người thuê chính" Margin="0,16,0,0"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
             <Button Content="Hủy" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="Cancel_Click"/>
-            <Button Content="Gán khách" Style="{StaticResource ManagerToolbarButtonStyle}" Click="Save_Click"/>
+            <Button x:Name="BtnSave" Content="Gán khách" Style="{StaticResource ManagerToolbarButtonStyle}" Click="Save_Click"/>
         </StackPanel>
     </Grid>
 </Window>

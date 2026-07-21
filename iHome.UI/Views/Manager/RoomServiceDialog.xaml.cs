@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace iHome.UI.Views.Manager
 {
@@ -18,25 +19,25 @@ namespace iHome.UI.Views.Manager
 		{
 			InitializeComponent();
 			_services = services.ToList();
-			CboRoom.ItemsSource = rooms.ToList();
-			CboRoom.SelectedIndex = CboRoom.Items.Count > 0 ? 0 : -1;
+			CbRoom.ItemsSource = rooms.ToList();
+			CbRoom.SelectedIndex = CbRoom.Items.Count > 0 ? 0 : -1;
 		}
 
 		private void RoomChanged(object sender, SelectionChangedEventArgs e)
 		{
-			if (CboRoom.SelectedItem is not ManagerLookupOptionDto room)
+			if (CbRoom.SelectedItem is not ManagerLookupOptionDto room)
 			{
-				CboService.ItemsSource = null;
+				CbService.ItemsSource = null;
 				return;
 			}
-			CboService.ItemsSource = _services.Where(service => service.BuildingId == room.BuildingId).ToList();
-			CboService.SelectedIndex = CboService.Items.Count > 0 ? 0 : -1;
+			CbService.ItemsSource = _services.Where(service => service.PropertyId == room.PropertyId).ToList();
+			CbService.SelectedIndex = CbService.Items.Count > 0 ? 0 : -1;
 		}
 
 		private void Save_Click(object sender, RoutedEventArgs e)
 		{
-			if (CboRoom.SelectedItem is not ManagerLookupOptionDto room ||
-				CboService.SelectedItem is not ManagerLookupOptionDto service)
+			if (CbRoom.SelectedItem is not ManagerLookupOptionDto room ||
+				CbService.SelectedItem is not ManagerLookupOptionDto service)
 			{
 				ManagerUi.ShowValidation("Không có phòng hoặc dịch vụ phù hợp.");
 				return;
@@ -47,5 +48,20 @@ namespace iHome.UI.Views.Manager
 		}
 
 		private void Cancel_Click(object sender, RoutedEventArgs e) => DialogResult = false;
+
+		// key down enter
+		private void CbRoom_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter) { e.Handled = true; CbService.Focus(); }
+		}
+
+		private void CbService_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter)
+			{
+				e.Handled = true;
+				Save_Click(BtnSave, new RoutedEventArgs());
+			}
+		}
 	}
 }

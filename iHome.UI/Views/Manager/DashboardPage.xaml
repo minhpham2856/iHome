@@ -60,14 +60,14 @@
 
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                        <Border Background="{StaticResource ColorPrimary}" CornerRadius="20" Padding="20" MinHeight="132">
+                        <Border Background="{StaticResource ColorPrimary}" Padding="20" MinHeight="132">
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="DOANH THU THÁNG" Foreground="{StaticResource ColorOnPrimaryMuted}" FontSize="12"/>
                                 <TextBlock x:Name="TxtRevenue" Foreground="{StaticResource ColorOnPrimary}" FontSize="27" FontWeight="Bold" Margin="0,7,0,0" TextWrapping="Wrap"/>
                                 <TextBlock Text="Theo dõi doanh thu đã thanh toán" Foreground="{StaticResource ColorOnPrimaryMuted}" FontSize="10" Margin="0,8,0,0"/>
                             </StackPanel>
                         </Border>
-                        <Border Grid.Column="2" Background="{StaticResource ColorSurfaceHover}" BorderBrush="{StaticResource ColorBorder}" BorderThickness="1" CornerRadius="20" Padding="20" MinHeight="132">
+                        <Border Grid.Column="2" Background="{StaticResource ColorSurfaceHover}" BorderBrush="{StaticResource ColorBorder}" BorderThickness="1" Padding="20" MinHeight="132">
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="TỔNG CÔNG NỢ" Foreground="{StaticResource ColorTextSecondary}" FontSize="12"/>
                                 <TextBlock x:Name="TxtOutstanding" Foreground="{StaticResource ColorDanger}" FontSize="27" FontWeight="Bold" Margin="0,7,0,0" TextWrapping="Wrap"/>
@@ -117,7 +117,7 @@
             </StackPanel>
         </ScrollViewer>
 
-        <Border x:Name="StatePanel" Background="{StaticResource ColorOverlay}" Visibility="Collapsed" CornerRadius="16">
+        <Border x:Name="StatePanel" Background="{StaticResource ColorOverlay}" Visibility="Collapsed">
             <TextBlock x:Name="StateText" Style="{StaticResource ManagerStateTextStyle}"/>
         </Border>
     </Grid>

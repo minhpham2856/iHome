@@ -36,8 +36,8 @@ namespace iHome.UI.Views.Manager
 			_suppressBillingChanges = true;
 			InitializeComponent();
 
-			CboContract.ItemsSource = contracts.ToList();
-			CboStatus.ItemsSource = new[]
+			CbContract.ItemsSource = contracts.ToList();
+			CbStatus.ItemsSource = new[]
 			{
 				new StatusOption("Unpaid", "Chưa thanh toán"),
 				new StatusOption("Paid", "Đã thanh toán")
@@ -45,23 +45,23 @@ namespace iHome.UI.Views.Manager
 
 			if (invoice == null)
 			{
-				CboContract.SelectedIndex = CboContract.Items.Count > 0 ? 0 : -1;
+				CbContract.SelectedIndex = CbContract.Items.Count > 0 ? 0 : -1;
 				DtpInvoiceDate.SelectedDate = DateTime.Today;
 				DtpDueDate.SelectedDate = DateTime.Today.AddDays(7);
-				CboStatus.SelectedIndex = 0;
+				CbStatus.SelectedIndex = 0;
 				_suppressBillingChanges = false;
 				Loaded += async (_, _) => await LoadDraftAsync();
 				return;
 			}
 
 			TxtTitle.Text = "Cập nhật hóa đơn";
-			CboContract.SelectedItem = CboContract.Items.Cast<ManagerContractOptionDto>()
+			CbContract.SelectedItem = CbContract.Items.Cast<ManagerContractOptionDto>()
 				.FirstOrDefault(item => item.Id == invoice.ContractId);
-			CboContract.IsEnabled = false;
+			CbContract.IsEnabled = false;
 			DtpInvoiceDate.SelectedDate = invoice.InvoiceDate;
 			DtpInvoiceDate.IsEnabled = false;
 			DtpDueDate.SelectedDate = invoice.DueDate.ToDateTime(TimeOnly.MinValue);
-			CboStatus.SelectedItem = CboStatus.Items.Cast<StatusOption>()
+			CbStatus.SelectedItem = CbStatus.Items.Cast<StatusOption>()
 				.First(item => item.Code == invoice.Status);
 			_items = invoice.Items;
 			ItemsGrid.ItemsSource = _items;
@@ -80,7 +80,7 @@ namespace iHome.UI.Views.Manager
 
 		private async Task LoadDraftAsync()
 		{
-			if (CboContract.SelectedItem is not ManagerContractOptionDto contract ||
+			if (CbContract.SelectedItem is not ManagerContractOptionDto contract ||
 				!DtpInvoiceDate.SelectedDate.HasValue)
 			{
 				_items.Clear();
@@ -166,8 +166,8 @@ namespace iHome.UI.Views.Manager
 
 		private void Save_Click(object sender, RoutedEventArgs e)
 		{
-			if (CboContract.SelectedItem is not ManagerContractOptionDto contract ||
-				CboStatus.SelectedItem is not StatusOption status ||
+			if (CbContract.SelectedItem is not ManagerContractOptionDto contract ||
+				CbStatus.SelectedItem is not StatusOption status ||
 				!DtpInvoiceDate.SelectedDate.HasValue ||
 				!DtpDueDate.SelectedDate.HasValue ||
 				_items.Count == 0)

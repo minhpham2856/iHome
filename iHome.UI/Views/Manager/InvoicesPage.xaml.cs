@@ -20,18 +20,18 @@ namespace iHome.UI.Views.Manager
 	{
 		private const string All = "Tất cả";
 		private readonly User _currentUser;
-		private readonly int? _propertyId;
+		private readonly int? _buildingId;
 		private readonly ManagerInvoiceService _service = new();
 		private readonly ManagerContractService _contractService = new();
 		private List<ManagerInvoiceDto> _invoices = new();
 		private ICollectionView? _view;
 		private bool _isLoading;
 
-		public InvoicesPage(User currentUser, int? propertyId)
+		public InvoicesPage(User currentUser, int? buildingId)
 		{
 			InitializeComponent();
 			_currentUser = currentUser;
-			_propertyId = propertyId;
+			_buildingId = buildingId;
 			Loaded += async (_, _) => await LoadAsync();
 		}
 
@@ -44,7 +44,7 @@ namespace iHome.UI.Views.Manager
 			{
 				_isLoading = true; BtnRefresh.IsEnabled = false; SetState("Đang tải danh sách hóa đơn...", true);
 				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				var (ok, invoices, error) = await ManagerUi.TryGetAsync(() => _service.GetInvoices(managerId, _propertyId));
+				var (ok, invoices, error) = await ManagerUi.TryGetAsync(() => _service.GetInvoices(managerId, _buildingId));
 				if (!ok || invoices == null)
 				{
 					SetState(error ?? "Không thể tải danh sách hóa đơn.", true);
@@ -52,7 +52,7 @@ namespace iHome.UI.Views.Manager
 				}
 				_invoices = invoices;
 				_view = CollectionViewSource.GetDefaultView(_invoices); _view.Filter = FilterInvoice; InvoicesGrid.ItemsSource = _view;
-				CboStatus.ItemsSource = new[] { All }.Concat(_invoices.Select(item => item.StatusDisplay).Distinct()); CboStatus.SelectedIndex = 0;
+				CbStatus.ItemsSource = new[] { All }.Concat(_invoices.Select(item => item.StatusDisplay).Distinct()); CbStatus.SelectedIndex = 0;
 				UpdateSummary(); RefreshView();
 			}
 			finally { _isLoading = false; BtnRefresh.IsEnabled = true; }
@@ -72,7 +72,7 @@ namespace iHome.UI.Views.Manager
 			if (item is not ManagerInvoiceDto invoice) return false;
 			string keyword = TxtSearch.Text.Trim();
 			bool search = string.IsNullOrEmpty(keyword) || invoice.Id.ToString().Contains(keyword) || invoice.BuildingName.Contains(keyword, StringComparison.OrdinalIgnoreCase) || invoice.RoomNumber.Contains(keyword, StringComparison.OrdinalIgnoreCase) || invoice.MainTenantName.Contains(keyword, StringComparison.OrdinalIgnoreCase);
-			bool status = CboStatus.SelectedItem is not string selected || selected == All || selected == invoice.StatusDisplay;
+			bool status = CbStatus.SelectedItem is not string selected || selected == All || selected == invoice.StatusDisplay;
 			return search && status;
 		}
 
@@ -82,7 +82,7 @@ namespace iHome.UI.Views.Manager
 		private async void AddInvoice_Click(object sender, RoutedEventArgs e)
 		{
 			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-			var (ok, contracts, error) = await ManagerUi.TryGetAsync(() => _contractService.GetContractOptions(managerId, _propertyId));
+			var (ok, contracts, error) = await ManagerUi.TryGetAsync(() => _contractService.GetContractOptions(managerId, _buildingId));
 			if (!ok || contracts == null)
 			{
 				ManagerUi.ShowError(error ?? "Không thể tải danh sách hợp đồng.");
@@ -103,7 +103,7 @@ namespace iHome.UI.Views.Manager
 			if (InvoicesGrid.SelectedItem is not ManagerInvoiceDto selected) { ShowSelect(); return; }
 			int managerId = ManagerPageAccess.GetManagerId(_currentUser);
 			var (formOk, form, formError) = await ManagerUi.TryGetAsync(() => _service.GetInvoice(managerId, selected.Id));
-			var (contractsOk, contracts, contractsError) = await ManagerUi.TryGetAsync(() => _contractService.GetContractOptions(managerId, _propertyId));
+			var (contractsOk, contracts, contractsError) = await ManagerUi.TryGetAsync(() => _contractService.GetContractOptions(managerId, _buildingId));
 			if (!formOk || !contractsOk || form == null || contracts == null)
 			{
 				ManagerUi.ShowError(formError ?? contractsError ?? "Không thể tải dữ liệu hóa đơn.");

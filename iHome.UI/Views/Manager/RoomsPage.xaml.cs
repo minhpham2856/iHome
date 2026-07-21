@@ -16,17 +16,17 @@ namespace iHome.UI.Views.Manager
 	{
 		private const string All = "Tất cả";
 		private readonly User _currentUser;
-		private readonly int? _propertyId;
+		private readonly int? _buildingId;
 		private readonly ManagerRoomService _service = new();
 		private List<ManagerRoomDto> _rooms = new();
 		private ICollectionView? _roomView;
 		private bool _isLoading;
 
-		public RoomsPage(User currentUser, int? propertyId)
+		public RoomsPage(User currentUser, int? buildingId)
 		{
 			InitializeComponent();
 			_currentUser = currentUser;
-			_propertyId = propertyId;
+			_buildingId = buildingId;
 			Loaded += RoomsPage_Loaded;
 		}
 
@@ -49,7 +49,7 @@ namespace iHome.UI.Views.Manager
 				BtnRefresh.IsEnabled = false;
 				SetState("Đang tải danh sách phòng...", true);
 				int managerId = ManagerPageAccess.GetManagerId(_currentUser);
-				_rooms = await Task.Run(() => _service.GetRooms(managerId, _propertyId));
+				_rooms = await Task.Run(() => _service.GetRooms(managerId, _buildingId));
 
 				_roomView = CollectionViewSource.GetDefaultView(_rooms);
 				_roomView.Filter = FilterRoom;
@@ -71,15 +71,15 @@ namespace iHome.UI.Views.Manager
 
 		private void PopulateFilters()
 		{
-			CboBuilding.ItemsSource = new[] { All }
+			CbBuilding.ItemsSource = new[] { All }
 				.Concat(_rooms.Select(r => r.BuildingName).Distinct().OrderBy(name => name));
-			CboStatus.ItemsSource = new[] { All }
+			CbStatus.ItemsSource = new[] { All }
 				.Concat(_rooms.Select(r => r.StatusDisplay).Distinct().OrderBy(status => status));
-			CboFloor.ItemsSource = new[] { All }
+			CbFloor.ItemsSource = new[] { All }
 				.Concat(_rooms.Select(r => r.Floor.ToString()).Distinct().OrderBy(floor => floor));
-			CboBuilding.SelectedIndex = 0;
-			CboStatus.SelectedIndex = 0;
-			CboFloor.SelectedIndex = 0;
+			CbBuilding.SelectedIndex = 0;
+			CbStatus.SelectedIndex = 0;
+			CbFloor.SelectedIndex = 0;
 		}
 
 		private void UpdateSummary()
@@ -106,11 +106,11 @@ namespace iHome.UI.Views.Manager
 				room.RoomNumber.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
 				room.BuildingName.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
 				room.RoomTypeName.Contains(keyword, StringComparison.OrdinalIgnoreCase);
-			bool matchesBuilding = CboBuilding.SelectedItem is not string building ||
+			bool matchesBuilding = CbBuilding.SelectedItem is not string building ||
 				building == All || room.BuildingName == building;
-			bool matchesStatus = CboStatus.SelectedItem is not string status ||
+			bool matchesStatus = CbStatus.SelectedItem is not string status ||
 				status == All || room.StatusDisplay == status;
-			bool matchesFloor = CboFloor.SelectedItem is not string floor ||
+			bool matchesFloor = CbFloor.SelectedItem is not string floor ||
 				floor == All || room.Floor.ToString() == floor;
 
 			return matchesKeyword && matchesBuilding && matchesStatus && matchesFloor;
