@@ -26,30 +26,30 @@
                 <Button Content="Gán vào phòng" Style="{StaticResource ManagerToolbarButtonStyle}" Click="AssignTenant_Click"/>
                 <Button Content="Gỡ khỏi HĐ" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="RemoveTenant_Click"/>
                 <Button Content="Xóa" Style="{StaticResource ManagerDangerButtonStyle}" Click="DeleteTenant_Click"/>
-                <Button x:Name="BtnRefresh" Content="↻ Làm mới" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="BtnRefresh_Click"/>
+                <Button x:Name="btnRefresh" Content="↻ Làm mới" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="btnRefresh_Click"/>
             </StackPanel>
         </Grid>
 
         <UniformGrid Grid.Row="1" Columns="4" Margin="4,0,-6,14">
-            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="TỔNG NGƯỜI THUÊ" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtTotalTenants" Style="{StaticResource ManagerKpiPrimaryValueStyle}"/></StackPanel></Border>
-            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="NGƯỜI THUÊ CHÍNH" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtMainTenants" Style="{StaticResource ManagerKpiInfoValueStyle}"/></StackPanel></Border>
-            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="NGƯỜI Ở CÙNG" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtRoommates" Style="{StaticResource ManagerKpiValueStyle}"/></StackPanel></Border>
-            <Border Style="{StaticResource ManagerKpiCardStyle}" Margin="0"><StackPanel><TextBlock Text="SẮP HẾT HẠN" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtExpiringTenants" Style="{StaticResource ManagerKpiDangerValueStyle}"/></StackPanel></Border>
+            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="TỔNG NGƯỜI THUÊ" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="lbTotalTenants" Style="{StaticResource ManagerKpiPrimaryValueStyle}"/></StackPanel></Border>
+            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="NGƯỜI THUÊ CHÍNH" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="lbMainTenants" Style="{StaticResource ManagerKpiInfoValueStyle}"/></StackPanel></Border>
+            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="NGƯỜI Ở CÙNG" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="lbRoommates" Style="{StaticResource ManagerKpiValueStyle}"/></StackPanel></Border>
+            <Border Style="{StaticResource ManagerKpiCardStyle}" Margin="0"><StackPanel><TextBlock Text="SẮP HẾT HẠN" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="lbExpiringTenants" Style="{StaticResource ManagerKpiDangerValueStyle}"/></StackPanel></Border>
         </UniformGrid>
 
         <Border Grid.Row="2" Style="{StaticResource ManagerCardStyle}" Margin="4,0,4,14" Padding="16">
             <Grid>
                 <Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                <StackPanel Margin="0,0,12,0"><TextBlock Text="TÊN, CCCD HOẶC SỐ ĐIỆN THOẠI" Style="{StaticResource ManagerFilterLabelStyle}"/><TextBox x:Name="TxtSearch" Style="{StaticResource ManagerTextBoxStyle}" TextChanged="FilterChanged"/></StackPanel>
-                <StackPanel Grid.Column="1" Margin="0,0,12,0"><TextBlock Text="TÒA NHÀ" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="CbBuilding" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="BuildingFilterChanged"/></StackPanel>
-                <StackPanel Grid.Column="2" Margin="0,0,12,0"><TextBlock Text="PHÒNG" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="CbRoom" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
-                <StackPanel Grid.Column="3"><TextBlock Text="HỢP ĐỒNG" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="CbContractStatus" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
+                <StackPanel Margin="0,0,12,0"><TextBlock Text="TÊN, CCCD HOẶC SỐ ĐIỆN THOẠI" Style="{StaticResource ManagerFilterLabelStyle}"/><TextBox x:Name="txtSearch" Style="{StaticResource ManagerTextBoxStyle}" TextChanged="FilterChanged"/></StackPanel>
+                <StackPanel Grid.Column="1" Margin="0,0,12,0"><TextBlock Text="TÒA NHÀ" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="cbBuilding" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="BuildingFilterChanged"/></StackPanel>
+                <StackPanel Grid.Column="2" Margin="0,0,12,0"><TextBlock Text="PHÒNG" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="cbRoom" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
+                <StackPanel Grid.Column="3"><TextBlock Text="HỢP ĐỒNG" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="cbContractStatus" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
             </Grid>
         </Border>
 
         <Border Grid.Row="3" Margin="4,0,4,0" Style="{StaticResource ManagerCardStyle}" Padding="0">
             <Grid>
-                <DataGrid x:Name="GuestsGrid" Style="{StaticResource ManagerDataGridStyle}" HorizontalScrollBarVisibility="Auto">
+                <DataGrid x:Name="dgGuests" Style="{StaticResource ManagerDataGridStyle}" HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="HỌ TÊN &amp; EMAIL" Width="1.45*" MinWidth="180">
                             <DataGridTemplateColumn.CellTemplate><DataTemplate><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding FullName}" FontWeight="SemiBold" Foreground="{StaticResource ColorTextPrimary}"/><TextBlock Text="{Binding Email}" FontSize="10" Foreground="{StaticResource ColorTextSecondary}" TextTrimming="CharacterEllipsis"/></StackPanel></DataTemplate></DataGridTemplateColumn.CellTemplate>
@@ -77,10 +77,10 @@
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
-                <Border x:Name="StatePanel" Background="{StaticResource ColorOverlay}" Visibility="Collapsed"><TextBlock x:Name="StateText" Style="{StaticResource ManagerStateTextStyle}"/></Border>
+                <Border x:Name="brdState" Background="{StaticResource ColorOverlay}" Visibility="Collapsed"><TextBlock x:Name="lbState" Style="{StaticResource ManagerStateTextStyle}"/></Border>
             </Grid>
         </Border>
 
-        <TextBlock x:Name="TxtResultCount" Grid.Row="4" Margin="10,10,4,0" Foreground="{StaticResource ColorTextSecondary}" FontSize="12"/>
+        <TextBlock x:Name="lbResultCount" Grid.Row="4" Margin="10,10,4,0" Foreground="{StaticResource ColorTextSecondary}" FontSize="12"/>
     </Grid>
 </Page>

@@ -618,14 +618,20 @@
         <Setter Property="Background" Value="{StaticResource ColorInfoSoft}"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Style.Triggers>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Trống">
+                <Setter Property="Background" Value="{StaticResource ColorSurfaceHover}"/>
+            </DataTrigger>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Còn trống">
                 <Setter Property="Background" Value="{StaticResource ColorSurfaceHover}"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Đã đặt cọc">
-                <Setter Property="Background" Value="{StaticResource ColorDangerSoft}"/>
+                <Setter Property="Background" Value="{StaticResource ColorInfoSoft}"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Đang ở">
-                <Setter Property="Background" Value="{StaticResource ColorInfoSoft}"/>
+                <Setter Property="Background" Value="{StaticResource ColorSuccessSoft}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Bảo trì">
+                <Setter Property="Background" Value="{StaticResource ColorDangerSoft}"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -634,10 +640,19 @@
         <Setter Property="Foreground" Value="{StaticResource ColorInfo}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Style.Triggers>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Trống">
+                <Setter Property="Foreground" Value="{StaticResource ColorTextSecondary}"/>
+            </DataTrigger>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Còn trống">
                 <Setter Property="Foreground" Value="{StaticResource ColorTextSecondary}"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Đã đặt cọc">
+                <Setter Property="Foreground" Value="{StaticResource ColorInfo}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Đang ở">
+                <Setter Property="Foreground" Value="{StaticResource ColorSuccess}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Bảo trì">
                 <Setter Property="Foreground" Value="{StaticResource ColorDanger}"/>
             </DataTrigger>
         </Style.Triggers>
@@ -646,6 +661,9 @@
     <Style x:Key="ManagerRoomStatusTagStyle" TargetType="Border" BasedOn="{StaticResource ManagerTagStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Còn trống"><Setter Property="Background" Value="{StaticResource ColorSurfaceHover}"/></DataTrigger>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Trống"><Setter Property="Background" Value="{StaticResource ColorSurfaceHover}"/></DataTrigger>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Đã đặt cọc"><Setter Property="Background" Value="{StaticResource ColorInfoSoft}"/></DataTrigger>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Đang ở"><Setter Property="Background" Value="{StaticResource ColorSuccessSoft}"/></DataTrigger>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Bảo trì"><Setter Property="Background" Value="{StaticResource ColorDangerSoft}"/></DataTrigger>
         </Style.Triggers>
     </Style>
@@ -654,6 +672,9 @@
         <Setter Property="Foreground" Value="{StaticResource ColorInfo}"/>
         <Style.Triggers>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Còn trống"><Setter Property="Foreground" Value="{StaticResource ColorTextSecondary}"/></DataTrigger>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Trống"><Setter Property="Foreground" Value="{StaticResource ColorTextSecondary}"/></DataTrigger>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Đã đặt cọc"><Setter Property="Foreground" Value="{StaticResource ColorInfo}"/></DataTrigger>
+            <DataTrigger Binding="{Binding StatusDisplay}" Value="Đang ở"><Setter Property="Foreground" Value="{StaticResource ColorSuccess}"/></DataTrigger>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Bảo trì"><Setter Property="Foreground" Value="{StaticResource ColorDanger}"/></DataTrigger>
         </Style.Triggers>
     </Style>
@@ -661,8 +682,8 @@
     <Style x:Key="ManagerContractStatusTagStyle" TargetType="Border" BasedOn="{StaticResource ManagerTagStyle}">
         <Setter Property="Background" Value="{StaticResource ColorSuccessSoft}"/>
         <Style.Triggers>
-            <DataTrigger Binding="{Binding ContractStatus}" Value="Expired"><Setter Property="Background" Value="{StaticResource ColorDangerSoft}"/></DataTrigger>
-            <DataTrigger Binding="{Binding ContractStatus}" Value="Terminated"><Setter Property="Background" Value="{StaticResource ColorSurfaceHover}"/></DataTrigger>
+            <DataTrigger Binding="{Binding ContractStatus}" Value="Đã hết hạn"><Setter Property="Background" Value="{StaticResource ColorDangerSoft}"/></DataTrigger>
+            <DataTrigger Binding="{Binding ContractStatus}" Value="Đã chấm dứt"><Setter Property="Background" Value="{StaticResource ColorSurfaceHover}"/></DataTrigger>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Sắp hết hạn"><Setter Property="Background" Value="{StaticResource ColorDangerSoft}"/></DataTrigger>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Đã hết hạn"><Setter Property="Background" Value="{StaticResource ColorDangerSoft}"/></DataTrigger>
             <DataTrigger Binding="{Binding ContractStatusDisplay}" Value="Sắp hết hạn"><Setter Property="Background" Value="{StaticResource ColorDangerSoft}"/></DataTrigger>
@@ -673,8 +694,8 @@
     <Style x:Key="ManagerContractStatusTextStyle" TargetType="TextBlock" BasedOn="{StaticResource ManagerTagTextStyle}">
         <Setter Property="Foreground" Value="{StaticResource ColorSuccess}"/>
         <Style.Triggers>
-            <DataTrigger Binding="{Binding ContractStatus}" Value="Expired"><Setter Property="Foreground" Value="{StaticResource ColorDanger}"/></DataTrigger>
-            <DataTrigger Binding="{Binding ContractStatus}" Value="Terminated"><Setter Property="Foreground" Value="{StaticResource ColorTextSecondary}"/></DataTrigger>
+            <DataTrigger Binding="{Binding ContractStatus}" Value="Đã hết hạn"><Setter Property="Foreground" Value="{StaticResource ColorDanger}"/></DataTrigger>
+            <DataTrigger Binding="{Binding ContractStatus}" Value="Đã chấm dứt"><Setter Property="Foreground" Value="{StaticResource ColorTextSecondary}"/></DataTrigger>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Sắp hết hạn"><Setter Property="Foreground" Value="{StaticResource ColorDanger}"/></DataTrigger>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Đã hết hạn"><Setter Property="Foreground" Value="{StaticResource ColorDanger}"/></DataTrigger>
             <DataTrigger Binding="{Binding ContractStatusDisplay}" Value="Sắp hết hạn"><Setter Property="Foreground" Value="{StaticResource ColorDanger}"/></DataTrigger>
@@ -699,14 +720,14 @@
     <Style x:Key="ManagerInvoiceStatusTagStyle" TargetType="Border" BasedOn="{StaticResource ManagerTagStyle}">
         <Setter Property="Background" Value="{StaticResource ColorInfoSoft}"/>
         <Style.Triggers>
-            <DataTrigger Binding="{Binding Status}" Value="Paid"><Setter Property="Background" Value="{StaticResource ColorSuccessSoft}"/></DataTrigger>
+            <DataTrigger Binding="{Binding Status}" Value="Đã thanh toán"><Setter Property="Background" Value="{StaticResource ColorSuccessSoft}"/></DataTrigger>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Quá hạn"><Setter Property="Background" Value="{StaticResource ColorDangerSoft}"/></DataTrigger>
         </Style.Triggers>
     </Style>
 
     <Style x:Key="ManagerInvoiceStatusTextStyle" TargetType="TextBlock" BasedOn="{StaticResource ManagerTagTextStyle}">
         <Style.Triggers>
-            <DataTrigger Binding="{Binding Status}" Value="Paid"><Setter Property="Foreground" Value="{StaticResource ColorSuccess}"/></DataTrigger>
+            <DataTrigger Binding="{Binding Status}" Value="Đã thanh toán"><Setter Property="Foreground" Value="{StaticResource ColorSuccess}"/></DataTrigger>
             <DataTrigger Binding="{Binding StatusDisplay}" Value="Quá hạn"><Setter Property="Foreground" Value="{StaticResource ColorDanger}"/></DataTrigger>
         </Style.Triggers>
     </Style>

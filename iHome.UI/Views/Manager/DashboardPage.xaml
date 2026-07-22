@@ -17,9 +17,9 @@
                         <TextBlock Text="Chào mừng trở lại! Dưới đây là tổng quan các nhà trọ bạn đang quản lý."
                                    Style="{StaticResource ManagerPageDescriptionStyle}"/>
                     </StackPanel>
-                    <Button x:Name="BtnRefresh" Grid.Column="1" Content="↻  Làm mới"
+                    <Button x:Name="btnRefresh" Grid.Column="1" Content="↻  Làm mới"
                             Style="{StaticResource ManagerRefreshButtonStyle}"
-                            Click="BtnRefresh_Click"/>
+                            Click="btnRefresh_Click"/>
                 </Grid>
 
                 <Grid Margin="4,0,4,10">
@@ -28,26 +28,26 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Tổng quan quản lý" Style="{StaticResource ManagerSectionTitleStyle}" Margin="0"/>
-                    <TextBlock x:Name="TxtLastUpdated" Grid.Column="1"
+                    <TextBlock x:Name="lbLastUpdated" Grid.Column="1"
                                Foreground="{StaticResource ColorTextSecondary}" FontSize="11"
                                VerticalAlignment="Center"/>
                 </Grid>
 
                 <UniformGrid Columns="5" Margin="4,0,-6,16">
                     <Border Style="{StaticResource ManagerKpiCardStyle}">
-                        <StackPanel><TextBlock Style="{StaticResource ManagerKpiLabelStyle}" Text="TÒA NHÀ"/><TextBlock x:Name="TxtBuildings" Style="{StaticResource ManagerKpiPrimaryValueStyle}"/></StackPanel>
+                        <StackPanel><TextBlock Style="{StaticResource ManagerKpiLabelStyle}" Text="TÒA NHÀ"/><TextBlock x:Name="lbBuildings" Style="{StaticResource ManagerKpiPrimaryValueStyle}"/></StackPanel>
                     </Border>
                     <Border Style="{StaticResource ManagerKpiCardStyle}">
-                        <StackPanel><TextBlock Style="{StaticResource ManagerKpiLabelStyle}" Text="PHÒNG"/><TextBlock x:Name="TxtRooms" Style="{StaticResource ManagerKpiValueStyle}"/></StackPanel>
+                        <StackPanel><TextBlock Style="{StaticResource ManagerKpiLabelStyle}" Text="PHÒNG"/><TextBlock x:Name="lbRooms" Style="{StaticResource ManagerKpiValueStyle}"/></StackPanel>
                     </Border>
                     <Border Style="{StaticResource ManagerKpiCardStyle}">
-                        <StackPanel><TextBlock Style="{StaticResource ManagerKpiLabelStyle}" Text="ĐANG Ở"/><TextBlock x:Name="TxtOccupied" Style="{StaticResource ManagerKpiInfoValueStyle}"/></StackPanel>
+                        <StackPanel><TextBlock Style="{StaticResource ManagerKpiLabelStyle}" Text="ĐANG Ở"/><TextBlock x:Name="lbOccupied" Style="{StaticResource ManagerKpiInfoValueStyle}"/></StackPanel>
                     </Border>
                     <Border Style="{StaticResource ManagerKpiCardStyle}">
-                        <StackPanel><TextBlock Style="{StaticResource ManagerKpiLabelStyle}" Text="CÒN TRỐNG"/><TextBlock x:Name="TxtVacant" Style="{StaticResource ManagerKpiValueStyle}"/></StackPanel>
+                        <StackPanel><TextBlock Style="{StaticResource ManagerKpiLabelStyle}" Text="CÒN TRỐNG"/><TextBlock x:Name="lbVacant" Style="{StaticResource ManagerKpiValueStyle}"/></StackPanel>
                     </Border>
                     <Border Style="{StaticResource ManagerKpiCardStyle}" Margin="0">
-                        <StackPanel><TextBlock Style="{StaticResource ManagerDangerLabelStyle}" Text="BẢO TRÌ"/><TextBlock x:Name="TxtMaintenance" Style="{StaticResource ManagerKpiDangerValueStyle}"/></StackPanel>
+                        <StackPanel><TextBlock Style="{StaticResource ManagerDangerLabelStyle}" Text="BẢO TRÌ"/><TextBlock x:Name="lbMaintenance" Style="{StaticResource ManagerKpiDangerValueStyle}"/></StackPanel>
                     </Border>
                 </UniformGrid>
 
@@ -63,14 +63,14 @@
                         <Border Background="{StaticResource ColorPrimary}" Padding="20" MinHeight="132">
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="DOANH THU THÁNG" Foreground="{StaticResource ColorOnPrimaryMuted}" FontSize="12"/>
-                                <TextBlock x:Name="TxtRevenue" Foreground="{StaticResource ColorOnPrimary}" FontSize="27" FontWeight="Bold" Margin="0,7,0,0" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="lbRevenue" Foreground="{StaticResource ColorOnPrimary}" FontSize="27" FontWeight="Bold" Margin="0,7,0,0" TextWrapping="Wrap"/>
                                 <TextBlock Text="Theo dõi doanh thu đã thanh toán" Foreground="{StaticResource ColorOnPrimaryMuted}" FontSize="10" Margin="0,8,0,0"/>
                             </StackPanel>
                         </Border>
                         <Border Grid.Column="2" Background="{StaticResource ColorSurfaceHover}" BorderBrush="{StaticResource ColorBorder}" BorderThickness="1" Padding="20" MinHeight="132">
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="TỔNG CÔNG NỢ" Foreground="{StaticResource ColorTextSecondary}" FontSize="12"/>
-                                <TextBlock x:Name="TxtOutstanding" Foreground="{StaticResource ColorDanger}" FontSize="27" FontWeight="Bold" Margin="0,7,0,0" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="lbOutstanding" Foreground="{StaticResource ColorDanger}" FontSize="27" FontWeight="Bold" Margin="0,7,0,0" TextWrapping="Wrap"/>
                                 <TextBlock Text="Các khoản chưa được thanh toán" Foreground="{StaticResource ColorTextSecondary}" FontSize="10" Margin="0,8,0,0"/>
                             </StackPanel>
                         </Border>
@@ -79,10 +79,10 @@
                     <Border Grid.Column="2" Style="{StaticResource ManagerCardStyle}" Padding="16">
                         <StackPanel>
                             <TextBlock Text="Tình trạng nhanh" Style="{StaticResource ManagerSectionTitleStyle}"/>
-                            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Người thuê hiện tại" Foreground="{StaticResource ColorTextSecondary}"/><TextBlock x:Name="TxtTenants" Grid.Column="1" FontWeight="Bold" Foreground="{StaticResource ColorTextPrimary}"/></Grid>
-                            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Hợp đồng hoạt động" Foreground="{StaticResource ColorTextSecondary}"/><TextBlock x:Name="TxtContracts" Grid.Column="1" FontWeight="Bold" Foreground="{StaticResource ColorPrimary}"/></Grid>
-                            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Sắp hết hạn" Foreground="{StaticResource ColorTextSecondary}"/><TextBlock x:Name="TxtExpiring" Grid.Column="1" FontWeight="Bold" Foreground="{StaticResource ColorPrimary}"/></Grid>
-                            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Hóa đơn quá hạn" Foreground="{StaticResource ColorDanger}"/><TextBlock x:Name="TxtOverdue" Grid.Column="1" FontWeight="Bold" Foreground="{StaticResource ColorDanger}"/></Grid>
+                            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Người thuê hiện tại" Foreground="{StaticResource ColorTextSecondary}"/><TextBlock x:Name="lbTenants" Grid.Column="1" FontWeight="Bold" Foreground="{StaticResource ColorTextPrimary}"/></Grid>
+                            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Hợp đồng hoạt động" Foreground="{StaticResource ColorTextSecondary}"/><TextBlock x:Name="lbContracts" Grid.Column="1" FontWeight="Bold" Foreground="{StaticResource ColorPrimary}"/></Grid>
+                            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Sắp hết hạn" Foreground="{StaticResource ColorTextSecondary}"/><TextBlock x:Name="lbExpiring" Grid.Column="1" FontWeight="Bold" Foreground="{StaticResource ColorPrimary}"/></Grid>
+                            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Hóa đơn quá hạn" Foreground="{StaticResource ColorDanger}"/><TextBlock x:Name="lbOverdue" Grid.Column="1" FontWeight="Bold" Foreground="{StaticResource ColorDanger}"/></Grid>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -91,7 +91,7 @@
                     <StackPanel>
                         <TextBlock Text="Doanh thu 12 tháng gần nhất" Style="{StaticResource ManagerSectionTitleStyle}"/>
                         <TextBlock Text="Theo dõi xu hướng và hiệu quả thu tiền" Style="{StaticResource ManagerPageDescriptionStyle}" Margin="0,0,0,10"/>
-                        <lvc:CartesianChart x:Name="RevenueChart" Height="250"/>
+                        <lvc:CartesianChart x:Name="chartRevenue" Height="250"/>
                     </StackPanel>
                 </Border>
 
@@ -104,21 +104,21 @@
                     <Border Style="{StaticResource ManagerCardStyle}">
                         <StackPanel>
                             <TextBlock Text="Tình trạng phòng" Style="{StaticResource ManagerSectionTitleStyle}"/>
-                            <lvc:PieChart x:Name="RoomStatusChart" Height="220" LegendLocation="Right"/>
+                            <lvc:PieChart x:Name="chartRoomStatus" Height="220" LegendLocation="Right"/>
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="2" Style="{StaticResource ManagerCardStyle}">
                         <StackPanel>
                             <TextBlock Text="Tình trạng hợp đồng" Style="{StaticResource ManagerSectionTitleStyle}"/>
-                            <lvc:PieChart x:Name="ContractStatusChart" Height="220" LegendLocation="Right"/>
+                            <lvc:PieChart x:Name="chartContractStatus" Height="220" LegendLocation="Right"/>
                         </StackPanel>
                     </Border>
                 </Grid>
             </StackPanel>
         </ScrollViewer>
 
-        <Border x:Name="StatePanel" Background="{StaticResource ColorOverlay}" Visibility="Collapsed">
-            <TextBlock x:Name="StateText" Style="{StaticResource ManagerStateTextStyle}"/>
+        <Border x:Name="brdState" Background="{StaticResource ColorOverlay}" Visibility="Collapsed">
+            <TextBlock x:Name="lbState" Style="{StaticResource ManagerStateTextStyle}"/>
         </Border>
     </Grid>
 </Page>

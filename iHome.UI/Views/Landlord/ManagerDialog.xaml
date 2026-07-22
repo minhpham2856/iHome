@@ -12,7 +12,7 @@
         </Grid.RowDefinitions>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <TextBlock x:Name="lblTitle" Text="Thêm nhân viên" Style="{StaticResource ManagerDialogTitleStyle}"/>
+                <TextBlock x:Name="lbTitle" Text="Thêm nhân viên" Style="{StaticResource ManagerDialogTitleStyle}"/>
                 <TextBlock Text="HỌ VÀ TÊN" Style="{StaticResource ManagerDialogLabelStyle}"/>
                 <TextBox x:Name="txtFullName" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="100"
                          KeyDown="txtFullName_KeyDown"/>
@@ -22,7 +22,7 @@
                 <TextBlock Text="SỐ ĐIỆN THOẠI" Style="{StaticResource ManagerDialogLabelStyle}"/>
                 <TextBox x:Name="txtPhone" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="20"
                          KeyDown="txtPhone_KeyDown"/>
-                <TextBlock x:Name="lblAccountHint" Text="Hệ thống sẽ tự tạo tài khoản (vd: binhnv123456) và gửi mật khẩu tạm qua email."
+                <TextBlock x:Name="lbAccountHint" Text="Hệ thống sẽ tự tạo tài khoản (vd: binhnv123456) và gửi mật khẩu tạm qua email."
                            Style="{StaticResource ManagerPageDescriptionStyle}" Margin="0,8,0,0" TextWrapping="Wrap"/>
                 <CheckBox x:Name="chkIsActive" Content="Đang hoạt động" Margin="0,12,0,0"
                           Foreground="{StaticResource ColorTextPrimary}" IsChecked="True" Visibility="Collapsed"/>

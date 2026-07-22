@@ -35,18 +35,18 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock x:Name="txtPageTitle"
+                    <TextBlock x:Name="lbPageTitle"
                                Text="Bảng điều khiển"
                                Style="{StaticResource DashboardHeaderTitleStyle}"/>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <ComboBox x:Name="CbProperty"
+                        <ComboBox x:Name="cbProperty"
                                   Style="{StaticResource DashboardPropertyComboBoxStyle}"
                                   DisplayMemberPath="Name"
                                   SelectedValuePath="Id"
                                   Visibility="Collapsed"
-                                  SelectionChanged="CbProperty_SelectionChanged"/>
-                        <TextBlock x:Name="txtWelcome"
+                                  SelectionChanged="cbProperty_SelectionChanged"/>
+                        <TextBlock x:Name="lbWelcome"
                                    Text="Xin chào"
                                    Style="{StaticResource DashboardWelcomeStyle}"/>
                     </StackPanel>

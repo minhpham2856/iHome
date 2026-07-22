@@ -15,6 +15,8 @@ public partial class AuditLog
 
     public string? RecordId { get; set; }
 
+    public string? Detail { get; set; }
+
     public string? OldValue { get; set; }
 
     public string? NewValue { get; set; }

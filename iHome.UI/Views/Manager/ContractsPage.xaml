@@ -19,24 +19,24 @@
                 <Button Content="Sửa" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="EditContract_Click"/>
                 <Button Content="Gán thêm khách" Style="{StaticResource ManagerToolbarButtonStyle}" Click="AssignTenant_Click"/>
                 <Button Content="Xóa" Style="{StaticResource ManagerDangerButtonStyle}" Click="DeleteContract_Click"/>
-                <Button x:Name="BtnRefresh" Content="↻ Làm mới" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="BtnRefresh_Click"/>
+                <Button x:Name="btnRefresh" Content="↻ Làm mới" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="btnRefresh_Click"/>
             </StackPanel>
         </Grid>
         <UniformGrid Grid.Row="1" Columns="4" Margin="4,0,-6,14">
-            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="TỔNG HỢP ĐỒNG" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtTotal" Style="{StaticResource ManagerKpiPrimaryValueStyle}"/></StackPanel></Border>
-            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="ĐANG HOẠT ĐỘNG" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtActive" Style="{StaticResource ManagerKpiInfoValueStyle}"/></StackPanel></Border>
-            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="SẮP HẾT HẠN" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtExpiring" Style="{StaticResource ManagerKpiDangerValueStyle}"/></StackPanel></Border>
-            <Border Style="{StaticResource ManagerKpiCardStyle}" Margin="0"><StackPanel><TextBlock Text="ĐÃ CHẤM DỨT" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="TxtTerminated" Style="{StaticResource ManagerKpiValueStyle}"/></StackPanel></Border>
+            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="TỔNG HỢP ĐỒNG" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="lbTotal" Style="{StaticResource ManagerKpiPrimaryValueStyle}"/></StackPanel></Border>
+            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="ĐANG HOẠT ĐỘNG" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="lbActive" Style="{StaticResource ManagerKpiInfoValueStyle}"/></StackPanel></Border>
+            <Border Style="{StaticResource ManagerKpiCardStyle}"><StackPanel><TextBlock Text="SẮP HẾT HẠN" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="lbExpiring" Style="{StaticResource ManagerKpiDangerValueStyle}"/></StackPanel></Border>
+            <Border Style="{StaticResource ManagerKpiCardStyle}" Margin="0"><StackPanel><TextBlock Text="ĐÃ CHẤM DỨT" Style="{StaticResource ManagerKpiLabelStyle}"/><TextBlock x:Name="lbTerminated" Style="{StaticResource ManagerKpiValueStyle}"/></StackPanel></Border>
         </UniformGrid>
         <Border Grid.Row="2" Style="{StaticResource ManagerCardStyle}" Margin="4,0,4,14" Padding="16">
             <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                <StackPanel Margin="0,0,12,0"><TextBlock Text="TÌM KIẾM" Style="{StaticResource ManagerFilterLabelStyle}"/><TextBox x:Name="TxtSearch" Style="{StaticResource ManagerTextBoxStyle}" TextChanged="FilterChanged"/></StackPanel>
-                <StackPanel Grid.Column="1"><TextBlock Text="TRẠNG THÁI" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="CbStatus" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
+                <StackPanel Margin="0,0,12,0"><TextBlock Text="TÌM KIẾM" Style="{StaticResource ManagerFilterLabelStyle}"/><TextBox x:Name="txtSearch" Style="{StaticResource ManagerTextBoxStyle}" TextChanged="FilterChanged"/></StackPanel>
+                <StackPanel Grid.Column="1"><TextBlock Text="TRẠNG THÁI" Style="{StaticResource ManagerFilterLabelStyle}"/><ComboBox x:Name="cbStatus" Style="{StaticResource ManagerComboBoxStyle}" SelectionChanged="FilterChanged"/></StackPanel>
             </Grid>
         </Border>
         <Border Grid.Row="3" Margin="4,0,4,0" Style="{StaticResource ManagerCardStyle}" Padding="0">
             <Grid>
-                <DataGrid x:Name="ContractsGrid" Style="{StaticResource ManagerDataGridStyle}" HorizontalScrollBarVisibility="Auto">
+                <DataGrid x:Name="dgContracts" Style="{StaticResource ManagerDataGridStyle}" HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="MÃ HĐ" Binding="{Binding Id, StringFormat=HĐ #{0}}" Width="0.7*" MinWidth="80" ElementStyle="{StaticResource ManagerDataGridLinkTextStyle}"/>
                         <DataGridTextColumn Header="TÒA NHÀ" Binding="{Binding BuildingName}" Width="1.1*" MinWidth="115" ElementStyle="{StaticResource ManagerDataGridTextStyle}"/>
@@ -49,9 +49,9 @@
                         <DataGridTemplateColumn Header="TRẠNG THÁI" Width="1.1*" MinWidth="125"><DataGridTemplateColumn.CellTemplate><DataTemplate><Border Style="{StaticResource ManagerContractStatusTagStyle}"><TextBlock Text="{Binding StatusDisplay}" Style="{StaticResource ManagerContractStatusTextStyle}"/></Border></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
-                <Border x:Name="StatePanel" Background="{StaticResource ColorOverlay}" Visibility="Collapsed"><TextBlock x:Name="StateText" Style="{StaticResource ManagerStateTextStyle}"/></Border>
+                <Border x:Name="brdState" Background="{StaticResource ColorOverlay}" Visibility="Collapsed"><TextBlock x:Name="lbState" Style="{StaticResource ManagerStateTextStyle}"/></Border>
             </Grid>
         </Border>
-        <TextBlock x:Name="TxtResultCount" Grid.Row="4" Margin="10,10,4,0" Foreground="{StaticResource ColorTextSecondary}" FontSize="12"/>
+        <TextBlock x:Name="lbResultCount" Grid.Row="4" Margin="10,10,4,0" Foreground="{StaticResource ColorTextSecondary}" FontSize="12"/>
     </Grid>
 </Page>

@@ -20,13 +20,13 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel>
                     <TextBlock Text="NHÀ TRỌ" Style="{StaticResource ManagerFilterLabelStyle}"/>
-                    <ComboBox x:Name="cboProperty" Style="{StaticResource ManagerComboBoxStyle}"
-                              DisplayMemberPath="Name" SelectionChanged="cboProperty_SelectionChanged"/>
+                    <ComboBox x:Name="cbProperty" Style="{StaticResource ManagerComboBoxStyle}"
+                              DisplayMemberPath="Name" SelectionChanged="cbProperty_SelectionChanged"/>
                 </StackPanel>
                 <StackPanel Grid.Column="2">
                     <TextBlock Text="TÒA NHÀ" Style="{StaticResource ManagerFilterLabelStyle}"/>
-                    <ComboBox x:Name="cboBuilding" Style="{StaticResource ManagerComboBoxStyle}"
-                              DisplayMemberPath="Name" SelectionChanged="cboBuilding_SelectionChanged"/>
+                    <ComboBox x:Name="cbBuilding" Style="{StaticResource ManagerComboBoxStyle}"
+                              DisplayMemberPath="Name" SelectionChanged="cbBuilding_SelectionChanged"/>
                 </StackPanel>
                 <Button x:Name="btnRefresh" Grid.Column="3" Content="↻" Margin="12,18,0,0"
                         Style="{StaticResource ManagerSecondaryButtonStyle}" Click="btnRefresh_Click" ToolTip="Làm mới"
@@ -109,7 +109,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="lblRoomSection" Text="Phòng &amp; gán dịch vụ" Style="{StaticResource ManagerSectionTitleStyle}"
+                        <TextBlock x:Name="lbRoomSection" Text="Phòng &amp; gán dịch vụ" Style="{StaticResource ManagerSectionTitleStyle}"
                                    Margin="0" VerticalAlignment="Center"/>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <Button x:Name="btnEditRoom" Content="Sửa" Style="{StaticResource ManagerSecondaryButtonStyle}"

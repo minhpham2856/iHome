@@ -1,83 +1,92 @@
 using System;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace iHome.UI.Views.Manager
 {
-	// Helper UI Manager: hiện MessageBox lỗi trên form thay vì để exception nhảy vào debugger (Continue)
-	// TryRunAsync / TryGetAsync bắt lỗi nghiệp vụ bên trong Task.Run rồi trả message
+	// Manager UI helper: catch business errors, show MessageBox — synchronous calls only (BLL is not async)
 	internal static class ManagerUi
 	{
+		// Show validation warning dialog
 		public static void ShowValidation(string message) =>
 			MessageBox.Show(message, "Dữ liệu không hợp lệ", MessageBoxButton.OK, MessageBoxImage.Warning);
 
+		// Show generic business-error dialog
 		public static void ShowError(string message) =>
 			MessageBox.Show(message, "Không thể thực hiện", MessageBoxButton.OK, MessageBoxImage.Warning);
 
-		// Chạy thao tác ghi (create/update/delete); false nếu lỗi nghiệp vụ đã được báo MessageBox
-		public static async Task<bool> TryRunAsync(Action action)
+		// Run a write action; returns false if a business error was already shown
+		public static bool TryRun(Action action)
 		{
-			string? error = await Task.Run(() => Execute(action));
+			// Run delegated action inside try/catch and capture business error message
+			string? error = Execute(action);
+			// Guard clause: only continue when UI selection, role, or input is valid
 			if (error == null)
 			{
+				// Exit method early or return value/tuple to caller
 				return true;
 			}
+			// Execute UI step inside TryRun
 			ShowError(error);
+			// Exit method early or return value/tuple to caller
 			return false;
 		}
 
-		// Chạy thao tác trả kết quả (vd. CreateTenant trả Id)
-		public static async Task<(bool ok, T value)> TryRunAsync<T>(Func<T> action)
+		// Run an action that returns a value (e.g. CreateTenant returns Id)
+		public static (bool ok, T value) TryRun<T>(Func<T> action)
 		{
-			var result = await Task.Run(() =>
-			{
-				try
-				{
-					return (ok: true, value: action(), error: (string?)null);
-				}
-				catch (Exception ex) when (IsBusinessError(ex))
-				{
-					return (ok: false, value: default(T)!, error: ex.Message);
-				}
-			});
-			if (result.ok)
-			{
-				return (true, result.value);
-			}
-			ShowError(result.error!);
-			return (false, default!);
-		}
-
-		// Đọc dữ liệu; không tự MessageBox — caller quyết định hiện lỗi hay SetState trên trang
-		public static async Task<(bool ok, T? value, string? error)> TryGetAsync<T>(Func<T> action)
-		{
-			return await Task.Run(() =>
-			{
-				try
-				{
-					return (ok: true, value: (T?)action(), error: (string?)null);
-				}
-				catch (Exception ex) when (IsBusinessError(ex))
-				{
-					return (ok: false, value: default, error: ex.Message);
-				}
-			});
-		}
-
-		private static string? Execute(Action action)
-		{
+			// Begin try block so BLL/SQL errors become friendly MessageBox instead of crash
 			try
 			{
-				action();
-				return null;
+				// Exit method early or return value/tuple to caller
+				return (true, action());
 			}
+			// Catch only BLL validation/authorization exceptions as user-facing errors
 			catch (Exception ex) when (IsBusinessError(ex))
 			{
+				// Execute UI step inside static
+				ShowError(ex.Message);
+				// Exit method early or return value/tuple to caller
+				return (false, default!);
+			}
+		}
+
+		// Load data; caller handles MessageBox / UI state on failure
+		public static (bool ok, T? value, string? error) TryGet<T>(Func<T> action)
+		{
+			// Begin try block so BLL/SQL errors become friendly MessageBox instead of crash
+			try
+			{
+				// Exit method early or return value/tuple to caller
+				return (true, action(), null);
+			}
+			// Catch only BLL validation/authorization exceptions as user-facing errors
+			catch (Exception ex) when (IsBusinessError(ex))
+			{
+				// Exit method early or return value/tuple to caller
+				return (false, default, ex.Message);
+			}
+		}
+
+		// Execute action and return error message, or null on success
+		private static string? Execute(Action action)
+		{
+			// Begin try block so BLL/SQL errors become friendly MessageBox instead of crash
+			try
+			{
+				// Execute UI step inside Execute
+				action();
+				// Exit method early or return value/tuple to caller
+				return null;
+			}
+			// Catch only BLL validation/authorization exceptions as user-facing errors
+			catch (Exception ex) when (IsBusinessError(ex))
+			{
+				// Exit method early or return value/tuple to caller
 				return ex.Message;
 			}
 		}
 
-		// Chỉ coi là lỗi nghiệp vụ mong đợi; lỗi hệ thống khác vẫn throw bình thường
+		// Treat common BLL validation/authorization exceptions as user-facing business errors
 		private static bool IsBusinessError(Exception ex) =>
 			ex is ArgumentException
 				or ArgumentOutOfRangeException

@@ -33,61 +33,61 @@
                 <Border Style="{StaticResource CardStyle}" Margin="4">
                     <StackPanel>
                         <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Tổng nhà trọ"/>
-                        <TextBlock x:Name="lblTotalProperties" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                        <TextBlock x:Name="lbTotalProperties" Style="{StaticResource KpiValueStyle}" Text="0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource CardStyle}" Margin="4">
                     <StackPanel>
                         <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Tổng tòa nhà"/>
-                        <TextBlock x:Name="lblTotalBuildings" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                        <TextBlock x:Name="lbTotalBuildings" Style="{StaticResource KpiValueStyle}" Text="0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource CardStyle}" Margin="4">
                     <StackPanel>
                         <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Tổng phòng"/>
-                        <TextBlock x:Name="lblTotalRooms" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                        <TextBlock x:Name="lbTotalRooms" Style="{StaticResource KpiValueStyle}" Text="0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource CardStyle}" Margin="4">
                     <StackPanel>
                         <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Đang ở"/>
-                        <TextBlock x:Name="lblOccupiedRooms" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                        <TextBlock x:Name="lbOccupiedRooms" Style="{StaticResource KpiValueStyle}" Text="0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource CardStyle}" Margin="4">
                     <StackPanel>
                         <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Trống"/>
-                        <TextBlock x:Name="lblVacantRooms" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                        <TextBlock x:Name="lbVacantRooms" Style="{StaticResource KpiValueStyle}" Text="0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource CardStyle}" Margin="4">
                     <StackPanel>
                         <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Tổng khách"/>
-                        <TextBlock x:Name="lblTotalTenants" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                        <TextBlock x:Name="lbTotalTenants" Style="{StaticResource KpiValueStyle}" Text="0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource CardStyle}" Margin="4">
                     <StackPanel>
                         <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Hợp đồng hoạt động"/>
-                        <TextBlock x:Name="lblActiveContracts" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                        <TextBlock x:Name="lbActiveContracts" Style="{StaticResource KpiValueStyle}" Text="0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource CardStyle}" Margin="4">
                     <StackPanel>
                         <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Doanh thu tháng"/>
-                        <TextBlock x:Name="lblMonthlyRevenue" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                        <TextBlock x:Name="lbMonthlyRevenue" Style="{StaticResource KpiValueStyle}" Text="0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource CardStyle}" Margin="4">
                     <StackPanel>
                         <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Chưa thanh toán"/>
-                        <TextBlock x:Name="lblOutstanding" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                        <TextBlock x:Name="lbOutstanding" Style="{StaticResource KpiValueStyle}" Text="0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource CardStyle}" Margin="4">
                     <StackPanel>
                         <TextBlock Style="{StaticResource KpiTitleStyle}" Text="Quá hạn"/>
-                        <TextBlock x:Name="lblOverdue" Style="{StaticResource KpiValueStyle}" Text="0"/>
+                        <TextBlock x:Name="lbOverdue" Style="{StaticResource KpiValueStyle}" Text="0"/>
                     </StackPanel>
                 </Border>
             </UniformGrid>
@@ -99,7 +99,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="lblRevenueTitle" Style="{StaticResource ChartTitleStyle}"
+                        <TextBlock x:Name="lbRevenueTitle" Style="{StaticResource ChartTitleStyle}"
                                    Text="Doanh thu" VerticalAlignment="Center" Margin="0"/>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <ComboBox x:Name="cbRevenueRange"

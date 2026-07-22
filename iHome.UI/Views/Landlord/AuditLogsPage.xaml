@@ -21,14 +21,14 @@
                     <ComboBox x:Name="cbRole"
                               Style="{StaticResource ManagerComboBoxStyle}"
                               Width="180"
-                              DisplayMemberPath="Name"
+                              DisplayMemberPath="Display"
                               VerticalAlignment="Center"
                               SelectionChanged="FilterChanged"/>
                     <TextBlock Text="Người dùng" Style="{StaticResource FilterInlineLabelStyle}" Margin="12,0,6,0"/>
                     <ComboBox x:Name="cbUser"
                               Style="{StaticResource ManagerComboBoxStyle}"
                               Width="220"
-                              DisplayMemberPath="Name"
+                              DisplayMemberPath="Display"
                               VerticalAlignment="Center"
                               SelectionChanged="FilterChanged"/>
                     <Button x:Name="btnRefresh" Content="↻" Style="{StaticResource ManagerSecondaryButtonStyle}"
@@ -46,12 +46,26 @@
                         <DataGridTextColumn Header="THỜI GIAN" Binding="{Binding TimestampDisplay}" SortMemberPath="Timestamp" Width="Auto" MinWidth="130"/>
                         <DataGridTextColumn Header="NGƯỜI DÙNG" Binding="{Binding UserFullName}" SortMemberPath="UserFullName" Width="Auto" MinWidth="110"/>
                         <DataGridTextColumn Header="TÀI KHOẢN" Binding="{Binding Username}" SortMemberPath="Username" Width="Auto" MinWidth="90"/>
-                        <DataGridTextColumn Header="VAI TRÒ" Binding="{Binding RoleDisplay}" SortMemberPath="RoleDisplay" Width="Auto" MinWidth="80"/>
-                        <DataGridTextColumn Header="HÀNH ĐỘNG" Binding="{Binding Action}" SortMemberPath="Action" Width="Auto" MinWidth="80"/>
-                        <DataGridTextColumn Header="BẢNG" Binding="{Binding TableName}" SortMemberPath="TableName" Width="Auto" MinWidth="80"/>
-                        <DataGridTextColumn Header="BẢN GHI" Binding="{Binding RecordId}" SortMemberPath="RecordId" Width="Auto" MinWidth="60"/>
-                        <DataGridTextColumn Header="GIÁ TRỊ CŨ" Binding="{Binding OldValue}" Width="*" MinWidth="100"/>
-                        <DataGridTextColumn Header="GIÁ TRỊ MỚI" Binding="{Binding NewValue}" Width="*" MinWidth="100"/>
+                        <DataGridTextColumn Header="VAI TRÒ" Binding="{Binding Role}" SortMemberPath="Role" Width="Auto" MinWidth="80"/>
+                        <DataGridTextColumn Header="HÀNH ĐỘNG" Binding="{Binding Action}" SortMemberPath="Action" Width="Auto" MinWidth="120"/>
+                        <DataGridTextColumn Header="ĐỐI TƯỢNG" Binding="{Binding ObjectName}" SortMemberPath="ObjectName" Width="Auto" MinWidth="100"/>
+                        <DataGridTextColumn Header="CHI TIẾT" Binding="{Binding Detail}" SortMemberPath="Detail" Width="Auto" MinWidth="100"/>
+                        <DataGridTemplateColumn Header="GIÁ TRỊ CŨ" Width="*" MinWidth="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding OldValue}" TextWrapping="Wrap" Margin="0,4"
+                                               VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="GIÁ TRỊ MỚI" Width="*" MinWidth="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding NewValue}" TextWrapping="Wrap" Margin="0,4"
+                                               VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
                 <Border x:Name="brdState" Background="{StaticResource ColorOverlay}" Visibility="Collapsed">

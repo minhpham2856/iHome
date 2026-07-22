@@ -15,9 +15,9 @@
         <StackPanel>
             <TextBlock Text="Sửa dịch vụ theo phòng" Style="{StaticResource ManagerDialogTitleStyle}"/>
             <TextBlock Text="PHÒNG" Style="{StaticResource ManagerDialogLabelStyle}"/>
-            <ComboBox x:Name="cboRoom" Style="{StaticResource ManagerComboBoxStyle}"
-                      DisplayMemberPath="DisplayName" SelectionChanged="cboRoom_SelectionChanged"
-                      KeyDown="cboRoom_KeyDown"/>
+            <ComboBox x:Name="cbRoom" Style="{StaticResource ManagerComboBoxStyle}"
+                      DisplayMemberPath="DisplayName" SelectionChanged="cbRoom_SelectionChanged"
+                      KeyDown="cbRoom_KeyDown"/>
             <Grid Margin="0,12,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

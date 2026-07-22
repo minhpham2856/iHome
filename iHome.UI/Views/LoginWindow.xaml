@@ -41,9 +41,9 @@
                      KeyDown="txtPassword_KeyDown"/>
 
         <!-- Forgot Password -->
-        <TextBlock x:Name="tbForgotPassword" Grid.Row="5" 
+        <TextBlock x:Name="lbForgotPassword" Grid.Row="5" 
                    Style="{StaticResource AuthLinkTextStyle}"
-                   MouseDown="tbForgotPassword_MouseDown">
+                   MouseDown="lbForgotPassword_MouseDown">
             <Hyperlink TextDecorations="None" Click="Hyperlink_Click">
                 Quên mật khẩu?
             </Hyperlink>

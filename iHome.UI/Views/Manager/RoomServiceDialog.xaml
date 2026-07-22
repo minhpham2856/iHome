@@ -10,15 +10,15 @@
             <TextBlock Text="Gán dịch vụ vào phòng" Style="{StaticResource ManagerDialogTitleStyle}"/>
             <TextBlock Text="Đơn giá do chủ trọ thiết lập và Manager không thể thay đổi." Style="{StaticResource ManagerPageDescriptionStyle}"/>
             <TextBlock Text="PHÒNG" Style="{StaticResource ManagerDialogLabelStyle}"/>
-            <ComboBox x:Name="CbRoom" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"
-                      SelectionChanged="RoomChanged" KeyDown="CbRoom_KeyDown"/>
+            <ComboBox x:Name="cbRoom" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"
+                      SelectionChanged="RoomChanged" KeyDown="cbRoom_KeyDown"/>
             <TextBlock Text="DỊCH VỤ CÙNG TÒA NHÀ" Style="{StaticResource ManagerDialogLabelStyle}"/>
-            <ComboBox x:Name="CbService" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"
-                      KeyDown="CbService_KeyDown"/>
+            <ComboBox x:Name="cbService" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"
+                      KeyDown="cbService_KeyDown"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
             <Button Content="Hủy" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="Cancel_Click"/>
-            <Button x:Name="BtnSave" Content="Gán dịch vụ" Style="{StaticResource ManagerToolbarButtonStyle}" Click="Save_Click"/>
+            <Button x:Name="btnSave" Content="Gán dịch vụ" Style="{StaticResource ManagerToolbarButtonStyle}" Click="Save_Click"/>
         </StackPanel>
     </Grid>
 </Window>

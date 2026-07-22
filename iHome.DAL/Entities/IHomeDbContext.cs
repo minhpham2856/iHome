@@ -47,18 +47,8 @@ public partial class IHomeDbContext : DbContext
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
-		if (optionsBuilder.IsConfigured)
-		{
-			return;
-		}
-
-		// prefer IHOME_CONNECTION_STRING; fall back to CONNECTION_STRING then hardcoded local
-		string? connectionString =
-			Environment.GetEnvironmentVariable("IHOME_CONNECTION_STRING")
-			?? Environment.GetEnvironmentVariable("CONNECTION_STRING")
-			?? "Server=(local);uid=sa;password=123;database=iHomeDB;Encrypt=False;TrustServerCertificate=True;";
-
-		optionsBuilder.UseSqlServer(connectionString);
+		if (optionsBuilder.IsConfigured) return;
+		optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
 	}
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -73,6 +63,7 @@ public partial class IHomeDbContext : DbContext
 
             entity.Property(e => e.Action).HasMaxLength(100);
             entity.Property(e => e.RecordId).HasMaxLength(50);
+            entity.Property(e => e.Detail).HasMaxLength(200);
             entity.Property(e => e.TableName).HasMaxLength(100);
             entity.Property(e => e.Timestamp).HasDefaultValueSql("(getdate())");
 
@@ -374,8 +365,7 @@ public partial class IHomeDbContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false);
             entity.Property(e => e.Role)
-                .HasMaxLength(20)
-                .IsUnicode(false);
+                .HasMaxLength(20);
             entity.Property(e => e.Username)
                 .HasMaxLength(50)
                 .IsUnicode(false);

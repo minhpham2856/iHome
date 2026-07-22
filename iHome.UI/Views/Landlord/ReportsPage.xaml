@@ -1,13 +1,134 @@
 <Page x:Class="iHome.UI.Views.Landlord.ReportsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
       Title="Báo cáo thống kê">
 
-    <Grid Background="{StaticResource ColorBackground}">
-        <TextBlock Text="Báo cáo thống kê" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource ColorTextPrimary}"/>
+    <Grid Background="{StaticResource ColorBackground}" TextElement.FontFamily="Segoe UI">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Background="{StaticResource ColorSurface}"
+                BorderBrush="{StaticResource ColorBorder}" BorderThickness="0,0,0,1" Padding="12,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="NHÀ TRỌ" Style="{StaticResource ManagerFilterLabelStyle}"/>
+                    <ComboBox x:Name="cbProperty" Style="{StaticResource ManagerComboBoxStyle}"
+                              DisplayMemberPath="Name" SelectionChanged="FilterChanged"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="TÒA NHÀ" Style="{StaticResource ManagerFilterLabelStyle}"/>
+                    <ComboBox x:Name="cbBuilding" Style="{StaticResource ManagerComboBoxStyle}"
+                              DisplayMemberPath="Name" SelectionChanged="FilterChanged"/>
+                </StackPanel>
+                <StackPanel Grid.Column="4" Margin="0,0,12,0">
+                    <TextBlock Text="THÁNG" Style="{StaticResource ManagerFilterLabelStyle}"/>
+                    <ComboBox x:Name="cbMonth" Style="{StaticResource ManagerComboBoxStyle}"
+                              Width="140" DisplayMemberPath="Name" SelectionChanged="FilterChanged"/>
+                </StackPanel>
+                <StackPanel Grid.Column="5" Orientation="Horizontal" Margin="0,18,0,0" VerticalAlignment="Top">
+                    <Button Content="Xuất Excel" Style="{StaticResource ManagerSecondaryButtonStyle}"
+                            Click="btnExportExcel_Click"/>
+                    <Button Content="↻" Style="{StaticResource ManagerSecondaryButtonStyle}"
+                            Click="btnRefresh_Click" ToolTip="Làm mới" Margin="8,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid Margin="0,0,0,12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="420"/>
+                </Grid.RowDefinitions>
+
+                <Grid Margin="8,8,8,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.4*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Style="{StaticResource CardStyle}" Margin="4" Padding="16">
+                        <StackPanel>
+                            <TextBlock x:Name="lbRevenueChartTitle" Style="{StaticResource ChartTitleStyle}"
+                                       Text="Doanh thu theo ngày"/>
+                            <lvc:CartesianChart x:Name="chartRevenue" Height="260" LegendLocation="None"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Style="{StaticResource CardStyle}" Margin="4" Padding="16">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource ChartTitleStyle}" Text="Tình trạng phòng"/>
+                            <lvc:PieChart x:Name="chartRoomStatus" Height="260" LegendLocation="Right"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <TabControl Grid.Row="1" Margin="8,4,8,0" BorderThickness="0" Background="{StaticResource ColorBackground}">
+                    <TabItem Header="Phòng">
+                        <DataGrid x:Name="dgRooms" Style="{StaticResource ManagerDataGridStyle}"
+                                  CanUserSortColumns="True" AutoGenerateColumns="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="NHÀ TRỌ" Binding="{Binding PropertyName}" Width="1.4*" MinWidth="120"/>
+                                <DataGridTextColumn Header="TÒA" Binding="{Binding BuildingName}" Width="*" MinWidth="90"/>
+                                <DataGridTextColumn Header="PHÒNG" Binding="{Binding RoomNumber}" Width="0.7*" MinWidth="70"/>
+                                <DataGridTextColumn Header="TẦNG" Binding="{Binding Floor}" Width="0.5*" MinWidth="50"/>
+                                <DataGridTextColumn Header="LOẠI" Binding="{Binding RoomTypeName}" Width="*" MinWidth="90"/>
+                                <DataGridTextColumn Header="TRẠNG THÁI" Binding="{Binding StatusDisplay}" Width="*" MinWidth="90"/>
+                                <DataGridTextColumn Header="GIÁ THUÊ" Binding="{Binding BaseRent, StringFormat=N0}" Width="*" MinWidth="90"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </TabItem>
+                    <TabItem Header="Doanh thu">
+                        <DataGrid x:Name="dgRevenues" Style="{StaticResource ManagerDataGridStyle}"
+                                  CanUserSortColumns="True" AutoGenerateColumns="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="NGÀY" Binding="{Binding PaymentDateDisplay}" Width="*" MinWidth="100"/>
+                                <DataGridTextColumn Header="TÒA" Binding="{Binding BuildingName}" Width="*" MinWidth="90"/>
+                                <DataGridTextColumn Header="PHÒNG" Binding="{Binding RoomNumber}" Width="0.7*" MinWidth="70"/>
+                                <DataGridTextColumn Header="SỐ TIỀN" Binding="{Binding Amount, StringFormat=N0}" Width="*" MinWidth="100"/>
+                                <DataGridTextColumn Header="PHƯƠNG THỨC" Binding="{Binding MethodDisplay}" Width="*" MinWidth="110"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </TabItem>
+                    <TabItem Header="Hóa đơn">
+                        <DataGrid x:Name="dgInvoices" Style="{StaticResource ManagerDataGridStyle}"
+                                  CanUserSortColumns="True" AutoGenerateColumns="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="NGÀY LẬP" Binding="{Binding InvoiceDateDisplay}" Width="*" MinWidth="100"/>
+                                <DataGridTextColumn Header="TÒA" Binding="{Binding BuildingName}" Width="*" MinWidth="90"/>
+                                <DataGridTextColumn Header="PHÒNG" Binding="{Binding RoomNumber}" Width="0.7*" MinWidth="70"/>
+                                <DataGridTextColumn Header="TỔNG TIỀN" Binding="{Binding TotalAmount, StringFormat=N0}" Width="*" MinWidth="100"/>
+                                <DataGridTextColumn Header="TRẠNG THÁI" Binding="{Binding StatusDisplay}" Width="1.1*" MinWidth="110"/>
+                                <DataGridTextColumn Header="HẠN TT" Binding="{Binding DueDateDisplay}" Width="*" MinWidth="100"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </TabItem>
+                    <TabItem Header="Hợp đồng">
+                        <DataGrid x:Name="dgContracts" Style="{StaticResource ManagerDataGridStyle}"
+                                  CanUserSortColumns="True" AutoGenerateColumns="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="TÒA" Binding="{Binding BuildingName}" Width="*" MinWidth="90"/>
+                                <DataGridTextColumn Header="PHÒNG" Binding="{Binding RoomNumber}" Width="0.7*" MinWidth="70"/>
+                                <DataGridTextColumn Header="KHÁCH CHÍNH" Binding="{Binding MainTenantName}" Width="1.3*" MinWidth="120"/>
+                                <DataGridTextColumn Header="BẮT ĐẦU" Binding="{Binding StartDateDisplay}" Width="*" MinWidth="100"/>
+                                <DataGridTextColumn Header="KẾT THÚC" Binding="{Binding EndDateDisplay}" Width="*" MinWidth="100"/>
+                                <DataGridTextColumn Header="TIỀN THUÊ" Binding="{Binding MonthlyRent, StringFormat=N0}" Width="*" MinWidth="90"/>
+                                <DataGridTextColumn Header="TRẠNG THÁI" Binding="{Binding StatusDisplay}" Width="*" MinWidth="90"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </ScrollViewer>
     </Grid>
 </Page>

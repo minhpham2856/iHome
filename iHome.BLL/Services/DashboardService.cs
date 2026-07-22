@@ -1,4 +1,5 @@
 using iHome.BLL.DTOs;
+using iHome.BLL.Enums;
 using iHome.DAL.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -8,34 +9,29 @@ using System.Linq;
 
 namespace iHome.BLL.Services
 {
+	// Aggregate KPI and chart data for Landlord dashboard — queries IHomeDbContext directly (read-only)
 	public class DashboardService
 	{
+		// Shared EF Core context instance
 		private readonly IHomeDbContext _db;
 
-		private const string RoomOccupied = "Occupied";
-		private const string RoomVacant = "Empty";
-		private const string RoomVacantAlt = "Vacant";
-		private const string RoomMaintenance = "Maintenance";
-		private const string ContractActive = "Active";
-		private const string ContractExpired = "Expired";
-		private const string ContractTerminated = "Terminated";
-		private const string InvoicePaid = "Paid";
-
-		public DashboardService() : this(new IHomeDbContext())
-		{
-		}
+		public DashboardService() : this(new IHomeDbContext()) { }
 
 		public DashboardService(IHomeDbContext db)
 		{
+			// Reject null DbContext dependency
 			_db = db ?? throw new ArgumentNullException(nameof(db));
 		}
 
+		// Property filter combo: first item is All plus landlord property list
 		public List<DashboardPropertyOption> GetPropertyOptions(int landlordId)
 		{
+			// Start with "all properties" sentinel (Id=null)
 			var options = new List<DashboardPropertyOption>
 			{
 				new() { Id = null, Name = "Tất cả nhà trọ" }
 			};
+			// Append each property owned by this landlord, sorted by name
 			options.AddRange(_db.Properties
 				.AsNoTracking()
 				.Where(p => p.LandlordId == landlordId)
@@ -44,22 +40,27 @@ namespace iHome.BLL.Services
 			return options;
 		}
 
+		// Aggregate dashboard metrics: counts, monthly revenue, chart series by property filter and date range
 		public DashboardData GetDashboardData(
 			int landlordId,
 			int? propertyId = null,
 			DateOnly? revenueFrom = null,
 			DateOnly? revenueTo = null)
 		{
+			// Verify caller is a landlord
 			EnsureLandlord(landlordId);
+			// When filtering by a specific property, verify ownership
 			if (propertyId.HasValue)
 			{
 				EnsureOwnedProperty(landlordId, propertyId.Value);
 			}
 
+			// Empty result container filled below
 			var data = new DashboardData();
 			var now = DateTime.Now;
 			var today = DateOnly.FromDateTime(now);
 
+			// Scope properties by landlord plus optional propertyId filter
 			var properties = _db.Properties
 				.AsNoTracking()
 				.Where(p => p.LandlordId == landlordId && (!propertyId.HasValue || p.Id == propertyId.Value));
@@ -77,23 +78,26 @@ namespace iHome.BLL.Services
 				.Where(r => r.Building.Property.LandlordId == landlordId &&
 					(!propertyId.HasValue || r.Building.PropertyId == propertyId.Value));
 			data.TotalRooms = rooms.Count();
-			data.OccupiedRooms = rooms.Count(r => r.Status == RoomOccupied);
-			data.VacantRooms = rooms.Count(r => r.Status == RoomVacant || r.Status == RoomVacantAlt);
-			int maintenance = rooms.Count(r => r.Status == RoomMaintenance);
+			data.OccupiedRooms = rooms.Count(r => r.Status == RoomStatus.Occupied);
+			// Compare status const directly — do not call IsVacant() because EF cannot translate it to SQL
+			data.VacantRooms = rooms.Count(r => r.Status == RoomStatus.Empty);
+			int deposited = rooms.Count(r => r.Status == RoomStatus.Deposited);
+			int maintenance = rooms.Count(r => r.Status == RoomStatus.Maintenance);
 
 			var contracts = _db.Contracts
 				.AsNoTracking()
 				.Where(c => c.Room.Building.Property.LandlordId == landlordId &&
 					(!propertyId.HasValue || c.Room.Building.PropertyId == propertyId.Value));
-			data.ActiveContracts = contracts.Count(c => c.Status == ContractActive);
-			int expired = contracts.Count(c => c.Status == ContractExpired);
-			int terminated = contracts.Count(c => c.Status == ContractTerminated);
+			data.ActiveContracts = contracts.Count(c => c.Status == ContractStatus.Active);
+			int expired = contracts.Count(c => c.Status == ContractStatus.Expired);
+			int terminated = contracts.Count(c => c.Status == ContractStatus.Terminated);
 
+			// Count distinct tenants on active contracts
 			data.TotalTenants = _db.ContractTenants
 				.AsNoTracking()
 				.Where(ct => ct.Contract.Room.Building.Property.LandlordId == landlordId &&
 					(!propertyId.HasValue || ct.Contract.Room.Building.PropertyId == propertyId.Value) &&
-					ct.Contract.Status == ContractActive)
+					ct.Contract.Status == ContractStatus.Active)
 				.Select(ct => ct.TenantId)
 				.Distinct()
 				.Count();
@@ -102,49 +106,62 @@ namespace iHome.BLL.Services
 				.AsNoTracking()
 				.Where(i => i.Contract.Room.Building.Property.LandlordId == landlordId &&
 					(!propertyId.HasValue || i.Contract.Room.Building.PropertyId == propertyId.Value));
+			// Total outstanding = sum of TotalAmount for invoices not yet Paid
 			data.OutstandingAmount = invoices
-				.Where(i => i.Status != InvoicePaid)
+				.Where(i => i.Status != InvoiceStatus.Paid)
 				.Select(i => (decimal?)i.TotalAmount)
 				.Sum() ?? 0m;
-			data.OverdueInvoices = invoices.Count(i => i.Status != InvoicePaid && i.DueDate < today);
+			data.OverdueInvoices = invoices.Count(i => i.Status != InvoiceStatus.Paid && i.DueDate < today);
 
+			// Payment query scoped to landlord (and optional property)
 			var payments = ScopedPayments(landlordId, propertyId);
+			// Current calendar month revenue
 			data.MonthlyRevenue = payments
 				.Where(p => p.PaymentDate.Year == now.Year && p.PaymentDate.Month == now.Month)
 				.Select(p => (decimal?)p.Amount)
 				.Sum() ?? 0m;
 
+			// Revenue chart date range — default from = earliest payment or 12 months ago
 			DateOnly from = revenueFrom ?? ResolveDefaultFrom(payments, today);
 			DateOnly to = revenueTo ?? today;
+			// Swap inverted ranges so chart always renders left-to-right
 			if (to < from)
 			{
 				(from, to) = (to, from);
 			}
 			data.RevenueSeries = BuildRevenueSeries(payments, from, to);
 
-			data.RoomStatusSeries.Add(new ChartPoint { Label = "Đang ở", Value = data.OccupiedRooms });
-			data.RoomStatusSeries.Add(new ChartPoint { Label = "Trống", Value = data.VacantRooms });
-			data.RoomStatusSeries.Add(new ChartPoint { Label = "Bảo trì", Value = maintenance });
+			// Room status pie chart slices
+			data.RoomStatusSeries.Add(new ChartPoint { Label = RoomStatus.Occupied, Value = data.OccupiedRooms });
+			data.RoomStatusSeries.Add(new ChartPoint { Label = RoomStatus.Empty, Value = data.VacantRooms });
+			data.RoomStatusSeries.Add(new ChartPoint { Label = RoomStatus.Deposited, Value = deposited });
+			data.RoomStatusSeries.Add(new ChartPoint { Label = RoomStatus.Maintenance, Value = maintenance });
 
-			data.ContractStatusSeries.Add(new ChartPoint { Label = "Hoạt động", Value = data.ActiveContracts });
-			data.ContractStatusSeries.Add(new ChartPoint { Label = "Hết hạn", Value = expired });
-			data.ContractStatusSeries.Add(new ChartPoint { Label = "Đã hủy", Value = terminated });
+			// Contract status pie chart slices
+			data.ContractStatusSeries.Add(new ChartPoint { Label = ContractStatus.Active, Value = data.ActiveContracts });
+			data.ContractStatusSeries.Add(new ChartPoint { Label = ContractStatus.Expired, Value = expired });
+			data.ContractStatusSeries.Add(new ChartPoint { Label = ContractStatus.Terminated, Value = terminated });
 
 			return data;
 		}
 
-		private IQueryable<Payment> ScopedPayments(int landlordId, int? propertyId) =>
-			_db.Payments
+		// IQueryable payments scoped by landlord plus optional property filter
+		private IQueryable<Payment> ScopedPayments(int landlordId, int? propertyId)
+		{
+			return _db.Payments
 				.AsNoTracking()
 				.Where(p => p.Invoice.Contract.Room.Building.Property.LandlordId == landlordId &&
 					(!propertyId.HasValue || p.Invoice.Contract.Room.Building.PropertyId == propertyId.Value));
+		}
 
+		// Default from-date: earliest payment in scope or start of month 11 months ago
 		private static DateOnly ResolveDefaultFrom(IQueryable<Payment> payments, DateOnly today)
 		{
 			var min = payments.Select(p => (DateOnly?)p.PaymentDate).Min();
 			return min ?? today.AddMonths(-11).AddDays(1 - today.Day);
 		}
 
+		// Revenue series: span ≤45 days → group by day; otherwise group by month
 		private static List<ChartPoint> BuildRevenueSeries(IQueryable<Payment> payments, DateOnly from, DateOnly to)
 		{
 			var rows = payments
@@ -186,15 +203,17 @@ namespace iHome.BLL.Services
 			return series;
 		}
 
+		// Guard: userId must be Landlord
 		private void EnsureLandlord(int landlordId)
 		{
-			bool ok = _db.Users.Any(u => u.Id == landlordId && u.Role == "Landlord");
+			bool ok = _db.Users.Any(u => u.Id == landlordId && u.Role == UserRole.Landlord);
 			if (!ok)
 			{
 				throw new UnauthorizedAccessException("Chỉ chủ trọ mới xem bảng điều khiển này.");
 			}
 		}
 
+		// Guard: property owned by landlord when using a specific property filter
 		private void EnsureOwnedProperty(int landlordId, int propertyId)
 		{
 			bool ok = _db.Properties.Any(p => p.Id == propertyId && p.LandlordId == landlordId);

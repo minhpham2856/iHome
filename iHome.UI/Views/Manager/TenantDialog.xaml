@@ -9,30 +9,30 @@
         <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <TextBlock x:Name="TxtTitle" Text="Thêm khách thuê" Style="{StaticResource ManagerDialogTitleStyle}"/>
+                <TextBlock x:Name="lbTitle" Text="Thêm khách thuê" Style="{StaticResource ManagerDialogTitleStyle}"/>
                 <TextBlock Text="HỌ VÀ TÊN" Style="{StaticResource ManagerDialogLabelStyle}"/>
-                <TextBox x:Name="TxtFullName" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="100"
-                         KeyDown="TxtFullName_KeyDown"/>
+                <TextBox x:Name="txtFullName" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="100"
+                         KeyDown="txtFullName_KeyDown"/>
                 <TextBlock Text="NGÀY SINH" Style="{StaticResource ManagerDialogLabelStyle}"/>
-                <DatePicker x:Name="DtpDateOfBirth" Style="{StaticResource ManagerDatePickerStyle}"
-                            KeyDown="DtpDateOfBirth_KeyDown"/>
+                <DatePicker x:Name="dpDateOfBirth" Style="{StaticResource ManagerDatePickerStyle}"
+                            KeyDown="dpDateOfBirth_KeyDown"/>
                 <TextBlock Text="CCCD" Style="{StaticResource ManagerDialogLabelStyle}"/>
-                <TextBox x:Name="TxtIdCard" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="20"
-                         KeyDown="TxtIdCard_KeyDown"/>
+                <TextBox x:Name="txtIdCard" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="20"
+                         KeyDown="txtIdCard_KeyDown"/>
                 <TextBlock Text="SỐ ĐIỆN THOẠI" Style="{StaticResource ManagerDialogLabelStyle}"/>
-                <TextBox x:Name="TxtPhone" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="20"
-                         KeyDown="TxtPhone_KeyDown"/>
+                <TextBox x:Name="txtPhone" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="20"
+                         KeyDown="txtPhone_KeyDown"/>
                 <TextBlock Text="EMAIL" Style="{StaticResource ManagerDialogLabelStyle}"/>
-                <TextBox x:Name="TxtEmail" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="150"
-                         KeyDown="TxtEmail_KeyDown"/>
+                <TextBox x:Name="txtEmail" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="150"
+                         KeyDown="txtEmail_KeyDown"/>
                 <TextBlock Text="ĐỊA CHỈ THƯỜNG TRÚ" Style="{StaticResource ManagerDialogLabelStyle}"/>
-                <TextBox x:Name="TxtAddress" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="300"
-                         KeyDown="TxtAddress_KeyDown"/>
+                <TextBox x:Name="txtAddress" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="300"
+                         KeyDown="txtAddress_KeyDown"/>
             </StackPanel>
         </ScrollViewer>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
             <Button Content="Hủy" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="Cancel_Click"/>
-            <Button x:Name="BtnSave" Content="Lưu" Style="{StaticResource ManagerToolbarButtonStyle}" Click="Save_Click"/>
+            <Button x:Name="btnSave" Content="Lưu" Style="{StaticResource ManagerToolbarButtonStyle}" Click="Save_Click"/>
         </StackPanel>
     </Grid>
 </Window>

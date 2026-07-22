@@ -6,17 +6,23 @@ using System.Linq;
 
 namespace iHome.DAL.Repositories
 {
+	// EF Core data access for Manager read queries.
 	public class ManagerReadRepository
 	{
+		// Shared EF Core context instance.
 		private readonly IHomeDbContext _context;
 
 		public ManagerReadRepository()
 		{
+			// Instantiate a dedicated DbContext for manager dashboard read queries
 			_context = new IHomeDbContext();
 		}
 
-		public List<Property> GetProperties(int managerId) =>
-			_context.Buildings
+		// Query Properties records.
+		public List<Property> GetProperties(int managerId)
+		{
+			// Derive distinct active properties from buildings currently assigned to this manager
+			return _context.Buildings
 				.AsNoTracking()
 				.Where(b =>
 					b.ManagerId == managerId &&
@@ -26,9 +32,13 @@ namespace iHome.DAL.Repositories
 				.Distinct()
 				.OrderBy(p => p.Name)
 				.ToList();
+		}
 
-		public List<Building> GetBuildings(int managerId, int? buildingId = null) =>
-			_context.Buildings
+		// Query Buildings records.
+		public List<Building> GetBuildings(int managerId, int? buildingId = null)
+		{
+			// Load active buildings managed by this user, optionally narrowed to one building id
+			return _context.Buildings
 				.AsNoTracking()
 				.Where(b =>
 					b.ManagerId == managerId &&
@@ -36,9 +46,13 @@ namespace iHome.DAL.Repositories
 					(!buildingId.HasValue || b.Id == buildingId.Value))
 				.OrderBy(b => b.Name)
 				.ToList();
+		}
 
-		public List<Room> GetRooms(int managerId, int? buildingId = null) =>
-			_context.Rooms
+		// Query Rooms records.
+		public List<Room> GetRooms(int managerId, int? buildingId = null)
+		{
+			// Load rooms in managed active buildings with building, room type, contracts, and contract tenants
+			return _context.Rooms
 				.AsNoTracking()
 				.Include(r => r.Building)
 				.Include(r => r.RoomType)
@@ -52,9 +66,13 @@ namespace iHome.DAL.Repositories
 				.ThenBy(r => r.Floor)
 				.ThenBy(r => r.RoomNumber)
 				.ToList();
+		}
 
-		public List<ContractTenant> GetContractTenants(int managerId, int? buildingId = null) =>
-			_context.ContractTenants
+		// Query ContractTenants records.
+		public List<ContractTenant> GetContractTenants(int managerId, int? buildingId = null)
+		{
+			// Load contract-tenant links for rooms in managed active buildings with full room/building navigation
+			return _context.ContractTenants
 				.AsNoTracking()
 				.Include(ct => ct.Tenant)
 				.Include(ct => ct.Contract)
@@ -69,9 +87,12 @@ namespace iHome.DAL.Repositories
 				.ThenBy(ct => ct.Contract.Room.RoomNumber)
 				.ThenBy(ct => ct.Tenant.FullName)
 				.ToList();
+		}
 
+		// Query Services records.
 		public List<Service> GetServices(int managerId, int? buildingId = null)
 		{
+			// Resolve distinct property ids reachable from the manager's active building assignments
 			var managedPropertyIds = _context.Buildings
 				.AsNoTracking()
 				.Where(b =>
@@ -81,6 +102,7 @@ namespace iHome.DAL.Repositories
 				.Select(b => b.PropertyId)
 				.Distinct();
 
+			// Return active-property services for those property ids, ordered by property then service name
 			return _context.Services
 				.AsNoTracking()
 				.Include(s => s.Property)
@@ -91,16 +113,23 @@ namespace iHome.DAL.Repositories
 				.ThenBy(s => s.ServiceName)
 				.ToList();
 		}
-		public int CountAssignedBuildings(int managerId, int? buildingId = null) =>
-			_context.Buildings
+
+		// CountAssignedBuildings — public entry point.
+		public int CountAssignedBuildings(int managerId, int? buildingId = null)
+		{
+			// Count active buildings assigned to this manager, optionally restricted to one building id
+			return _context.Buildings
 				.AsNoTracking()
 				.Count(b =>
 					b.ManagerId == managerId &&
 					b.IsActive &&
 					(!buildingId.HasValue || b.Id == buildingId.Value));
+		}
 
-		public Dictionary<string, int> GetRoomStatusCounts(int managerId, int? buildingId = null) =>
-			_context.Rooms
+		public Dictionary<string, int> GetRoomStatusCounts(int managerId, int? buildingId = null)
+		{
+			// Group managed active rooms by Status and count members in each group
+			return _context.Rooms
 				.AsNoTracking()
 				.Where(r =>
 					r.Building.ManagerId == managerId &&
@@ -117,12 +146,16 @@ namespace iHome.DAL.Repositories
 					item => item.Status,
 					item => item.Count,
 					StringComparer.OrdinalIgnoreCase);
+		}
 
+		// CountActiveTenants — public entry point.
 		public int CountActiveTenants(
 			int managerId,
 			string activeContractStatus,
-			int? buildingId = null) =>
-			_context.ContractTenants
+			int? buildingId = null)
+		{
+			// Count distinct tenants on contracts with the active status in managed active buildings
+			return _context.ContractTenants
 				.AsNoTracking()
 				.Where(ct =>
 					ct.Contract.Room.Building.ManagerId == managerId &&
@@ -133,11 +166,14 @@ namespace iHome.DAL.Repositories
 				.Select(ct => ct.TenantId)
 				.Distinct()
 				.Count();
+		}
 
 		public Dictionary<string, int> GetContractStatusCounts(
 			int managerId,
-			int? buildingId = null) =>
-			_context.Contracts
+			int? buildingId = null)
+		{
+			// Group managed active contracts by Status and count members in each group
+			return _context.Contracts
 				.AsNoTracking()
 				.Where(c =>
 					c.Room.Building.ManagerId == managerId &&
@@ -154,14 +190,18 @@ namespace iHome.DAL.Repositories
 					item => item.Status,
 					item => item.Count,
 					StringComparer.OrdinalIgnoreCase);
+		}
 
+		// CountExpiringContracts — public entry point.
 		public int CountExpiringContracts(
 			int managerId,
 			string activeStatus,
 			DateOnly fromDate,
 			DateOnly toDate,
-			int? buildingId = null) =>
-			_context.Contracts
+			int? buildingId = null)
+		{
+			// Count active contracts whose EndDate falls within the inclusive date window for managed buildings
+			return _context.Contracts
 				.AsNoTracking()
 				.Count(c =>
 					c.Room.Building.ManagerId == managerId &&
@@ -170,13 +210,17 @@ namespace iHome.DAL.Repositories
 					c.EndDate >= fromDate &&
 					c.EndDate <= toDate &&
 					(!buildingId.HasValue || c.Room.BuildingId == buildingId.Value));
+		}
 
+		// CountOverdueInvoices — public entry point.
 		public int CountOverdueInvoices(
 			int managerId,
 			string paidStatus,
 			DateOnly today,
-			int? buildingId = null) =>
-			_context.Invoices
+			int? buildingId = null)
+		{
+			// Count unpaid invoices past due date for contracts in managed active buildings
+			return _context.Invoices
 				.AsNoTracking()
 				.Count(i =>
 					i.Contract.Room.Building.ManagerId == managerId &&
@@ -185,12 +229,15 @@ namespace iHome.DAL.Repositories
 					i.DueDate < today &&
 					(!buildingId.HasValue ||
 					 i.Contract.Room.BuildingId == buildingId.Value));
+		}
 
+		// Query OutstandingAmount records.
 		public decimal GetOutstandingAmount(
 			int managerId,
 			string paidStatus,
 			int? buildingId = null)
 		{
+			// Select unpaid invoice rows scoped to managed active buildings for total computation
 			var unpaidInvoices = _context.Invoices
 				.AsNoTracking()
 				.Where(i =>
@@ -200,9 +247,11 @@ namespace iHome.DAL.Repositories
 					(!buildingId.HasValue ||
 					 i.Contract.Room.BuildingId == buildingId.Value));
 
+			// Sum invoice TotalAmount for the unpaid invoice set, treating null aggregate as zero
 			var invoiceTotal = unpaidInvoices
 				.Select(i => (decimal?)i.TotalAmount)
 				.Sum() ?? 0m;
+			// Sum payment Amount rows linked to still-unpaid invoices in the same managed scope
 			var paidTotal = _context.Payments
 				.AsNoTracking()
 				.Where(p =>
@@ -214,6 +263,7 @@ namespace iHome.DAL.Repositories
 				.Select(p => (decimal?)p.Amount)
 				.Sum() ?? 0m;
 
+			// Outstanding balance is billed total minus recorded payments
 			return invoiceTotal - paidTotal;
 		}
 
@@ -223,6 +273,7 @@ namespace iHome.DAL.Repositories
 			DateOnly endDate,
 			int? buildingId = null)
 		{
+			// Group payments in the date window by year/month and sum Amount per month for managed buildings
 			return _context.Payments
 				.AsNoTracking()
 				.Where(p =>

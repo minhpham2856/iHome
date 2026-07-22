@@ -73,7 +73,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="lblBuildingSection" Text="Tòa nhà" Style="{StaticResource ManagerSectionTitleStyle}"
+                    <TextBlock x:Name="lbBuildingSection" Text="Tòa nhà" Style="{StaticResource ManagerSectionTitleStyle}"
                                Margin="0" VerticalAlignment="Center"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <Button x:Name="btnAddBuilding" Content="+ Thêm tòa" Style="{StaticResource ManagerToolbarButtonStyle}" Click="btnAddBuilding_Click" IsEnabled="False"/>

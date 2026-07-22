@@ -4,136 +4,152 @@
       Title="Quản lý khách">
 
     <Grid Background="{StaticResource ColorBackground}" Margin="0" TextElement.FontFamily="Segoe UI">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1.2*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <!-- Left: Tenants -->
-        <Grid Grid.Column="0" Margin="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <Border Background="{StaticResource ColorSurface}"
-                    BorderBrush="{StaticResource ColorBorder}" BorderThickness="0,0,1,1" Padding="12,8">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+        <Border Background="{StaticResource ColorSurface}"
+                BorderBrush="{StaticResource ColorBorder}" BorderThickness="0,0,0,1" Padding="12,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="1.4*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="NHÀ TRỌ" Style="{StaticResource ManagerFilterLabelStyle}"/>
+                    <ComboBox x:Name="cbProperty" Style="{StaticResource ManagerComboBoxStyle}"
+                              DisplayMemberPath="Name" SelectionChanged="cbProperty_SelectionChanged"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="TÒA NHÀ" Style="{StaticResource ManagerFilterLabelStyle}"/>
+                    <ComboBox x:Name="cbBuilding" Style="{StaticResource ManagerComboBoxStyle}"
+                              DisplayMemberPath="Name" SelectionChanged="cbBuilding_SelectionChanged"/>
+                </StackPanel>
+                <StackPanel Grid.Column="4">
+                    <TextBlock Text="TÌM KIẾM" Style="{StaticResource ManagerFilterLabelStyle}"/>
                     <TextBox x:Name="txtSearch" Style="{StaticResource ManagerTextBoxStyle}"
-                             Margin="0,0,12,0" VerticalAlignment="Center"
                              ToolTip="Tìm theo tên / CCCD / điện thoại / email"
                              TextChanged="txtSearch_TextChanged"/>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button x:Name="btnAdd" Content="+ Thêm" Style="{StaticResource ManagerToolbarButtonStyle}" Click="btnAdd_Click"/>
-                        <Button x:Name="btnEdit" Content="Sửa" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="btnEdit_Click" IsEnabled="False"/>
-                        <Button x:Name="btnDelete" Content="Xóa" Style="{StaticResource ManagerDangerButtonStyle}" Click="btnDelete_Click" IsEnabled="False"/>
-                        <Button x:Name="btnRefresh" Content="↻" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="btnRefresh_Click" ToolTip="Làm mới"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
+                </StackPanel>
+                <StackPanel Grid.Column="5" Orientation="Horizontal" Margin="12,18,0,0" VerticalAlignment="Top">
+                    <Button x:Name="btnEdit" Content="Sửa" Style="{StaticResource ManagerToolbarButtonStyle}" Click="btnEdit_Click" IsEnabled="False"/>
+                    <Button x:Name="btnRefresh" Content="↻" Style="{StaticResource ManagerSecondaryButtonStyle}" Click="btnRefresh_Click" ToolTip="Làm mới"/>
+                </StackPanel>
+            </Grid>
+        </Border>
 
-            <Border Grid.Row="1" Style="{StaticResource ManagerCardStyle}" Margin="0" Padding="0"
-                    BorderThickness="0,0,1,0">
-                <Grid>
-                    <DataGrid x:Name="dgTenants" Style="{StaticResource ManagerDataGridStyle}"
-                              CanUserSortColumns="True"
-                              SelectionChanged="dgTenants_SelectionChanged"
-                              MouseDoubleClick="dgTenants_MouseDoubleClick"
-                              HorizontalScrollBarVisibility="Auto">
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="HỌ TÊN" SortMemberPath="FullName" Width="1.4*" MinWidth="120">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding FullName}" FontWeight="SemiBold"
-                                                       Foreground="{StaticResource ColorTextPrimary}"/>
-                                            <TextBlock Text="{Binding Email}" FontSize="10"
-                                                       Foreground="{StaticResource ColorTextSecondary}"
-                                                       TextTrimming="CharacterEllipsis"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="CCCD / SĐT" SortMemberPath="IdCardNumber" Width="1.2*" MinWidth="110">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding IdCardNumber}"/>
-                                            <TextBlock Text="{Binding PhoneNumber}" FontSize="10"
-                                                       Foreground="{StaticResource ColorTextSecondary}"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="VỊ TRÍ" SortMemberPath="CurrentBuildingName" Width="1.2*" MinWidth="100">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding CurrentBuildingName}" FontWeight="SemiBold"
-                                                       Foreground="{StaticResource ColorPrimary}"/>
-                                            <TextBlock Text="{Binding CurrentRoomNumber, StringFormat=Phòng {0}}" FontSize="10"
-                                                       Foreground="{StaticResource ColorTextSecondary}"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="TRẠNG THÁI" Binding="{Binding CurrentStatusDisplay}"
-                                                SortMemberPath="CurrentStatusDisplay" Width="1.1*" MinWidth="100"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <Border x:Name="brdTenantState" Background="{StaticResource ColorOverlay}" Visibility="Collapsed">
-                        <TextBlock x:Name="txtTenantState" Style="{StaticResource ManagerStateTextStyle}"/>
-                    </Border>
-                </Grid>
-            </Border>
-        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.2*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-        <!-- Right: Contracts of selected tenant -->
-        <Grid Grid.Column="1" Margin="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+            <!-- Left: Tenants -->
+            <Grid Grid.Column="0" Margin="0">
+                <Border Style="{StaticResource ManagerCardStyle}" Margin="0" Padding="0"
+                        BorderThickness="0,0,1,0">
+                    <Grid>
+                        <DataGrid x:Name="dgTenants" Style="{StaticResource ManagerDataGridStyle}"
+                                  CanUserSortColumns="True"
+                                  SelectionChanged="dgTenants_SelectionChanged"
+                                  MouseDoubleClick="dgTenants_MouseDoubleClick"
+                                  HorizontalScrollBarVisibility="Auto">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="HỌ TÊN" SortMemberPath="FullName" Width="1.4*" MinWidth="120">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding FullName}" FontWeight="SemiBold"
+                                                           Foreground="{StaticResource ColorTextPrimary}"/>
+                                                <TextBlock Text="{Binding Email}" FontSize="10"
+                                                           Foreground="{StaticResource ColorTextSecondary}"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="CCCD / SĐT" SortMemberPath="IdCardNumber" Width="1.2*" MinWidth="110">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding IdCardNumber}"/>
+                                                <TextBlock Text="{Binding PhoneNumber}" FontSize="10"
+                                                           Foreground="{StaticResource ColorTextSecondary}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="VỊ TRÍ" SortMemberPath="CurrentBuildingName" Width="1.2*" MinWidth="100">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding CurrentBuildingName}" FontWeight="SemiBold"
+                                                           Foreground="{StaticResource ColorPrimary}"/>
+                                                <TextBlock Text="{Binding CurrentRoomNumber, StringFormat=Phòng {0}}" FontSize="10"
+                                                           Foreground="{StaticResource ColorTextSecondary}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="TRẠNG THÁI" Binding="{Binding CurrentStatusDisplay}"
+                                                    SortMemberPath="CurrentStatusDisplay" Width="1.1*" MinWidth="100"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <Border x:Name="brdTenantState" Background="{StaticResource ColorOverlay}" Visibility="Collapsed">
+                            <TextBlock x:Name="lbTenantState" Style="{StaticResource ManagerStateTextStyle}"/>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
 
-            <Border Background="{StaticResource ColorSurface}"
-                    BorderBrush="{StaticResource ColorBorder}" BorderThickness="0,0,0,1" Padding="12,8">
-                <TextBlock x:Name="lblContractSection" Text="Hợp đồng" Style="{StaticResource ManagerSectionTitleStyle}"
-                           Margin="0" VerticalAlignment="Center"/>
-            </Border>
+            <!-- Right: Contracts of selected tenant -->
+            <Grid Grid.Column="1" Margin="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <Border Grid.Row="1" Style="{StaticResource ManagerCardStyle}" Margin="0" Padding="0" BorderThickness="0">
-                <Grid>
-                    <DataGrid x:Name="dgContracts" Style="{StaticResource ManagerDataGridStyle}"
-                              CanUserSortColumns="True"
-                              HorizontalScrollBarVisibility="Auto">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="NHÀ TRỌ" Binding="{Binding PropertyName}" SortMemberPath="PropertyName" Width="1.1*" MinWidth="80"/>
-                            <DataGridTextColumn Header="TÒA / PHÒNG" Binding="{Binding BuildingName}" SortMemberPath="BuildingName" Width="1*" MinWidth="80"/>
-                            <DataGridTextColumn Header="PHÒNG" Binding="{Binding RoomNumber}" SortMemberPath="RoomNumber" Width="0.7*" MinWidth="60"/>
-                            <DataGridTextColumn Header="VAI TRÒ" Binding="{Binding RoleDisplay}" SortMemberPath="IsMainTenant" Width="1.1*" MinWidth="90"/>
-                            <DataGridTemplateColumn Header="THỜI HẠN" Width="1.3*" MinWidth="120">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock VerticalAlignment="Center" FontSize="11">
-                                            <Run Text="{Binding StartDate, StringFormat={}{0:dd/MM/yyyy}}"/>
-                                            <Run Text=" - "/>
-                                            <Run Text="{Binding EndDate, StringFormat={}{0:dd/MM/yyyy}}"/>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="TRẠNG THÁI" Binding="{Binding StatusDisplay}" SortMemberPath="StatusDisplay" Width="1.1*" MinWidth="90"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <Border x:Name="brdContractState" Background="{StaticResource ColorOverlay}" Visibility="Visible">
-                        <TextBlock Text="Chọn một khách để xem hợp đồng và phòng đang thuê." Style="{StaticResource ManagerStateTextStyle}"/>
-                    </Border>
-                </Grid>
-            </Border>
+                <Border Background="{StaticResource ColorSurface}"
+                        BorderBrush="{StaticResource ColorBorder}" BorderThickness="0,0,0,1" Padding="12,8">
+                    <TextBlock x:Name="lbContractSection" Text="Hợp đồng" Style="{StaticResource ManagerSectionTitleStyle}"
+                               Margin="0" VerticalAlignment="Center"/>
+                </Border>
+
+                <Border Grid.Row="1" Style="{StaticResource ManagerCardStyle}" Margin="0" Padding="0" BorderThickness="0">
+                    <Grid>
+                        <DataGrid x:Name="dgContracts" Style="{StaticResource ManagerDataGridStyle}"
+                                  CanUserSortColumns="True"
+                                  HorizontalScrollBarVisibility="Auto">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="NHÀ TRỌ" Binding="{Binding PropertyName}" SortMemberPath="PropertyName" Width="1.1*" MinWidth="80"/>
+                                <DataGridTextColumn Header="TÒA / PHÒNG" Binding="{Binding BuildingName}" SortMemberPath="BuildingName" Width="1*" MinWidth="80"/>
+                                <DataGridTextColumn Header="PHÒNG" Binding="{Binding RoomNumber}" SortMemberPath="RoomNumber" Width="0.7*" MinWidth="60"/>
+                                <DataGridTextColumn Header="VAI TRÒ" Binding="{Binding RoleDisplay}" SortMemberPath="IsMainTenant" Width="1.1*" MinWidth="90"/>
+                                <DataGridTemplateColumn Header="THỜI HẠN" Width="1.3*" MinWidth="120">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock VerticalAlignment="Center" FontSize="11">
+                                                <Run Text="{Binding StartDate, StringFormat={}{0:dd/MM/yyyy}}"/>
+                                                <Run Text=" - "/>
+                                                <Run Text="{Binding EndDate, StringFormat={}{0:dd/MM/yyyy}}"/>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="TRẠNG THÁI" Binding="{Binding StatusDisplay}" SortMemberPath="StatusDisplay" Width="1.1*" MinWidth="90"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <Border x:Name="brdContractState" Background="{StaticResource ColorOverlay}" Visibility="Visible">
+                            <TextBlock Text="Chọn một khách để xem hợp đồng và phòng đang thuê." Style="{StaticResource ManagerStateTextStyle}"/>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
         </Grid>
     </Grid>
 </Page>

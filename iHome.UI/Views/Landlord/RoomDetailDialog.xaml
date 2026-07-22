@@ -13,7 +13,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock x:Name="lblTitle" Text="Chi tiết phòng" Style="{StaticResource ManagerDialogTitleStyle}"/>
+        <TextBlock x:Name="lbTitle" Text="Chi tiết phòng" Style="{StaticResource ManagerDialogTitleStyle}"/>
 
         <Border Grid.Row="1" Style="{StaticResource ManagerCardStyle}" Margin="0,0,0,12" Padding="16">
             <Grid>
@@ -29,47 +29,47 @@
 
                 <StackPanel Margin="0,0,12,8">
                     <TextBlock Text="NHÀ TRỌ" Style="{StaticResource ManagerFilterLabelStyle}"/>
-                    <TextBlock x:Name="lblProperty" Style="{StaticResource ManagerDataGridStrongTextStyle}"/>
+                    <TextBlock x:Name="lbProperty" Style="{StaticResource ManagerDataGridStrongTextStyle}"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Margin="0,0,0,8">
                     <TextBlock Text="TÒA NHÀ" Style="{StaticResource ManagerFilterLabelStyle}"/>
-                    <TextBlock x:Name="lblBuilding" Style="{StaticResource ManagerDataGridStrongTextStyle}"/>
+                    <TextBlock x:Name="lbBuilding" Style="{StaticResource ManagerDataGridStrongTextStyle}"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" Margin="0,0,12,8">
                     <TextBlock Text="SỐ PHÒNG" Style="{StaticResource ManagerFilterLabelStyle}"/>
-                    <TextBlock x:Name="lblRoomNumber" Style="{StaticResource ManagerDataGridLinkTextStyle}"/>
+                    <TextBlock x:Name="lbRoomNumber" Style="{StaticResource ManagerDataGridLinkTextStyle}"/>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,8">
                     <TextBlock Text="LOẠI PHÒNG" Style="{StaticResource ManagerFilterLabelStyle}"/>
-                    <TextBlock x:Name="lblRoomType" Style="{StaticResource ManagerDataGridTextStyle}"/>
+                    <TextBlock x:Name="lbRoomType" Style="{StaticResource ManagerDataGridTextStyle}"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="2" Margin="0,0,12,8">
                     <TextBlock Text="TẦNG" Style="{StaticResource ManagerFilterLabelStyle}"/>
-                    <TextBlock x:Name="lblFloor" Style="{StaticResource ManagerDataGridTextStyle}"/>
+                    <TextBlock x:Name="lbFloor" Style="{StaticResource ManagerDataGridTextStyle}"/>
                 </StackPanel>
                 <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,8">
                     <TextBlock Text="DIỆN TÍCH" Style="{StaticResource ManagerFilterLabelStyle}"/>
-                    <TextBlock x:Name="lblArea" Style="{StaticResource ManagerDataGridTextStyle}"/>
+                    <TextBlock x:Name="lbArea" Style="{StaticResource ManagerDataGridTextStyle}"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="3" Margin="0,0,12,8">
                     <TextBlock Text="GIÁ THUÊ" Style="{StaticResource ManagerFilterLabelStyle}"/>
-                    <TextBlock x:Name="lblBaseRent" Style="{StaticResource ManagerDataGridTextStyle}"/>
+                    <TextBlock x:Name="lbBaseRent" Style="{StaticResource ManagerDataGridTextStyle}"/>
                 </StackPanel>
                 <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,0,0,8">
                     <TextBlock Text="TRẠNG THÁI" Style="{StaticResource ManagerFilterLabelStyle}"/>
-                    <TextBlock x:Name="lblStatus" Style="{StaticResource ManagerDataGridTextStyle}"/>
+                    <TextBlock x:Name="lbStatus" Style="{StaticResource ManagerDataGridTextStyle}"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="4" Margin="0,0,12,8">
                     <TextBlock Text="SỨC CHỨA" Style="{StaticResource ManagerFilterLabelStyle}"/>
-                    <TextBlock x:Name="lblOccupancy" Style="{StaticResource ManagerDataGridTextStyle}"/>
+                    <TextBlock x:Name="lbOccupancy" Style="{StaticResource ManagerDataGridTextStyle}"/>
                 </StackPanel>
                 <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,0,8">
                     <TextBlock Text="GHI CHÚ" Style="{StaticResource ManagerFilterLabelStyle}"/>
-                    <TextBlock x:Name="lblNotes" Style="{StaticResource ManagerDataGridTextStyle}" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="lbNotes" Style="{StaticResource ManagerDataGridTextStyle}" TextWrapping="Wrap"/>
                 </StackPanel>
             </Grid>
         </Border>

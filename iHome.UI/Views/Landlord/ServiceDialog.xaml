@@ -12,7 +12,7 @@
         </Grid.RowDefinitions>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <TextBlock x:Name="lblTitle" Text="Thêm dịch vụ" Style="{StaticResource ManagerDialogTitleStyle}"/>
+                <TextBlock x:Name="lbTitle" Text="Thêm dịch vụ" Style="{StaticResource ManagerDialogTitleStyle}"/>
                 <TextBlock Text="TÊN DỊCH VỤ" Style="{StaticResource ManagerDialogLabelStyle}"/>
                 <TextBox x:Name="txtServiceName" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="100"
                          KeyDown="txtServiceName_KeyDown"/>
@@ -23,9 +23,9 @@
                 <TextBox x:Name="txtUnitPrice" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="15"
                          KeyDown="txtUnitPrice_KeyDown"/>
                 <TextBlock Text="CÁCH TÍNH" Style="{StaticResource ManagerDialogLabelStyle}"/>
-                <ComboBox x:Name="cboCalculationMethod" Style="{StaticResource ManagerComboBoxStyle}"
+                <ComboBox x:Name="cbCalculationMethod" Style="{StaticResource ManagerComboBoxStyle}"
                           DisplayMemberPath="DisplayName" SelectedValuePath="Value"
-                          KeyDown="cboCalculationMethod_KeyDown"/>
+                          KeyDown="cbCalculationMethod_KeyDown"/>
                 <CheckBox x:Name="chkIsActive" Content="Đang hoạt động" Margin="0,16,0,0"
                           Foreground="{StaticResource ColorTextPrimary}" IsChecked="True"/>
             </StackPanel>

@@ -12,7 +12,7 @@
         </Grid.RowDefinitions>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <TextBlock x:Name="lblTitle" Text="Thêm nhà trọ" Style="{StaticResource ManagerDialogTitleStyle}"/>
+                <TextBlock x:Name="lbTitle" Text="Thêm nhà trọ" Style="{StaticResource ManagerDialogTitleStyle}"/>
                 <TextBlock Text="TÊN NHÀ TRỌ" Style="{StaticResource ManagerDialogLabelStyle}"/>
                 <TextBox x:Name="txtName" Style="{StaticResource ManagerTextBoxStyle}" MaxLength="150"
                          KeyDown="txtName_KeyDown"/>

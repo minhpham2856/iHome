@@ -1,4 +1,4 @@
-using iHome.BLL.DTOs;
+using iHome.BLL.DTOs.Manager;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -6,6 +6,7 @@ using System.Windows.Input;
 
 namespace iHome.UI.Views.Manager
 {
+	// Code-behind for the AssignTenantDialog modal dialog.
 	public partial class AssignTenantDialog : Window
 	{
 		public int ContractId { get; private set; }
@@ -13,55 +14,78 @@ namespace iHome.UI.Views.Manager
 		public bool IsMainTenant { get; private set; }
 
 		public AssignTenantDialog(
-			IEnumerable<ManagerContractOptionDto> contracts,
-			IEnumerable<ManagerLookupOptionDto> tenants,
+			IEnumerable<ContractOptionDto> contracts,
+			IEnumerable<LookupOptionDto> tenants,
 			int? selectedTenantId = null,
 			int? selectedContractId = null)
 		{
+			// Load XAML markup and register named controls for code-behind
 			InitializeComponent();
-			CbContract.ItemsSource = contracts.ToList();
-			CbTenant.ItemsSource = tenants.ToList();
-			CbContract.SelectedItem = selectedContractId.HasValue
-				? CbContract.Items.Cast<ManagerContractOptionDto>().FirstOrDefault(item => item.Id == selectedContractId.Value)
+			// Bind ItemsSource so grid/combo displays BLL list or ICollectionView
+			cbContract.ItemsSource = contracts.ToList();
+			// Bind ItemsSource so grid/combo displays BLL list or ICollectionView
+			cbTenant.ItemsSource = tenants.ToList();
+			// Restore or set combo selection to match entity id or filter
+			cbContract.SelectedItem = selectedContractId.HasValue
+				// Work with BLL DTO/form object returned from service or built from controls
+				? cbContract.Items.Cast<ContractOptionDto>().FirstOrDefault(item => item.Id == selectedContractId.Value)
+				// Execute UI step inside AssignTenantDialog
 				: null;
-			if (CbContract.SelectedItem == null)
+			// Restore or set combo selection to match entity id or filter
+			if (cbContract.SelectedItem == null)
 			{
-				CbContract.SelectedIndex = CbContract.Items.Count > 0 ? 0 : -1;
+				// Pick default combo index (usually first/all option) after reload
+				cbContract.SelectedIndex = cbContract.Items.Count > 0 ? 0 : -1;
 			}
-			CbTenant.SelectedItem = selectedTenantId.HasValue
-				? CbTenant.Items.Cast<ManagerLookupOptionDto>().FirstOrDefault(item => item.Id == selectedTenantId.Value)
+			// Restore or set combo selection to match entity id or filter
+			cbTenant.SelectedItem = selectedTenantId.HasValue
+				// Work with BLL DTO/form object returned from service or built from controls
+				? cbTenant.Items.Cast<LookupOptionDto>().FirstOrDefault(item => item.Id == selectedTenantId.Value)
+				// Execute UI step inside AssignTenantDialog
 				: null;
-			if (CbTenant.SelectedItem == null)
+			// Restore or set combo selection to match entity id or filter
+			if (cbTenant.SelectedItem == null)
 			{
-				CbTenant.SelectedIndex = CbTenant.Items.Count > 0 ? 0 : -1;
+				// Pick default combo index (usually first/all option) after reload
+				cbTenant.SelectedIndex = cbTenant.Items.Count > 0 ? 0 : -1;
 			}
 		}
 
 		private void Save_Click(object sender, RoutedEventArgs e)
 		{
-			if (CbContract.SelectedItem is not ManagerContractOptionDto contract ||
-				CbTenant.SelectedItem is not ManagerLookupOptionDto tenant)
+			// Change combo selection to drive filter cascade or dialog default
+			if (cbContract.SelectedItem is not ContractOptionDto contract ||
+				// Change combo selection to drive filter cascade or dialog default
+				cbTenant.SelectedItem is not LookupOptionDto tenant)
 			{
+				// ManagerUi.ShowValidation shows validation/error dialog or wraps BLL exceptions
 				ManagerUi.ShowValidation("Không có hợp đồng hoặc khách phù hợp.");
+				// Exit method early or return value/tuple to caller
 				return;
 			}
+			// Assign local/page state inside Save_Click without altering business rules
 			ContractId = contract.Id;
+			// Assign local/page state inside Save_Click without altering business rules
 			TenantId = tenant.Id;
-			IsMainTenant = ChkMainTenant.IsChecked == true;
+			// Read CheckBox to capture boolean flag such as main-tenant selection
+			IsMainTenant = chkMainTenant.IsChecked == true;
+			// Close dialog successfully so caller reads Result/output properties
 			DialogResult = true;
 		}
 
+		// Cancel dialog without persisting changes
 		private void Cancel_Click(object sender, RoutedEventArgs e) => DialogResult = false;
 
-		// key down enter
-		private void CbContract_KeyDown(object sender, KeyEventArgs e)
+		private void cbContract_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.Key == Key.Enter) { e.Handled = true; CbTenant.Focus(); }
+			// Move keyboard focus for faster keyboard-driven form entry
+			if (e.Key == Key.Enter) { e.Handled = true; cbTenant.Focus(); }
 		}
 
-		private void CbTenant_KeyDown(object sender, KeyEventArgs e)
+		private void cbTenant_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.Key == Key.Enter) { e.Handled = true; ChkMainTenant.Focus(); }
+			// Move keyboard focus for faster keyboard-driven form entry
+			if (e.Key == Key.Enter) { e.Handled = true; chkMainTenant.Focus(); }
 		}
 	}
 }
