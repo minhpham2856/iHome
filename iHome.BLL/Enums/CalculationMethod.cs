@@ -9,7 +9,6 @@ namespace iHome.BLL.Enums
 
 		// Pass through stored method text; blank stays blank for grid cells
 		public static string Format(string method) =>
-			// Null/whitespace → return as-is; otherwise return canonical Vietnamese label unchanged
 			string.IsNullOrWhiteSpace(method) ? method : method;
 	}
 }

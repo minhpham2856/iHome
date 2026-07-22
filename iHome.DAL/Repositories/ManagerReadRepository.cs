@@ -6,22 +6,19 @@ using System.Linq;
 
 namespace iHome.DAL.Repositories
 {
-	// EF Core data access for Manager read queries.
+	// Truy vấn đọc dữ liệu cho vai trò Quản lý.
 	public class ManagerReadRepository
 	{
-		// Shared EF Core context instance.
 		private readonly IHomeDbContext _context;
 
 		public ManagerReadRepository()
 		{
-			// Instantiate a dedicated DbContext for manager dashboard read queries
 			_context = new IHomeDbContext();
 		}
 
-		// Query Properties records.
+		// Nhà trọ đang hoạt động từ các tòa được phân công.
 		public List<Property> GetProperties(int managerId)
 		{
-			// Derive distinct active properties from buildings currently assigned to this manager
 			return _context.Buildings
 				.AsNoTracking()
 				.Where(b =>
@@ -34,10 +31,9 @@ namespace iHome.DAL.Repositories
 				.ToList();
 		}
 
-		// Query Buildings records.
+		// Tòa nhà đang hoạt động do quản lý phụ trách.
 		public List<Building> GetBuildings(int managerId, int? buildingId = null)
 		{
-			// Load active buildings managed by this user, optionally narrowed to one building id
 			return _context.Buildings
 				.AsNoTracking()
 				.Where(b =>
@@ -48,10 +44,9 @@ namespace iHome.DAL.Repositories
 				.ToList();
 		}
 
-		// Query Rooms records.
+		// Phòng trong tòa được phân công (kèm loại phòng và hợp đồng).
 		public List<Room> GetRooms(int managerId, int? buildingId = null)
 		{
-			// Load rooms in managed active buildings with building, room type, contracts, and contract tenants
 			return _context.Rooms
 				.AsNoTracking()
 				.Include(r => r.Building)
@@ -68,10 +63,9 @@ namespace iHome.DAL.Repositories
 				.ToList();
 		}
 
-		// Query ContractTenants records.
+		// Liên kết khách–hợp đồng trong tòa được phân công.
 		public List<ContractTenant> GetContractTenants(int managerId, int? buildingId = null)
 		{
-			// Load contract-tenant links for rooms in managed active buildings with full room/building navigation
 			return _context.ContractTenants
 				.AsNoTracking()
 				.Include(ct => ct.Tenant)
@@ -89,10 +83,9 @@ namespace iHome.DAL.Repositories
 				.ToList();
 		}
 
-		// Query Services records.
+		// Dịch vụ thuộc nhà trọ của các tòa được phân công.
 		public List<Service> GetServices(int managerId, int? buildingId = null)
 		{
-			// Resolve distinct property ids reachable from the manager's active building assignments
 			var managedPropertyIds = _context.Buildings
 				.AsNoTracking()
 				.Where(b =>
@@ -102,7 +95,6 @@ namespace iHome.DAL.Repositories
 				.Select(b => b.PropertyId)
 				.Distinct();
 
-			// Return active-property services for those property ids, ordered by property then service name
 			return _context.Services
 				.AsNoTracking()
 				.Include(s => s.Property)
@@ -114,10 +106,9 @@ namespace iHome.DAL.Repositories
 				.ToList();
 		}
 
-		// CountAssignedBuildings — public entry point.
+		// Số tòa đang hoạt động được phân công.
 		public int CountAssignedBuildings(int managerId, int? buildingId = null)
 		{
-			// Count active buildings assigned to this manager, optionally restricted to one building id
 			return _context.Buildings
 				.AsNoTracking()
 				.Count(b =>
@@ -126,9 +117,9 @@ namespace iHome.DAL.Repositories
 					(!buildingId.HasValue || b.Id == buildingId.Value));
 		}
 
+		// Đếm phòng theo trạng thái.
 		public Dictionary<string, int> GetRoomStatusCounts(int managerId, int? buildingId = null)
 		{
-			// Group managed active rooms by Status and count members in each group
 			return _context.Rooms
 				.AsNoTracking()
 				.Where(r =>
@@ -148,13 +139,12 @@ namespace iHome.DAL.Repositories
 					StringComparer.OrdinalIgnoreCase);
 		}
 
-		// CountActiveTenants — public entry point.
+		// Số khách Distinct trên hợp đồng đang hoạt động.
 		public int CountActiveTenants(
 			int managerId,
 			string activeContractStatus,
 			int? buildingId = null)
 		{
-			// Count distinct tenants on contracts with the active status in managed active buildings
 			return _context.ContractTenants
 				.AsNoTracking()
 				.Where(ct =>
@@ -168,11 +158,11 @@ namespace iHome.DAL.Repositories
 				.Count();
 		}
 
+		// Đếm hợp đồng theo trạng thái.
 		public Dictionary<string, int> GetContractStatusCounts(
 			int managerId,
 			int? buildingId = null)
 		{
-			// Group managed active contracts by Status and count members in each group
 			return _context.Contracts
 				.AsNoTracking()
 				.Where(c =>
@@ -192,7 +182,7 @@ namespace iHome.DAL.Repositories
 					StringComparer.OrdinalIgnoreCase);
 		}
 
-		// CountExpiringContracts — public entry point.
+		// Hợp đồng hoạt động hết hạn trong khoảng [fromDate, toDate].
 		public int CountExpiringContracts(
 			int managerId,
 			string activeStatus,
@@ -200,7 +190,6 @@ namespace iHome.DAL.Repositories
 			DateOnly toDate,
 			int? buildingId = null)
 		{
-			// Count active contracts whose EndDate falls within the inclusive date window for managed buildings
 			return _context.Contracts
 				.AsNoTracking()
 				.Count(c =>
@@ -212,14 +201,13 @@ namespace iHome.DAL.Repositories
 					(!buildingId.HasValue || c.Room.BuildingId == buildingId.Value));
 		}
 
-		// CountOverdueInvoices — public entry point.
+		// Hóa đơn chưa thanh toán quá hạn.
 		public int CountOverdueInvoices(
 			int managerId,
 			string paidStatus,
 			DateOnly today,
 			int? buildingId = null)
 		{
-			// Count unpaid invoices past due date for contracts in managed active buildings
 			return _context.Invoices
 				.AsNoTracking()
 				.Count(i =>
@@ -231,13 +219,12 @@ namespace iHome.DAL.Repositories
 					 i.Contract.Room.BuildingId == buildingId.Value));
 		}
 
-		// Query OutstandingAmount records.
+		// Công nợ = tổng hóa đơn chưa trả − tổng thanh toán trên các hóa đơn đó.
 		public decimal GetOutstandingAmount(
 			int managerId,
 			string paidStatus,
 			int? buildingId = null)
 		{
-			// Select unpaid invoice rows scoped to managed active buildings for total computation
 			var unpaidInvoices = _context.Invoices
 				.AsNoTracking()
 				.Where(i =>
@@ -247,11 +234,9 @@ namespace iHome.DAL.Repositories
 					(!buildingId.HasValue ||
 					 i.Contract.Room.BuildingId == buildingId.Value));
 
-			// Sum invoice TotalAmount for the unpaid invoice set, treating null aggregate as zero
 			var invoiceTotal = unpaidInvoices
 				.Select(i => (decimal?)i.TotalAmount)
 				.Sum() ?? 0m;
-			// Sum payment Amount rows linked to still-unpaid invoices in the same managed scope
 			var paidTotal = _context.Payments
 				.AsNoTracking()
 				.Where(p =>
@@ -263,17 +248,16 @@ namespace iHome.DAL.Repositories
 				.Select(p => (decimal?)p.Amount)
 				.Sum() ?? 0m;
 
-			// Outstanding balance is billed total minus recorded payments
 			return invoiceTotal - paidTotal;
 		}
 
+		// Doanh thu theo tháng (khóa năm*100+tháng) trong khoảng ngày.
 		public Dictionary<int, decimal> GetMonthlyRevenue(
 			int managerId,
 			DateOnly startDate,
 			DateOnly endDate,
 			int? buildingId = null)
 		{
-			// Group payments in the date window by year/month and sum Amount per month for managed buildings
 			return _context.Payments
 				.AsNoTracking()
 				.Where(p =>

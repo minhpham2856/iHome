@@ -9,7 +9,6 @@ namespace iHome.BLL.Enums
 
 		// Format payment method for report/grid display
 		public static string Format(string? method) =>
-			// Missing method → em dash placeholder; otherwise show stored Vietnamese label
 			string.IsNullOrWhiteSpace(method) ? "—" : method;
 	}
 }

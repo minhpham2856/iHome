@@ -19,27 +19,21 @@ namespace iHome.BLL.Services
 
 		public LandlordPropertyService(IHomeDbContext context)
 		{
-			// Property data access against shared DbContext
 			_properties = new PropertyRepository(context);
-			// Audit trail for create/update operations
 			_audits = new AuditLogRepository(context);
 		}
 
 		// List properties belonging to the landlord for the grid view
 		public List<PropertyDto> GetByLandlord(int landlordId)
 		{
-			// Load all properties for this landlord from repository
 			var properties = _properties.GetByLandlord(landlordId);
-			// Map each entity to list DTO and return materialized list
 			return properties.Select(Map).ToList();
 		}
 
 		// Load edit form — throws from RequireOwned if property does not belong to landlord
 		public PropertyFormDto? GetForm(int landlordId, int propertyId)
 		{
-			// Verify ownership and load entity
 			var property = RequireOwned(landlordId, propertyId);
-			// Project entity fields into form DTO for two-way binding
 			return new PropertyFormDto
 			{
 				Id = property.Id,
@@ -53,9 +47,7 @@ namespace iHome.BLL.Services
 		// Create a new property with LandlordId set to the caller
 		public void Create(int landlordId, PropertyFormDto form)
 		{
-			// Validate required form fields
 			Validate(form);
-			// Build new Property entity from trimmed form values
 			var entity = new Property
 			{
 				LandlordId = landlordId,
@@ -65,13 +57,11 @@ namespace iHome.BLL.Services
 				IsActive = form.IsActive,
 				CreatedAt = DateTime.Now
 			};
-			// INSERT; throw if repository reports failure
 			if (!_properties.Add(entity))
 			{
 				throw new InvalidOperationException("Không thể thêm nhà trọ.");
 			}
 
-			// Record create audit with new-value snapshot
 			_audits.Add(new AuditLog
 			{
 				UserId = landlordId,
@@ -93,33 +83,26 @@ namespace iHome.BLL.Services
 		// Update property — AuditDiff captures before/after for key fields
 		public void Update(int landlordId, PropertyFormDto form)
 		{
-			// Validate form input
 			Validate(form);
-			// Load existing row and verify landlord ownership
 			var existing = RequireOwned(landlordId, form.Id);
 
-			// Normalize editable scalar fields
 			string name = form.Name.Trim();
 			string address = form.Address.Trim();
 			string? description = string.IsNullOrWhiteSpace(form.Description) ? null : form.Description.Trim();
-			// Snapshot values before edit for audit diff
 			var before = new Dictionary<string, string?>
 			{
 				[AuditField.Name] = existing.Name,
 				[AuditField.Address] = existing.Address,
 				[AuditField.Active] = DisplayText.FormatActive(existing.IsActive)
 			};
-			// Snapshot values after edit for audit diff
 			var after = new Dictionary<string, string?>
 			{
 				[AuditField.Name] = name,
 				[AuditField.Address] = address,
 				[AuditField.Active] = DisplayText.FormatActive(form.IsActive)
 			};
-			// Build compact old/new diff strings
 			var (oldValue, newValue) = AuditDiff.Build(before, after);
 
-			// Persist updated property row
 			_properties.Update(new Property
 			{
 				Id = form.Id,
@@ -129,7 +112,6 @@ namespace iHome.BLL.Services
 				IsActive = form.IsActive
 			});
 
-			// Write update audit entry
 			_audits.Add(new AuditLog
 			{
 				UserId = landlordId,
@@ -143,29 +125,24 @@ namespace iHome.BLL.Services
 			});
 		}
 
-		// Guard ownership — property.LandlordId must match caller
+		// Ensure the property belongs to this landlord
 		private Property RequireOwned(int landlordId, int propertyId)
 		{
-			// Load property by primary key
 			var property = _properties.GetById(propertyId);
-			// Reject missing or foreign-owned properties
 			if (property == null || property.LandlordId != landlordId)
 			{
 				throw new UnauthorizedAccessException("Nhà trọ không thuộc về bạn.");
 			}
-			// Return verified entity to caller
 			return property;
 		}
 
 		// Validate form: Name and Address are required
 		private static void Validate(PropertyFormDto form)
 		{
-			// Reject empty property name
 			if (string.IsNullOrWhiteSpace(form.Name))
 			{
 				throw new ArgumentException("Tên nhà trọ không được để trống.");
 			}
-			// Reject empty address
 			if (string.IsNullOrWhiteSpace(form.Address))
 			{
 				throw new ArgumentException("Địa chỉ không được để trống.");
@@ -175,7 +152,6 @@ namespace iHome.BLL.Services
 		// Map Property entity to list DTO including BuildingCount
 		private static PropertyDto Map(Property p)
 		{
-			// Project entity scalar fields and related building count into list DTO
 			return new PropertyDto
 			{
 				Id = p.Id,
@@ -183,7 +159,6 @@ namespace iHome.BLL.Services
 				Address = p.Address,
 				Description = p.Description,
 				IsActive = p.IsActive,
-				// Count related buildings for grid summary column
 				BuildingCount = p.Buildings?.Count ?? 0
 			};
 		}

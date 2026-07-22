@@ -8,30 +8,26 @@ using System.Linq;
 
 namespace iHome.BLL.Services.Manager
 {
-	// Manager contract lifecycle: list, create, update, delete, assign/remove tenants
+	// Vòng đời hợp đồng Manager: danh sách, tạo/sửa/xóa, gán/gỡ khách
 	public class ContractService
 	{
-		// Mutating contract operations
 		private readonly ManagerOperationsRepository _operationsRepository = new();
-		// Read-only room/contract lookups
 		private readonly ManagerReadRepository _readRepository = new();
 
-		// Grid rows for contracts in manager-assigned buildings
+		// Lưới hợp đồng trong các tòa được phân công
 		public List<ContractDto> GetContracts(int managerId, int? buildingId = null)
 		{
 			ServiceGuard.EnsureValidManagerId(managerId);
-			// Load contracts scoped to manager, map each to list DTO
 			return _operationsRepository.GetContracts(managerId, buildingId)
 				.Select(ToDto)
 				.ToList();
 		}
 
-		// Combo: rooms available for new contract (excludes maintenance rooms)
+		// Combo phòng cho HĐ mới — loại phòng Bảo trì; kèm MaxOccupancy cho chọn khách phụ
 		public List<LookupOptionDto> GetRoomOptions(int managerId, int? buildingId = null)
 		{
 			ServiceGuard.EnsureValidManagerId(managerId);
 			return _readRepository.GetRooms(managerId, buildingId)
-				// Maintenance rooms cannot receive new contracts
 				.Where(room => !string.Equals(room.Status, RoomStatus.Maintenance, StringComparison.OrdinalIgnoreCase))
 				.Select(room => new LookupOptionDto
 				{
@@ -39,31 +35,27 @@ namespace iHome.BLL.Services.Manager
 					BuildingId = room.BuildingId,
 					PropertyId = room.Building.PropertyId,
 					DisplayName = $"{room.Building.Name} - Phòng {room.RoomNumber}",
-					// Pre-fill monthly rent from room type base rent
 					SuggestedAmount = room.RoomType.BaseRent,
-					// Truyền sức chứa để dialog bắt buộc đủ khách đứng tên khi tạo HĐ
+					// Trần sức chứa (MaxOccupancy) — UI giới hạn số khách phụ khi tạo HĐ
 					MaxOccupancy = room.RoomType.MaxOccupancy
 				})
 				.ToList();
 		}
 
-		// Combo: active contracts for invoice creation picker
+		// Combo HĐ đang hoạt động cho form lập hóa đơn
 		public List<ContractOptionDto> GetContractOptions(int managerId, int? buildingId = null) =>
 			GetContracts(managerId, buildingId)
-				// Only billable active contracts appear in invoice form
 				.Where(contract => contract.Status == ContractStatus.Active)
 				.Select(contract => new ContractOptionDto
 				{
 					Id = contract.Id,
-					// Rich label: id + location + main tenant name
 					DisplayName = $"HĐ #{contract.Id} - {contract.BuildingName} / {contract.RoomNumber} - {contract.MainTenantName}"
 				})
 				.ToList();
 
-		// Load contract form for view/edit dialog
+		// Form xem/sửa — lấy MainTenantId từ ContractTenants
 		public ContractFormDto GetContract(int managerId, int contractId)
 		{
-			// Contract must exist in manager's scoped set
 			var contract = _operationsRepository.GetContracts(managerId)
 				.SingleOrDefault(item => item.Id == contractId)
 				?? throw new UnauthorizedAccessException("Bạn không có quyền xem hợp đồng này.");
@@ -71,7 +63,6 @@ namespace iHome.BLL.Services.Manager
 			{
 				Id = contract.Id,
 				RoomId = contract.RoomId,
-				// Resolve main tenant id from ContractTenants link table
 				MainTenantId = contract.ContractTenants.FirstOrDefault(ct => ct.IsMainTenant)?.TenantId ?? 0,
 				StartDate = contract.StartDate,
 				EndDate = contract.EndDate,
@@ -82,13 +73,11 @@ namespace iHome.BLL.Services.Manager
 			};
 		}
 
-		// Create new rental contract with main + co-tenants
+		// Tạo HĐ mới với khách chính + khách phụ
 		public int CreateContract(int managerId, ContractFormDto input)
 		{
 			ServiceGuard.EnsureValidManagerId(managerId);
-			// Validate dates, rent, status — isCreate=true enforces room/tenant selection
 			FormValidation.ValidateContract(input, true);
-			// Truyền CoTenantIds để DAL kiểm tra đủ MaxOccupancy và lưu ContractTenants
 			var contract = _operationsRepository.CreateContract(
 				managerId,
 				ToEntity(input, managerId),
@@ -97,27 +86,24 @@ namespace iHome.BLL.Services.Manager
 			return contract.Id;
 		}
 
-		// Update contract metadata (dates, rent, status, notes)
+		// Cập nhật metadata HĐ (ngày, tiền, trạng thái, ghi chú)
 		public void UpdateContract(int managerId, ContractFormDto input)
 		{
 			ServiceGuard.EnsureValidManagerId(managerId);
-			// isCreate=false — room/tenant not re-validated on edit
 			FormValidation.ValidateContract(input, false);
 			_operationsRepository.UpdateContract(managerId, ToEntity(input, managerId));
 		}
 
-		// Delete contract when business rules allow (no blocking invoices, etc.)
 		public void DeleteContract(int managerId, int contractId)
 		{
 			ServiceGuard.EnsureValidManagerId(managerId);
 			_operationsRepository.DeleteContract(managerId, contractId);
 		}
 
-		// Add tenant to existing contract (main or co-tenant)
+		// Gán khách vào HĐ hiện có (chính hoặc phụ)
 		public void AssignTenant(int managerId, int contractId, int tenantId, bool isMainTenant)
 		{
 			ServiceGuard.EnsureValidManagerId(managerId);
-			// Both ids required for link table insert
 			if (contractId <= 0 || tenantId <= 0)
 			{
 				throw new ArgumentException("Vui lòng chọn hợp đồng và khách thuê.");
@@ -125,14 +111,13 @@ namespace iHome.BLL.Services.Manager
 			_operationsRepository.AssignTenant(managerId, contractId, tenantId, isMainTenant);
 		}
 
-		// Remove tenant from contract — DAL prevents removing last main tenant
+		// Gỡ khách — DAL chặn gỡ khách chính cuối cùng
 		public void RemoveTenant(int managerId, int contractId, int tenantId)
 		{
 			ServiceGuard.EnsureValidManagerId(managerId);
 			_operationsRepository.RemoveTenant(managerId, contractId, tenantId);
 		}
 
-		// Map form → Contract entity for DAL persistence
 		private static Contract ToEntity(ContractFormDto input, int managerId) => new()
 		{
 			Id = input.Id,
@@ -143,15 +128,12 @@ namespace iHome.BLL.Services.Manager
 			DepositAmount = input.DepositAmount,
 			Status = input.Status,
 			Notes = input.Notes,
-			// Audit: which manager created the contract
 			CreatedBy = managerId,
 			CreatedAt = DateTime.Now
 		};
 
-		// Map Contract entity → grid/list DTO with tenant summary
 		private static ContractDto ToDto(Contract contract)
 		{
-			// Order tenants: main first, then alphabetically by name
 			var tenants = contract.ContractTenants.OrderByDescending(ct => ct.IsMainTenant).ToList();
 			// Hiển thị đủ tên: người chính gắn nhãn, các khách còn lại liệt kê sau
 			string tenantNames = string.Join(", ", tenants.Select(ct =>

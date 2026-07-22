@@ -1,6 +1,31 @@
 .vs/
 .vscode/
 .agent/
+.claude/
+.agents/
+
+# Secrets / local env
+.env
+.env.*
+!.env.example
+
+# Scripts / scratch / docs not part of the app
+*.py
+__pycache__/
+*.pyc
+CLAUDE.md
+styles.md
+*_check.txt
+_gen_tenants/
+_chk/
+
+# Tests (none shipped with this student project)
+**/test/
+**/tests/
+**/Test/
+**/Tests/
+*Test.cs
+*Tests.cs
 
 # Build
 bin/

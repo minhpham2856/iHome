@@ -22,59 +22,44 @@ namespace iHome.BLL.Services
 
 		public LandlordContractService(IHomeDbContext context)
 		{
-			// Contract data access against shared DbContext
 			_contracts = new ContractRepository(context);
-			// Property filter options
 			_properties = new PropertyRepository(context);
-			// Building filter options
 			_buildings = new BuildingRepository(context);
-			// Landlord role guard
 			_users = new UserRepository(context);
-			// Audit trail for update operations
 			_audits = new AuditLogRepository(context);
 		}
 
 		// Property filter combo — active properties only
 		public List<PropertyFilterOptionDto> GetPropertyOptions(int landlordId)
 		{
-			// Verify caller is a landlord
 			EnsureLandlord(landlordId);
-			// Start with "all properties" placeholder
 			var options = new List<PropertyFilterOptionDto>
 			{
 				new() { Id = 0, Name = "Tất cả nhà trọ" }
 			};
-			// Append active landlord properties sorted by name
 			options.AddRange(_properties.GetByLandlord(landlordId)
 				.Where(p => p.IsActive)
 				.OrderBy(p => p.Name)
 				.Select(p => new PropertyFilterOptionDto { Id = p.Id, Name = p.Name }));
-			// Return filter combo options
 			return options;
 		}
 
 		// Building filter combo by property — Id=0 means all buildings
 		public List<BuildingFilterOptionDto> GetBuildingOptions(int landlordId, int propertyId)
 		{
-			// Verify caller is a landlord
 			EnsureLandlord(landlordId);
-			// Start with "all buildings" placeholder
 			var options = new List<BuildingFilterOptionDto>
 			{
 				new() { Id = 0, PropertyId = propertyId, Name = "Tất cả tòa" }
 			};
-			// No specific property selected — return placeholder only
 			if (propertyId <= 0) return options;
 
-			// Load property and verify landlord ownership
 			var property = _properties.GetById(propertyId);
-			// Reject missing or foreign-owned properties
 			if (property == null || property.LandlordId != landlordId)
 			{
 				throw new UnauthorizedAccessException("Nhà trọ không thuộc về bạn.");
 			}
 
-			// Append active buildings for property sorted by name
 			options.AddRange(_buildings.GetByProperty(propertyId)
 				.Where(b => b.IsActive)
 				.OrderBy(b => b.Name)
@@ -85,14 +70,12 @@ namespace iHome.BLL.Services
 					Name = b.Name,
 					NumberOfFloors = b.NumberOfFloors
 				}));
-			// Return filter combo options
 			return options;
 		}
 
 		// Contract status combo for filter/form
 		public List<ContractStatusOptionDto> GetStatusOptions()
 		{
-			// Return fixed list of allowed contract status values
 			return new()
 			{
 				new() { Value = ContractStatus.Active, Name = ContractStatus.Active },
@@ -104,9 +87,7 @@ namespace iHome.BLL.Services
 		// Contract grid — optional filter by property/building
 		public List<ContractDto> GetByLandlord(int landlordId, int? propertyId = null, int? buildingId = null)
 		{
-			// Verify caller is a landlord
 			EnsureLandlord(landlordId);
-			// Load scoped contracts and map to list DTOs
 			return _contracts.GetForLandlord(landlordId, propertyId, buildingId)
 				.Select(MapList)
 				.ToList();
@@ -115,14 +96,11 @@ namespace iHome.BLL.Services
 		// View/edit form — resolve main tenant from ContractTenants
 		public ContractFormDto? GetForm(int landlordId, int contractId)
 		{
-			// Load contract and verify landlord ownership
 			var contract = RequireOwned(landlordId, contractId);
-			// Prefer main tenant; fall back to first linked tenant
 			var main = contract.ContractTenants?
 				.FirstOrDefault(ct => ct.IsMainTenant)?.Tenant
 				?? contract.ContractTenants?.FirstOrDefault()?.Tenant;
 
-			// Project contract metadata into form DTO
 			return new ContractFormDto
 			{
 				Id = contract.Id,
@@ -142,9 +120,7 @@ namespace iHome.BLL.Services
 		// Tenant list on contract — main tenant sorted first
 		public List<ContractTenantMemberDto> GetTenants(int landlordId, int contractId)
 		{
-			// Load contract and verify landlord ownership
 			var contract = RequireOwned(landlordId, contractId);
-			// Map contract tenant links to member DTOs
 			return (contract.ContractTenants ?? Enumerable.Empty<ContractTenant>())
 				.OrderByDescending(ct => ct.IsMainTenant)
 				.ThenBy(ct => ct.Tenant?.FullName)
@@ -162,17 +138,12 @@ namespace iHome.BLL.Services
 		// Landlord updates contract metadata only (dates, amounts, status, notes)
 		public void Update(int landlordId, ContractFormDto form)
 		{
-			// Verify contract belongs to landlord
 			RequireOwned(landlordId, form.Id);
-			// Validate form fields
 			Validate(form);
 
-			// Reload contract with landlord scope for audit snapshot
 			var existing = _contracts.GetByIdForLandlord(landlordId, form.Id)
 				?? throw new InvalidOperationException("Không tìm thấy hợp đồng.");
-			// Normalize optional notes field
 			string? notes = string.IsNullOrWhiteSpace(form.Notes) ? null : form.Notes.Trim();
-			// Snapshot values before edit for audit diff
 			var before = new Dictionary<string, string?>
 			{
 				[AuditField.StartDate] = existing.StartDate.ToString("dd/MM/yyyy"),
@@ -182,7 +153,6 @@ namespace iHome.BLL.Services
 				[AuditField.Status] = ContractStatus.FormatWithEndDate(existing.Status, existing.EndDate),
 				[AuditField.Notes] = existing.Notes
 			};
-			// Snapshot values after edit for audit diff
 			var after = new Dictionary<string, string?>
 			{
 				[AuditField.StartDate] = form.StartDate.ToString("dd/MM/yyyy"),
@@ -192,10 +162,8 @@ namespace iHome.BLL.Services
 				[AuditField.Status] = ContractStatus.FormatWithEndDate(form.Status, form.EndDate),
 				[AuditField.Notes] = notes
 			};
-			// Build compact old/new diff strings
 			var (oldValue, newValue) = AuditDiff.Build(before, after);
 
-			// Persist updated contract row
 			_contracts.Update(new Contract
 			{
 				Id = form.Id,
@@ -207,7 +175,6 @@ namespace iHome.BLL.Services
 				Notes = notes
 			});
 
-			// Write update audit entry
 			_audits.Add(new AuditLog
 			{
 				UserId = landlordId,
@@ -224,25 +191,19 @@ namespace iHome.BLL.Services
 		// Load contract and verify it belongs to landlord via Room→Building→Property chain
 		private Contract RequireOwned(int landlordId, int contractId)
 		{
-			// Verify caller is a landlord
 			EnsureLandlord(landlordId);
-			// Load contract scoped to landlord
 			var contract = _contracts.GetByIdForLandlord(landlordId, contractId);
-			// Reject contract outside landlord scope
 			if (contract == null)
 			{
 				throw new UnauthorizedAccessException("Hợp đồng không thuộc hệ thống nhà trọ của bạn.");
 			}
-			// Return verified entity to caller
 			return contract;
 		}
 
 		// Guard caller has Landlord role
 		private void EnsureLandlord(int landlordId)
 		{
-			// Load user by primary key
 			var user = _users.GetById(landlordId);
-			// Reject missing user or non-landlord role
 			if (user == null || user.Role != UserRole.Landlord)
 			{
 				throw new UnauthorizedAccessException("Chỉ chủ nhà mới quản lý hợp đồng.");
@@ -252,22 +213,18 @@ namespace iHome.BLL.Services
 		// Validate contract form fields
 		private static void Validate(ContractFormDto form)
 		{
-			// Reject end date before start date
 			if (form.EndDate < form.StartDate)
 			{
 				throw new ArgumentException("Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.");
 			}
-			// Reject negative monthly rent
 			if (form.MonthlyRent < 0)
 			{
 				throw new ArgumentException("Tiền thuê không được âm.");
 			}
-			// Reject negative deposit
 			if (form.DepositAmount < 0)
 			{
 				throw new ArgumentException("Tiền cọc không được âm.");
 			}
-			// Reject unknown contract status
 			if (form.Status is not (ContractStatus.Active or ContractStatus.Expired or ContractStatus.Terminated))
 			{
 				throw new ArgumentException("Trạng thái hợp đồng không hợp lệ.");
@@ -277,12 +234,10 @@ namespace iHome.BLL.Services
 		// Map Contract entity to grid list DTO
 		private static ContractDto MapList(Contract c)
 		{
-			// Prefer main tenant; fall back to first linked tenant
 			var main = c.ContractTenants?
 				.FirstOrDefault(ct => ct.IsMainTenant)?.Tenant
 				?? c.ContractTenants?.FirstOrDefault()?.Tenant;
 
-			// Project contract and room metadata into list DTO
 			return new ContractDto
 			{
 				Id = c.Id,

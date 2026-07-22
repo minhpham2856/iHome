@@ -28,7 +28,7 @@ GO
 
 -- ============================================================
 -- 1. Security & User Management
--- Stores landlord and manager login accounts, lockout state,
+-- Stores landlord and manager login accounts,
 -- and optional ManagedPropertyId (FK added after Properties exists).
 -- ============================================================
 
@@ -41,8 +41,6 @@ CREATE TABLE Users (
     PhoneNumber VARCHAR(20) NULL,
     Role NVARCHAR(30) NOT NULL, -- Chủ trọ / Quản lý
     IsActive BIT NOT NULL DEFAULT 1, -- Account active flag
-    LoginAttempts INT NOT NULL DEFAULT 0, -- Consecutive failed login count
-    LockedUntil DATETIME2 NULL, -- Temporary lockout expiry
     CreatedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     UpdatedAt DATETIME2 NULL,
     ManagedPropertyId INT NULL, -- Manager owns one property (FK added after Properties exists)

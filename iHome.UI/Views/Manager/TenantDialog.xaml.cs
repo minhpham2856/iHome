@@ -6,130 +6,101 @@ using System.Windows.Input;
 
 namespace iHome.UI.Views.Manager
 {
-	// Code-behind for the TenantDialog modal dialog.
+	// Dialog thêm/sửa thông tin khách thuê
 	public partial class TenantDialog : Window
 	{
 		private readonly int _tenantId;
 		public TenantFormDto? Result { get; private set; }
 
+		// Nạp form trống hoặc dữ liệu khách cần sửa
 		public TenantDialog(TenantFormDto? tenant = null)
 		{
-			// Load XAML markup and register named controls for code-behind
 			InitializeComponent();
-			// Assign local/page state inside TenantDialog without altering business rules
 			_tenantId = tenant?.Id ?? 0;
-			// Guard clause: only continue when UI selection, role, or input is valid
 			if (tenant == null)
 			{
-				// Read/write DatePicker for contract, invoice, or birth date fields
 				dpDateOfBirth.SelectedDate = DateTime.Today.AddYears(-18);
-				// Exit method early or return value/tuple to caller
 				return;
 			}
 
-			// Update TextBlock/TextBox caption or read user-entered text from control
 			lbTitle.Text = "Cập nhật khách thuê";
-			// Update TextBlock/TextBox caption or read user-entered text from control
 			txtFullName.Text = tenant.FullName;
-			// Read/write DatePicker for contract, invoice, or birth date fields
 			dpDateOfBirth.SelectedDate = tenant.DateOfBirth.ToDateTime(TimeOnly.MinValue);
-			// Update TextBlock/TextBox caption or read user-entered text from control
 			txtIdCard.Text = tenant.IdCardNumber;
-			// Update TextBlock/TextBox caption or read user-entered text from control
 			txtPhone.Text = tenant.PhoneNumber;
-			// Update TextBlock/TextBox caption or read user-entered text from control
 			txtEmail.Text = tenant.Email ?? string.Empty;
-			// Update TextBlock/TextBox caption or read user-entered text from control
 			txtAddress.Text = tenant.PermanentAddress ?? string.Empty;
 		}
 
+		// Kiểm tra form và trả Result
 		private void Save_Click(object sender, RoutedEventArgs e)
 		{
-			// Read/write DatePicker for contract, invoice, or birth date fields
 			if (!dpDateOfBirth.SelectedDate.HasValue)
 			{
-				// ManagerUi.ShowValidation shows validation/error dialog or wraps BLL exceptions
 				ManagerUi.ShowValidation("Vui lòng chọn ngày sinh.");
-				// Exit method early or return value/tuple to caller
 				return;
 			}
 
-			// Work with BLL DTO/form object returned from service or built from controls
 			var form = new TenantFormDto
 			{
-				// Assign local/page state inside Save_Click without altering business rules
 				Id = _tenantId,
-				// Update TextBlock/TextBox caption or read user-entered text from control
 				FullName = txtFullName.Text,
-				// Read/write DatePicker for contract, invoice, or birth date fields
 				DateOfBirth = DateOnly.FromDateTime(dpDateOfBirth.SelectedDate.Value),
-				// Update TextBlock/TextBox caption or read user-entered text from control
 				IdCardNumber = txtIdCard.Text,
-				// Update TextBlock/TextBox caption or read user-entered text from control
 				PhoneNumber = txtPhone.Text,
-				// Update TextBlock/TextBox caption or read user-entered text from control
 				Email = txtEmail.Text,
-				// Update TextBlock/TextBox caption or read user-entered text from control
 				PermanentAddress = txtAddress.Text
 			};
-			// FormValidation.GetTenantError validates dialog DTO before accepting save
 			string? error = FormValidation.GetTenantError(form);
-			// Guard clause: only continue when UI selection, role, or input is valid
 			if (error != null)
 			{
-				// ManagerUi.ShowValidation shows validation/error dialog or wraps BLL exceptions
 				ManagerUi.ShowValidation(error);
-				// Exit method early or return value/tuple to caller
 				return;
 			}
 
-			// Assign local/page state inside Save_Click without altering business rules
 			Result = form;
-			// Close dialog successfully so caller reads Result/output properties
 			DialogResult = true;
 		}
 
-		// Cancel dialog without persisting changes
+		// Đóng dialog không lưu
 		private void Cancel_Click(object sender, RoutedEventArgs e) => DialogResult = false;
 
+		// Enter → ngày sinh
 		private void txtFullName_KeyDown(object sender, KeyEventArgs e)
 		{
-			// Move keyboard focus for faster keyboard-driven form entry
 			if (e.Key == Key.Enter) { e.Handled = true; dpDateOfBirth.Focus(); }
 		}
 
+		// Enter → CCCD
 		private void dpDateOfBirth_KeyDown(object sender, KeyEventArgs e)
 		{
-			// Move keyboard focus for faster keyboard-driven form entry
 			if (e.Key == Key.Enter) { e.Handled = true; txtIdCard.Focus(); }
 		}
 
+		// Enter → SĐT
 		private void txtIdCard_KeyDown(object sender, KeyEventArgs e)
 		{
-			// Move keyboard focus for faster keyboard-driven form entry
 			if (e.Key == Key.Enter) { e.Handled = true; txtPhone.Focus(); }
 		}
 
+		// Enter → email
 		private void txtPhone_KeyDown(object sender, KeyEventArgs e)
 		{
-			// Move keyboard focus for faster keyboard-driven form entry
 			if (e.Key == Key.Enter) { e.Handled = true; txtEmail.Focus(); }
 		}
 
+		// Enter → địa chỉ
 		private void txtEmail_KeyDown(object sender, KeyEventArgs e)
 		{
-			// Move keyboard focus for faster keyboard-driven form entry
 			if (e.Key == Key.Enter) { e.Handled = true; txtAddress.Focus(); }
 		}
 
+		// Enter trên địa chỉ → lưu
 		private void txtAddress_KeyDown(object sender, KeyEventArgs e)
 		{
-			// Guard clause: only continue when UI selection, role, or input is valid
 			if (e.Key == Key.Enter)
 			{
-				// Consume Enter key so WPF does not trigger default button twice
 				e.Handled = true;
-				// Handle Enter key to move focus or submit like clicking the primary button
 				Save_Click(btnSave, new RoutedEventArgs());
 			}
 		}

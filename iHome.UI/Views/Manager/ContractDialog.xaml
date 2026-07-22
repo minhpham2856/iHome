@@ -20,17 +20,17 @@
                 <ComboBox x:Name="cbMainTenant" Style="{StaticResource ManagerComboBoxStyle}" DisplayMemberPath="DisplayName"
                           SelectionChanged="MainTenantChanged" KeyDown="cbMainTenant_KeyDown"/>
 
-                <!-- Phòng MaxOccupancy > 1: tick đủ khách đứng tên còn lại -->
+                <!-- Phòng MaxOccupancy > 1: khách phụ tùy chọn, không bắt buộc đủ sức chứa -->
                 <Border x:Name="brdCoTenantPanel" Visibility="Collapsed" Margin="0,12,0,0"
                         Background="{StaticResource ColorSurfaceHover}" Padding="12" CornerRadius="8"
                         BorderBrush="{StaticResource ColorBorder}" BorderThickness="1">
                     <StackPanel>
                         <TextBlock x:Name="lbCoTenantTitle" FontWeight="SemiBold" FontSize="13"
                                    Foreground="{StaticResource ColorTextPrimary}"
-                                   Text="Khách đứng tên còn lại"/>
+                                   Text="Khách đứng tên thêm (không bắt buộc)"/>
                         <TextBlock x:Name="lbCoTenantGuide" Style="{StaticResource ManagerPageDescriptionStyle}"
                                    Margin="0,6,0,10" TextWrapping="Wrap"
-                                   Text="Phòng này cần đủ số khách đứng tên trên hợp đồng. Tiền thuê tính chung, không chia theo từng người."/>
+                                   Text="Có thể thuê ít hơn sức chứa tối đa. Tiền thuê tính chung theo hợp đồng."/>
                         <ItemsControl x:Name="lstCoTenants">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>

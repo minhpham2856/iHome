@@ -104,13 +104,15 @@
                     <Border Style="{StaticResource ManagerCardStyle}">
                         <StackPanel>
                             <TextBlock Text="Tình trạng phòng" Style="{StaticResource ManagerSectionTitleStyle}"/>
-                            <lvc:PieChart x:Name="chartRoomStatus" Height="220" LegendLocation="Right"/>
+                            <lvc:PieChart x:Name="chartRoomStatus" Height="220" LegendLocation="Bottom"
+                                          Hoverable="False" DataTooltip="{x:Null}"/>
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="2" Style="{StaticResource ManagerCardStyle}">
                         <StackPanel>
                             <TextBlock Text="Tình trạng hợp đồng" Style="{StaticResource ManagerSectionTitleStyle}"/>
-                            <lvc:PieChart x:Name="chartContractStatus" Height="220" LegendLocation="Right"/>
+                            <lvc:PieChart x:Name="chartContractStatus" Height="220" LegendLocation="Bottom"
+                                          Hoverable="False" DataTooltip="{x:Null}"/>
                         </StackPanel>
                     </Border>
                 </Grid>

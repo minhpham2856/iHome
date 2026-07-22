@@ -1,16 +1,18 @@
 using iHome.BLL.DTOs.Manager;
-using iHome.BLL.Enums;
 using iHome.BLL.Services;
 using iHome.BLL.Services.Manager;
+using iHome.BLL.Enums;
 using iHome.DAL.Entities;
 using iHome.UI.Views.Shared;
+using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
 
 namespace iHome.UI.Views
 {
-	// Main shell after login
+	// Main shell after login — role menu, optional building filter, Frame navigation
 	public partial class DashboardWindow : Window
 	{
 		private readonly User _currentUser;
@@ -21,27 +23,27 @@ namespace iHome.UI.Views
 		private int? _selectedBuildingId;
 		public string CurrentRole => _currentUser.Role;
 
-		public void RefreshWelcome() => lbWelcome.Text = $"Xin chào, {_currentUser.FullName}";
+		public void RefreshWelcome()
+		{
+			lbWelcome.Text = $"Xin chào, {_currentUser.FullName}";
+		}
 
 		public DashboardWindow(User user)
 		{
 			InitializeComponent();
 			_currentUser = user ?? throw new ArgumentNullException(nameof(user));
-
 			MainSidebar.MenuItemSelected += MainSidebar_MenuItemSelected;
 			MainSidebar.LogoutRequested += MainSidebar_LogoutRequested;
 			RefreshWelcome();
-
 			LoadSidebar();
-
 			LoadBuildingFilter();
 			Forward(_currentPageName, _currentPageTitle);
 		}
 
+		// Build role-specific sidebar entries
 		private void LoadSidebar()
 		{
 			var menuItems = new List<SidebarMenuItem>();
-
 			if (CurrentRole == UserRole.Landlord)
 			{
 				menuItems.Add(new SidebarMenuItem { Title = "Bảng điều khiển", PageName = "DashboardPage" });
@@ -74,6 +76,7 @@ namespace iHome.UI.Views
 			MainSidebar.SetItems(menuItems);
 		}
 
+		// Manager-only building combo; null Id = all buildings
 		private void LoadBuildingFilter()
 		{
 			if (CurrentRole != UserRole.Manager)
@@ -81,7 +84,6 @@ namespace iHome.UI.Views
 				cbProperty.Visibility = Visibility.Collapsed;
 				return;
 			}
-
 			try
 			{
 				_isLoadingBuildingFilter = true;
@@ -106,13 +108,21 @@ namespace iHome.UI.Views
 			}
 		}
 
+		// Navigate Frame to the page for the current role
 		private void Forward(string pageName, string pageTitle = "")
 		{
 			_currentPageName = pageName;
-			_currentPageTitle = string.IsNullOrWhiteSpace(pageTitle) ? _currentPageTitle : pageTitle;
-			if (CurrentRole == UserRole.Manager) mainFrame.Navigate(CreateManagerPage(pageName));
-			else if (CurrentRole == UserRole.Landlord) mainFrame.Navigate(CreateLandlordPage(pageName));
-
+			_currentPageTitle = string.IsNullOrWhiteSpace(pageTitle)
+				? _currentPageTitle
+				: pageTitle;
+			if (CurrentRole == UserRole.Manager)
+			{
+				mainFrame.Navigate(CreateManagerPage(pageName));
+			}
+			else if (CurrentRole == UserRole.Landlord)
+			{
+				mainFrame.Navigate(CreateLandlordPage(pageName));
+			}
 			else
 			{
 				string uriString = $"Views/{CurrentRole}/{pageName}.xaml";
@@ -124,7 +134,6 @@ namespace iHome.UI.Views
 
 		private Page CreateLandlordPage(string pageName) => pageName switch
 		{
-
 			"DashboardPage" => new Landlord.DashboardPage(_currentUser),
 			"BuildingsPage" => new Landlord.BuildingsPage(_currentUser),
 			"RoomsPage" => new Landlord.RoomsPage(_currentUser),
@@ -135,10 +144,10 @@ namespace iHome.UI.Views
 			"AuditLogsPage" => new Landlord.AuditLogsPage(_currentUser),
 			"ReportsPage" => new Landlord.ReportsPage(_currentUser),
 			"SettingsPage" => new Landlord.SettingsPage(_currentUser),
-			// Throw when role guard or required theme resource is missing
-			_ => throw new InvalidOperationException("Trang không tồn tại.")
+			_ => throw new InvalidOperationException("Trang chủ trọ không tồn tại.")
 		};
 
+		// Pass selected building into manager pages for scoping
 		private Page CreateManagerPage(string pageName) => pageName switch
 		{
 			"DashboardPage" => new Manager.DashboardPage(_currentUser, _selectedBuildingId),
@@ -148,13 +157,13 @@ namespace iHome.UI.Views
 			"InvoicesPage" => new Manager.InvoicesPage(_currentUser, _selectedBuildingId),
 			"ServicesPage" => new Manager.ServicesPage(_currentUser, _selectedBuildingId),
 			"SettingsPage" => new Manager.SettingsPage(_currentUser),
-			// Throw when role guard or required theme resource is missing
-			_ => throw new InvalidOperationException("Trang không tồn tại.")
+			_ => throw new InvalidOperationException("Trang quản lý không tồn tại.")
 		};
 
 		private void MainSidebar_MenuItemSelected(SidebarMenuItem item) =>
 			Forward(item.PageName, item.Title);
 
+		// Reload current page when building filter changes
 		private void cbProperty_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			if (_isLoadingBuildingFilter || CurrentRole != UserRole.Manager)
@@ -176,11 +185,11 @@ namespace iHome.UI.Views
 			Close();
 		}
 
+		// Stretch Frame content to fill the content area
 		private void mainFrame_Navigated(object sender, NavigationEventArgs e)
 		{
 			if (mainFrame.Content is FrameworkElement page)
 			{
-				// Assign local/page state inside mainFrame_Navigated
 				page.HorizontalAlignment = HorizontalAlignment.Stretch;
 				page.VerticalAlignment = VerticalAlignment.Stretch;
 				page.Width = double.NaN;

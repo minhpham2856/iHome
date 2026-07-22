@@ -13,7 +13,6 @@ namespace iHome.DAL.Repositories
 		private const string OccupiedRoom = "Đang ở";
 		private const string EmptyRoom = "Trống";
 
-		// Shared EF Core context instance.
 		private readonly IHomeDbContext _context;
 
 		public ContractRepository() : this(new IHomeDbContext())
@@ -22,41 +21,34 @@ namespace iHome.DAL.Repositories
 
 		public ContractRepository(IHomeDbContext context)
 		{
-			// Reject a null context so every repository method has a valid DbContext to query against
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		// Query All records.
+		// All contracts.
 		public List<Contract> GetAll()
 		{
-			// Load every contract row without filters, includes, or ordering
 			return _context.Contracts.ToList();
 		}
 
-		// CountByStatus — public entry point.
+		// Count contracts with the given status label.
 		public int CountByStatus(string status)
 		{
-			// Count contracts whose Status column equals the supplied status label
 			return _context.Contracts.Count(c => c.Status == status);
 		}
 
-		// Active contracts expiring within one calendar month (by calendar month)
+		// Active contracts expiring within one calendar month from today.
 		public List<Contract> ExpiringSoon(string status, int days)
 		{
-			// Capture today's calendar date as the lower bound for expiry filtering
 			DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-			// Compute the exclusive upper bound one calendar month ahead of today
 			DateOnly limit = today.AddMonths(1);
-			// Return contracts matching status whose EndDate falls in [today, limit)
 			return _context.Contracts
 				.Where(c => c.Status == status && c.EndDate >= today && c.EndDate < limit)
 				.ToList();
 		}
 
-		// Query ForLandlord records.
+		// Landlord-scoped contracts, optionally filtered by property or building.
 		public List<Contract> GetForLandlord(int landlordId, int? propertyId = null, int? buildingId = null)
 		{
-			// Load landlord-scoped contracts with room/building/property and tenant links, optionally filtered by property or building
 			return _context.Contracts
 				.AsNoTracking()
 				.Include(c => c.Room)
@@ -74,9 +66,9 @@ namespace iHome.DAL.Repositories
 				.ToList();
 		}
 
+		// One contract by id when it belongs to the landlord.
 		public Contract? GetByIdForLandlord(int landlordId, int contractId)
 		{
-			// Load one contract by id only when it belongs to a room under the given landlord
 			return _context.Contracts
 				.Include(c => c.Room)
 					.ThenInclude(r => r.Building)
@@ -88,49 +80,45 @@ namespace iHome.DAL.Repositories
 					c.Room.Building.Property.LandlordId == landlordId);
 		}
 
-		// IsOwned — public entry point.
+		// True when the contract belongs to a room under the landlord.
 		public bool IsOwned(int landlordId, int contractId)
 		{
-			// Return true when a contract with this id exists under a room owned by the landlord
 			return _context.Contracts.Any(c =>
 				c.Id == contractId &&
 				c.Room.Building.Property.LandlordId == landlordId);
 		}
 
-		// Persist changes to an existing record.
+		// Update contract; check date overlap then refresh room status.
 		public void Update(Contract changes)
 		{
-			// Load the tracked contract with its room for availability checks and status refresh
 			var contract = _context.Contracts
 				.Include(c => c.Room)
 				.Single(c => c.Id == changes.Id);
 
-			// When the updated contract will be active, ensure the room has no overlapping active contract
+			// When becoming active: room must not overlap another active contract's dates.
 			if (changes.Status == ActiveContract)
 			{
 				EnsureRoomAvailable(contract.RoomId, changes.StartDate, changes.EndDate, contract.Id);
 			}
 
-			// Map editable contract fields from the incoming entity onto the tracked row
 			contract.StartDate = changes.StartDate;
 			contract.EndDate = changes.EndDate;
 			contract.MonthlyRent = changes.MonthlyRent;
 			contract.DepositAmount = changes.DepositAmount;
 			contract.Status = changes.Status;
 			contract.Notes = changes.Notes;
-			// Commit contract field updates to the database
 			_context.SaveChanges();
-			// Recompute the room occupancy status based on active contracts as of today
+			// Refresh room occupancy from active contracts covering today.
 			RefreshRoomStatus(contract.RoomId);
 		}
 
+		// Date overlap: StartA <= EndB && EndA >= StartB on other active contracts for the room.
 		private void EnsureRoomAvailable(
 			int roomId,
 			DateOnly startDate,
 			DateOnly endDate,
 			int excludingContractId)
 		{
-			// Detect any other active contract on the same room whose date range overlaps the proposed range
 			if (_context.Contracts.Any(c =>
 				c.RoomId == roomId &&
 				c.Status == ActiveContract &&
@@ -142,18 +130,16 @@ namespace iHome.DAL.Repositories
 			}
 		}
 
+		// Refresh Empty/Occupied from active contracts covering today (skip Bảo trì / Đã đặt cọc).
 		private void RefreshRoomStatus(int roomId)
 		{
-			// Load the room row that must receive an updated occupancy status
 			var room = _context.Rooms.Single(r => r.Id == roomId);
-			// Do not overwrite manual operational statuses such as maintenance or deposit-hold
 			if (string.Equals(room.Status, "Bảo trì", StringComparison.OrdinalIgnoreCase) ||
 				string.Equals(room.Status, "Đã đặt cọc", StringComparison.OrdinalIgnoreCase))
 			{
 				return;
 			}
 
-			// Determine whether an active contract covers today's calendar date for this room
 			DateOnly today = DateOnly.FromDateTime(DateTime.Today);
 			room.Status = _context.Contracts.Any(c =>
 				c.RoomId == roomId &&
@@ -162,7 +148,6 @@ namespace iHome.DAL.Repositories
 				c.EndDate >= today)
 				? OccupiedRoom
 				: EmptyRoom;
-			// Persist the derived room status change
 			_context.SaveChanges();
 		}
 	}

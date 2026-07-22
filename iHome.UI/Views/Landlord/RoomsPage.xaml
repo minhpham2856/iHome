@@ -125,11 +125,10 @@
                                   MouseDoubleClick="dgRooms_MouseDoubleClick"
                                   HorizontalScrollBarVisibility="Auto">
                             <DataGrid.Columns>
+                                <DataGridTextColumn Header="TÒA" Binding="{Binding BuildingName}" SortMemberPath="BuildingName" Width="0.9*" MinWidth="70"/>
                                 <DataGridTextColumn Header="SỐ PHÒNG" Binding="{Binding RoomNumber}" SortMemberPath="RoomNumber" Width="0.9*" MinWidth="70"/>
                                 <DataGridTextColumn Header="LOẠI" Binding="{Binding RoomTypeName}" SortMemberPath="RoomTypeName" Width="1.2*" MinWidth="90"/>
                                 <DataGridTextColumn Header="TẦNG" Binding="{Binding Floor}" SortMemberPath="Floor" Width="0.5*" MinWidth="50"/>
-                                <DataGridTextColumn Header="DIỆN TÍCH" Binding="{Binding Area, StringFormat={}{0:N1} m²}" SortMemberPath="Area" Width="0.9*" MinWidth="80"/>
-                                <DataGridTextColumn Header="GIÁ THUÊ" Binding="{Binding BaseRent, StringFormat={}{0:N0} đ}" SortMemberPath="BaseRent" Width="1.1*" MinWidth="95"/>
                                 <DataGridTextColumn Header="SỐ NGƯỜI" Binding="{Binding CurrentOccupancy}" SortMemberPath="CurrentOccupancy" Width="0.7*" MinWidth="65"/>
                                 <DataGridTemplateColumn Header="TRẠNG THÁI" SortMemberPath="StatusDisplay" Width="1*" MinWidth="95"
                                                         CellStyle="{StaticResource LandlordRoomStatusCellStyle}">

@@ -134,17 +134,26 @@
                 </Grid.ColumnDefinitions>
 
                 <Border Style="{StaticResource CardStyle}" Margin="4,0" Padding="16">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource ChartTitleStyle}" Text="Tình trạng phòng"/>
-                        <lvc:PieChart x:Name="chartRoomStatus" Height="240" LegendLocation="Right"/>
-                    </StackPanel>
+                    <DockPanel LastChildFill="True">
+                        <TextBlock DockPanel.Dock="Top" Style="{StaticResource ChartTitleStyle}" Text="Tình trạng phòng"/>
+                        <!-- Explicit Width+Height: LiveCharts pie collapses when only Height is set in half-column layout -->
+                        <lvc:PieChart x:Name="chartRoomStatus"
+                                      Height="280"
+                                      LegendLocation="Bottom"
+                                      DisableAnimations="True"
+                                      Hoverable="True"/>
+                    </DockPanel>
                 </Border>
 
                 <Border Grid.Column="2" Style="{StaticResource CardStyle}" Margin="4,0" Padding="16">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource ChartTitleStyle}" Text="Tình trạng hợp đồng"/>
-                        <lvc:PieChart x:Name="chartContractStatus" Height="240" LegendLocation="Right"/>
-                    </StackPanel>
+                    <DockPanel LastChildFill="True">
+                        <TextBlock DockPanel.Dock="Top" Style="{StaticResource ChartTitleStyle}" Text="Tình trạng hợp đồng"/>
+                        <lvc:PieChart x:Name="chartContractStatus"
+                                      Height="280"
+                                      LegendLocation="Bottom"
+                                      DisableAnimations="True"
+                                      Hoverable="True"/>
+                    </DockPanel>
                 </Border>
             </Grid>
 

@@ -12,27 +12,21 @@ namespace iHome.BLL.Common
 			IReadOnlyDictionary<string, string?> before,
 			IReadOnlyDictionary<string, string?> after)
 		{
-			// Union all keys from both dictionaries so new/removed fields are not missed
+			// Union keys from both sides so added/removed fields are included
 			var keys = before.Keys.Union(after.Keys).Distinct();
 			var oldLines = new List<string>();
 			var newLines = new List<string>();
 
 			foreach (string key in keys)
 			{
-				// Read old/new values; missing key treated as null
 				before.TryGetValue(key, out string? oldRaw);
 				after.TryGetValue(key, out string? newRaw);
-				// Trim + blank → empty string for stable comparison
-				string oldNorm = Normalize(oldRaw);
-				string newNorm = Normalize(newRaw);
-				// Unchanged → omit from audit diff
-				if (oldNorm == newNorm) continue;
+				if (Normalize(oldRaw) == Normalize(newRaw)) continue;
 
 				oldLines.Add($"{key}: {FormatDisplay(oldRaw)}");
 				newLines.Add($"{key}: {FormatDisplay(newRaw)}");
 			}
 
-			// No lines → return null instead of empty string
 			return (
 				oldLines.Count == 0 ? null : string.Join("\n", oldLines),
 				newLines.Count == 0 ? null : string.Join("\n", newLines));
@@ -64,16 +58,15 @@ namespace iHome.BLL.Common
 				if (sb.Length > 0) sb.Append('\n');
 				sb.Append(trimmed);
 			}
-			// Fallback to stored if trim left nothing (edge case)
 			return sb.Length == 0 ? stored : sb.ToString();
 		}
 
-		// null/whitespace → empty; otherwise Trim for comparison
 		private static string Normalize(string? value) =>
 			string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
 
-		// Display null/blank as em dash for readable audit grid cells
+		// Blank cells show as em dash in the audit grid
 		private static string FormatDisplay(string? value) =>
 			string.IsNullOrWhiteSpace(value) ? "—" : value.Trim();
 	}
 }
+

@@ -8,7 +8,6 @@ namespace iHome.BLL.Enums
 
 		// Map bool to Yes/No for AuditDiff and data grids
 		public static string FormatActive(bool active) =>
-			// true → "Có", false → "Không" for Vietnamese audit/display strings
 			active ? Yes : No;
 	}
 }

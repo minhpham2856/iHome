@@ -10,7 +10,6 @@ namespace iHome.BLL.Enums
 
 		// Return status text for UI binding — values are already Vietnamese in DB
 		public static string Format(string status) =>
-			// Blank status passes through; non-blank returned unchanged
 			string.IsNullOrWhiteSpace(status) ? status : status;
 	}
 }

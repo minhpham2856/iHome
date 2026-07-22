@@ -6,64 +6,64 @@ namespace iHome.DAL.Entities;
 
 public partial class IHomeDbContext : DbContext
 {
-	public IHomeDbContext()
-	{
-	}
+    public IHomeDbContext()
+    {
+    }
 
-	public IHomeDbContext(DbContextOptions<IHomeDbContext> options)
-		: base(options)
-	{
-	}
+    public IHomeDbContext(DbContextOptions<IHomeDbContext> options)
+        : base(options)
+    {
+    }
 
-	public virtual DbSet<AuditLog> AuditLogs { get; set; }
+    public virtual DbSet<AuditLog> AuditLogs { get; set; }
 
-	public virtual DbSet<Building> Buildings { get; set; }
+    public virtual DbSet<Building> Buildings { get; set; }
 
-	public virtual DbSet<Contract> Contracts { get; set; }
+    public virtual DbSet<Contract> Contracts { get; set; }
 
-	public virtual DbSet<ContractTenant> ContractTenants { get; set; }
+    public virtual DbSet<ContractTenant> ContractTenants { get; set; }
 
-	public virtual DbSet<Invoice> Invoices { get; set; }
+    public virtual DbSet<Invoice> Invoices { get; set; }
 
-	public virtual DbSet<InvoiceItem> InvoiceItems { get; set; }
+    public virtual DbSet<InvoiceItem> InvoiceItems { get; set; }
 
-	public virtual DbSet<Payment> Payments { get; set; }
+    public virtual DbSet<Payment> Payments { get; set; }
 
-	public virtual DbSet<Property> Properties { get; set; }
+    public virtual DbSet<Property> Properties { get; set; }
 
-	public virtual DbSet<Room> Rooms { get; set; }
+    public virtual DbSet<Room> Rooms { get; set; }
 
-	public virtual DbSet<RoomService> RoomServices { get; set; }
+    public virtual DbSet<RoomService> RoomServices { get; set; }
 
-	public virtual DbSet<RoomType> RoomTypes { get; set; }
+    public virtual DbSet<RoomType> RoomTypes { get; set; }
 
-	public virtual DbSet<Service> Services { get; set; }
+    public virtual DbSet<Service> Services { get; set; }
 
-	public virtual DbSet<ServiceReading> ServiceReadings { get; set; }
+    public virtual DbSet<ServiceReading> ServiceReadings { get; set; }
 
-	public virtual DbSet<Tenant> Tenants { get; set; }
+    public virtual DbSet<Tenant> Tenants { get; set; }
 
-	public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<User> Users { get; set; }
 
-	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	{
-		if (optionsBuilder.IsConfigured) return;
-		optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
-	}
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (optionsBuilder.IsConfigured) return;
+        optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
+    }
 
-	protected override void OnModelCreating(ModelBuilder modelBuilder)
-	{
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<AuditLog>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__AuditLog__3214EC074732BA37");
+            entity.HasKey(e => e.Id).HasName("PK__AuditLog__3214EC07BA0F8251");
 
             entity.HasIndex(e => e.Timestamp, "IX_AuditLogs_Timestamp");
 
             entity.HasIndex(e => e.UserId, "IX_AuditLogs_UserId");
 
             entity.Property(e => e.Action).HasMaxLength(100);
-            entity.Property(e => e.RecordId).HasMaxLength(50);
             entity.Property(e => e.Detail).HasMaxLength(200);
+            entity.Property(e => e.RecordId).HasMaxLength(50);
             entity.Property(e => e.TableName).HasMaxLength(100);
             entity.Property(e => e.Timestamp).HasDefaultValueSql("(getdate())");
 
@@ -75,7 +75,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Building>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Building__3214EC0763337048");
+            entity.HasKey(e => e.Id).HasName("PK__Building__3214EC07A01F1B1F");
 
             entity.HasIndex(e => e.ManagerId, "IX_Buildings_ManagerId");
 
@@ -97,7 +97,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Contract>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Contract__3214EC0725C8B93B");
+            entity.HasKey(e => e.Id).HasName("PK__Contract__3214EC07AD0FC930");
 
             entity.HasIndex(e => e.RoomId, "IX_Contracts_RoomId");
 
@@ -109,9 +109,7 @@ public partial class IHomeDbContext : DbContext
             entity.Property(e => e.DepositAmount).HasColumnType("decimal(15, 2)");
             entity.Property(e => e.MonthlyRent).HasColumnType("decimal(15, 2)");
             entity.Property(e => e.Notes).HasMaxLength(300);
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .IsUnicode(false);
+            entity.Property(e => e.Status).HasMaxLength(30);
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Contracts)
                 .HasForeignKey(d => d.CreatedBy)
@@ -143,7 +141,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Invoice>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Invoices__3214EC07278534F6");
+            entity.HasKey(e => e.Id).HasName("PK__Invoices__3214EC07DBEBD79E");
 
             entity.HasIndex(e => e.ContractId, "IX_Invoices_ContractId");
 
@@ -154,9 +152,7 @@ public partial class IHomeDbContext : DbContext
             entity.HasIndex(e => new { e.ContractId, e.InvoiceDate }, "UQ_Invoices_ContractDate").IsUnique();
 
             entity.Property(e => e.InvoiceDate).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .IsUnicode(false);
+            entity.Property(e => e.Status).HasMaxLength(30);
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(15, 2)");
 
             entity.HasOne(d => d.Contract).WithMany(p => p.Invoices)
@@ -167,7 +163,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<InvoiceItem>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__InvoiceI__3214EC0702D07FAF");
+            entity.HasKey(e => e.Id).HasName("PK__InvoiceI__3214EC07A2E76D24");
 
             entity.Property(e => e.Amount).HasColumnType("decimal(15, 2)");
             entity.Property(e => e.Description).HasMaxLength(200);
@@ -182,15 +178,13 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Payments__3214EC07386BD24D");
+            entity.HasKey(e => e.Id).HasName("PK__Payments__3214EC07DEF1C5BC");
 
             entity.HasIndex(e => e.InvoiceId, "IX_Payments_InvoiceId");
 
             entity.Property(e => e.Amount).HasColumnType("decimal(15, 2)");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Method)
-                .HasMaxLength(20)
-                .IsUnicode(false);
+            entity.Property(e => e.Method).HasMaxLength(30);
             entity.Property(e => e.Notes).HasMaxLength(300);
 
             entity.HasOne(d => d.Invoice).WithMany(p => p.Payments)
@@ -206,7 +200,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Property>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Properti__3214EC07ED0187EA");
+            entity.HasKey(e => e.Id).HasName("PK__Properti__3214EC07CA6BD56E");
 
             entity.HasIndex(e => e.LandlordId, "IX_Properties_LandlordId");
 
@@ -224,7 +218,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Room>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Rooms__3214EC076B1B83F8");
+            entity.HasKey(e => e.Id).HasName("PK__Rooms__3214EC0726044EA1");
 
             entity.HasIndex(e => e.BuildingId, "IX_Rooms_BuildingId");
 
@@ -234,9 +228,7 @@ public partial class IHomeDbContext : DbContext
 
             entity.Property(e => e.Notes).HasMaxLength(300);
             entity.Property(e => e.RoomNumber).HasMaxLength(20);
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .IsUnicode(false);
+            entity.Property(e => e.Status).HasMaxLength(30);
 
             entity.HasOne(d => d.Building).WithMany(p => p.Rooms)
                 .HasForeignKey(d => d.BuildingId)
@@ -270,7 +262,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<RoomType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RoomType__3214EC071F1A884C");
+            entity.HasKey(e => e.Id).HasName("PK__RoomType__3214EC07392E559C");
 
             entity.HasIndex(e => e.PropertyId, "IX_RoomTypes_PropertyId");
 
@@ -287,13 +279,11 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Service>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Services__3214EC0702CA7CC1");
+            entity.HasKey(e => e.Id).HasName("PK__Services__3214EC078F111B4E");
 
             entity.HasIndex(e => e.PropertyId, "IX_Services_PropertyId");
 
-            entity.Property(e => e.CalculationMethod)
-                .HasMaxLength(20)
-                .IsUnicode(false);
+            entity.Property(e => e.CalculationMethod).HasMaxLength(30);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.ServiceName).HasMaxLength(100);
             entity.Property(e => e.Unit).HasMaxLength(20);
@@ -307,7 +297,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<ServiceReading>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ServiceR__3214EC07FCEBEF5C");
+            entity.HasKey(e => e.Id).HasName("PK__ServiceR__3214EC076ADB26E1");
 
             entity.HasIndex(e => new { e.RoomId, e.ServiceId }, "IX_ServiceReadings_RoomService");
 
@@ -322,7 +312,7 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<Tenant>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Tenants__3214EC07A4918FB0");
+            entity.HasKey(e => e.Id).HasName("PK__Tenants__3214EC0709527CA3");
 
             entity.HasIndex(e => e.IdCardNumber, "UQ__Tenants__713A7B91DE688DB7").IsUnique();
 
@@ -342,15 +332,15 @@ public partial class IHomeDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC07165423AE");
+            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC078AAF7E54");
 
             entity.HasIndex(e => e.ManagedPropertyId, "IX_Users_ManagedPropertyId");
 
             entity.HasIndex(e => e.Role, "IX_Users_Role");
 
-            entity.HasIndex(e => e.Username, "UQ__Users__536C85E45D12BBD5").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__Users__536C85E4AB8EB01F").IsUnique();
 
-            entity.HasIndex(e => e.Email, "UQ__Users__A9D10534AE50468A").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__Users__A9D105341FE51613").IsUnique();
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Email)
@@ -364,8 +354,7 @@ public partial class IHomeDbContext : DbContext
             entity.Property(e => e.PhoneNumber)
                 .HasMaxLength(20)
                 .IsUnicode(false);
-            entity.Property(e => e.Role)
-                .HasMaxLength(20);
+            entity.Property(e => e.Role).HasMaxLength(30);
             entity.Property(e => e.Username)
                 .HasMaxLength(50)
                 .IsUnicode(false);
